@@ -118,6 +118,7 @@ namespace MetroidMod.Content.Projectiles
 			{
 				modifiers.FinalDamage += 1f;
 			}
+			BuffLogic(target);
 		}
 
 		bool[] npcPrevHit = new bool[Main.maxNPCs];
