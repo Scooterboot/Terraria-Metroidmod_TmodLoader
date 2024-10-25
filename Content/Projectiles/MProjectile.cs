@@ -108,7 +108,7 @@ namespace MetroidMod.Content.Projectiles
 			}
 			if (doParalyzerStun)
 			{
-				target.AddBuff(ModContent.BuffType<ParalyzerStun>(), (int)Math.Floor(paralyzerStunAmount * 60));
+				ApplyBuffToTarget(target, ModContent.BuffType<ParalyzerStun>(), (int)Math.Floor(paralyzerStunAmount * 60));
 			}
 		}
 		public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)/* tModPorter Note: Removed. Use ModifyHitPlayer and check modifiers.PvP */
@@ -123,6 +123,16 @@ namespace MetroidMod.Content.Projectiles
 		bool[] npcPrevHit = new bool[Main.maxNPCs];
 		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
 		{
+			BuffLogic(target);
+
+			if (Projectile.penetrate != 1)
+			{
+				npcPrevHit[target.whoAmI] = true;
+			}
+		}
+
+		private void BuffLogic(Entity target)
+		{
 			if (!Projectile.Name.Contains("Hyper")&& (!Projectile.Name.Contains("Phazon")))
 			{
 				if (Projectile.Name.Contains("Plasma") && Projectile.Name.Contains("Red") || shot.Contains("plasmared"))
@@ -131,16 +141,16 @@ namespace MetroidMod.Content.Projectiles
 					{
 						if (Projectile.Name.Contains("V2") || shot.Contains("V2"))
 						{
-							target.AddBuff(BuffID.Frostburn2, 300);
+							ApplyBuffToTarget(target, BuffID.Frostburn2, 300);
 						}
 						else
 						{
-							target.AddBuff(BuffID.Frostburn, 300);
+							ApplyBuffToTarget(target, BuffID.Frostburn, 300);
 						}
 					}
 					else
 					{
-						target.AddBuff(BuffID.OnFire, 300);
+						ApplyBuffToTarget(target, BuffID.OnFire, 300);
 					}
 				}
 
@@ -148,11 +158,11 @@ namespace MetroidMod.Content.Projectiles
 				{
 					if (Projectile.Name.Contains("Ice") || shot.Contains("ice"))
 					{
-						target.AddBuff(BuffID.Frostburn2, 300);
+						ApplyBuffToTarget(target, BuffID.Frostburn2, 300);
 					}
 					else
 					{
-						target.AddBuff(BuffID.CursedInferno, 300);
+						ApplyBuffToTarget(target, BuffID.CursedInferno, 300);
 					}
 				}
 				if (Projectile.Name.Contains("Ice") || Projectile.Name.Contains("Stardust") || shot.Contains("ice") || shot.Contains("stardust"))
@@ -161,20 +171,39 @@ namespace MetroidMod.Content.Projectiles
 					if (Projectile.Name.Contains("Missile"))
 						buffName = "InstantFreeze";
 
-					target.AddBuff(Mod.Find<ModBuff>(buffName).Type, 300);
+					ApplyBuffToTarget(target, Mod.Find<ModBuff>(buffName).Type, 300);
 				}
 
 				if (Projectile.Name.Contains("Solar") || shot.Contains("solar"))
 				{
-					target.AddBuff(189, 300);
+					ApplyBuffToTarget(target, 189, 300);
 				}
 			}
+		}
 
-			if (Projectile.penetrate != 1)
+		/// <summary>
+		/// Method that applies a buff to a target no matter whether it is a player or an npc. Errors if it is neither.
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="buffID"></param>
+		/// <param name="time"></param>
+		/// <param name="quiet"></param>
+		private void ApplyBuffToTarget(Entity target, int buffID, int time, bool quiet = false)
+		{
+			if (target is Player)
 			{
-				npcPrevHit[target.whoAmI] = true;
+				(target as Player).AddBuff(buffID, time, quiet);
+			}
+			else if (target is NPC)
+			{
+				(target as NPC).AddBuff(buffID, time, quiet);
+			}
+			else
+			{
+				Mod.Logger.Error("Tried to ApplyBuffToTarget to a non-player, non-npc entity. What.");
 			}
 		}
+
 		public override void PostAI()
 		{
 			for (int i = Projectile.oldPos.Length - 1; i > 0; i--)
