@@ -33,7 +33,7 @@ namespace MetroidMod.Content.Items.Accessories
 		}
 		public override bool CanAccessoryBeEquippedWith(Item equippedItem, Item incomingItem, Player player)
 		{
-			if (incomingItem.type == ModContent.ItemType<SupercooledEmblem>() || incomingItem.type == ModContent.ItemType<HunterEmblem>() || incomingItem.type == ModContent.ItemType<EnhancedCombatUnit>())
+			if (incomingItem.type == ModContent.ItemType<SupercooledEmblem>() || incomingItem.type == ModContent.ItemType<EnhancedCombatUnit>())
 			{
 				return false;
 			}
