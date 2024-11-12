@@ -1327,7 +1327,7 @@ namespace MetroidMod.Content.Items.Weapons
 				}
 
 				finalDmg = (int)Math.Round((double)(damage * (1f + iceDmg + waveDmg + spazDmg + plasDmg + hunterDmg)));
-				overheat = (isHunter && slot1.type != oc)? 0 : (int)Math.Max(Math.Round((double)(overheat * (1 + iceHeat + waveHeat + spazHeat + plasHeat + hunterHeat))), 1);
+				overheat = (isHunter && slot1.type != oc)? 0 : (int)Math.Max(Math.Round((double)(overheat * (1 + iceHeat + waveHeat + spazHeat + plasHeat + hunterHeat))), 0);
 
 				double shotsPerSecond = 60 / useTime * (1f + iceSpeed + waveSpeed + spazSpeed + plasSpeed);
 
