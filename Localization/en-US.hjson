@@ -1826,7 +1826,11 @@ Mods: {
 
 			NovaLaserDrill: {
 				DisplayName: Nova Laser Drill
-				Tooltip: Able to mine Phazon
+				Tooltip:
+					'''
+					Able to mine Phazon
+					Right click to swap between hammer and pick
+					'''
 			}
 
 			OmniKeycard: {
@@ -3301,7 +3305,7 @@ Mods: {
 			}
 
 			TorizoEyeNecklace: {
-				Tooltip: ""
+				Tooltip: Reduces damage and knockback resistance
 				DisplayName: Torizo Eye Necklace
 			}
 
