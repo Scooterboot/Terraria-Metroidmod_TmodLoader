@@ -484,10 +484,10 @@ namespace MetroidMod.Content.Items.Weapons
 					chargeV2 = slot1.type == ch2,
 					chargeV3 = slot1.type == ch3;
 
-				bool addonsV1 = (slot2.type == ic || slot3.type == wa || slot4.type == sp || ((slot5.type == plG || slot5.type == plR) && !chargeV2 && !chargeV3));
-				bool addonsV2 = (slot2.type == ic2 || slot3.type == wa2 || slot4.type == wi || slot5.type == nv);
-				addonsV2 |= ((slot5.type == plG || slot5.type == plR) && (chargeV2 || chargeV3) && !addonsV1);
-				bool addonsV3 = (slot2.type == sd || slot3.type == nb || slot4.type == vt || slot5.type == sl);
+				bool addonsV1 = slot2.type == ic || slot3.type == wa || slot4.type == sp || ((slot5.type == plG || slot5.type == plR) && !chargeV2 && !chargeV3);
+				bool addonsV2 = slot2.type == ic2 || slot3.type == wa2 || slot4.type == wi || slot5.type == nv;
+				addonsV2 |= (slot5.type == plG || slot5.type == plR) && (chargeV2 || chargeV3) && !addonsV1;
+				bool addonsV3 = slot2.type == sd || slot3.type == nb || slot4.type == vt || slot5.type == sl;
 				ac.maxUA = MConfigItems.Instance.ammoPowerBeam + (MConfigItems.Instance.ammoUA * Math.Min(UA.stack, 12));
 				if (ac.statUA > ac.maxUA)
 				{
@@ -538,7 +538,7 @@ namespace MetroidMod.Content.Items.Weapons
 				}
 				if (versionType == 1)
 				{
-					if (slot3.type == wa && slot5.IsAir && slot4.type != sp)
+					if (slot3.type == wa /*&& slot5.IsAir*/ && slot4.type != sp)
 					{
 						chargeShotAmt = 2;
 					}
