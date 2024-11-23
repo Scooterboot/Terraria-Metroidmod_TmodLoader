@@ -1,10 +1,14 @@
 using System;
 using System.IO;
+using MetroidMod.Common.Configs;
+using MetroidMod.Common.GlobalItems;
+using MetroidMod.Common.Players;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.Enums;
 using Terraria.ModLoader;
 
@@ -35,6 +39,8 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 
 		NPC target;
 
+		private int dmg = 0;
+		private int immuneTime = 0;
 		const float Max_Range = 300f;
 		float range = Max_Range;
 		const float Max_Distance = 300f;
@@ -50,7 +56,11 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 		int ampSyncCooldown = 20;
 		float[] amp = new float[3];
 		float[] ampDest = new float[3];
-
+		public override void OnSpawn(IEntitySource source)
+		{
+			dmg = Projectile.damage;
+		base.OnSpawn(source); 
+		}
 		public override void AI()
 		{
 
@@ -58,6 +68,10 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			Player O = Main.player[P.owner];
 
 			Lead = Main.projectile[(int)P.ai[0]];
+			if (O.HeldItem.GetGlobalItem<MGlobalItem>().statMissiles <= 0)
+			{
+				P.Kill();
+			}
 			if (!Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<ChargeLead>())
 			{
 				P.Kill();
@@ -72,7 +86,14 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			{
 				P.frame = 0;
 			}
-
+			if (immuneTime > 0)
+			{
+				P.damage = 0;
+				immuneTime--;
+			}
+			else {
+				P.damage = dmg;
+			}
 			range = Max_Range;
 			distance = Max_Distance;
 
@@ -110,11 +131,11 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 				mousePos = oPos + diff * Math.Min(Vector2.Distance(oPos, Main.MouseWorld), range);
 
 				target = null;
-				for (int i = 0; i < Main.maxNPCs; i++)
+				foreach (NPC who in Main.ActiveNPCs)
 				{
-					if (Main.npc[i].active && Main.npc[i].lifeMax > 5 && !Main.npc[i].dontTakeDamage && !Main.npc[i].friendly)
+					NPC npc = Main.npc[who.whoAmI];
+					if (npc.lifeMax > 5 && !npc.dontTakeDamage && !npc.friendly)
 					{
-						NPC npc = Main.npc[i];
 						Rectangle npcRect = new Rectangle((int)npc.position.X, (int)npc.position.Y, npc.width, npc.height);
 
 						float point = 0f;
@@ -127,7 +148,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 
 						bool flag = (Vector2.Distance(oPos, npc.Center) <= range + distance && Vector2.Distance(npc.Center, mousePos) <= distance);
 
-						if (Main.npc[i].CanBeChasedBy(P, false))
+						if (npc.CanBeChasedBy(P, false))
 						{
 							if (target == null || !target.active)
 							{
@@ -253,7 +274,14 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 				soundInstance.Stop(true);
 			}
 		}
-
+		public override bool? CanHitNPC(NPC target3)
+		{
+			if (target != target3 || immuneTime > 0)
+			{
+				return false;
+			}
+			return base.CanHitNPC(target3);
+		}
 		public override void CutTiles()
 		{
 			if (Lead != null && Lead.active)
@@ -367,7 +395,16 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 
 			return false;
 		}
-
+		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+		{
+			Player O = Main.player[Projectile.owner];
+			if (damageDone > 0)
+			{
+				immuneTime += O.HeldItem.useTime;
+				Projectile.localNPCHitCooldown = O.HeldItem.useTime;
+			}
+			base.OnHitNPC(target, hit, damageDone);
+		}
 		public override void SendExtraAI(BinaryWriter writer)
 		{
 			writer.WriteVector2(targetPos);

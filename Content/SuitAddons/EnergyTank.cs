@@ -1,5 +1,6 @@
 ﻿using System;
 using MetroidMod.Common.Players;
+using MetroidMod.Content.Items.Tiles;
 using MetroidMod.Content.Tiles.ItemTile;
 using MetroidMod.ID;
 using Terraria;
@@ -16,9 +17,9 @@ namespace MetroidMod.Content.SuitAddons
 
 		public override bool AddOnlyAddonItem => false;
 
-		//public override bool CanGenerateOnChozoStatue(int x, int y) => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || NPC.downedBoss2;
+		//public override bool CanGenerateOnChozoStatue() => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || NPC.downedBoss2;
 
-		public override double GenerationChance(int x, int y) => 4;
+		public override double GenerationChance() => 4;
 
 		public override void SetStaticDefaults()
 		{
@@ -26,8 +27,9 @@ namespace MetroidMod.Content.SuitAddons
 			// Tooltip.SetDefault("Grants the user an extra tank of energy.");
 			ItemNameLiteral = true;
 			SacrificeTotal = 14;
-			ItemID.Sets.ShimmerTransformToItem[ItemType] = ModContent.ItemType<Items.Accessories.ReserveTank>();
+			ItemID.Sets.ShimmerTransformToItem[ItemType] = ModContent.ItemType<UAExpansion>();
 			AddonSlot = SuitAddonSlotID.Tanks_Energy;
+			TileID.Sets.FriendlyFairyCanLureTo[TileType] = true;
 		}
 		public override void SetItemDefaults(Item item)
 		{

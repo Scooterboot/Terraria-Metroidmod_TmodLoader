@@ -7,10 +7,6 @@ namespace MetroidMod.Content.Projectiles.BattleHammer
 {
 	public class BattleHammerShot : MProjectile
 	{
-		public override void SetStaticDefaults()
-		{
-			// DisplayName.SetDefault("BattleHammer Shot");
-		}
 		public override void SetDefaults()
 		{
 			base.SetDefaults();
@@ -18,13 +14,13 @@ namespace MetroidMod.Content.Projectiles.BattleHammer
 			Projectile.height = 20;
 			Projectile.scale = .75f;
 			Projectile.aiStyle = 1;
-			//Projectile.usesLocalNPCImmunity = true;
-			//Projectile.localNPCHitCooldown = 1;
+			Projectile.usesLocalNPCImmunity = true;
+			Projectile.localNPCHitCooldown = 1;
 		}
-
+		private bool oof = true;
 		public override void AI()
 		{
-			Projectile.rotation = (float)Math.Atan2(Projectile.velocity.Y, Projectile.velocity.X) + 1.57f;
+			Projectile.rotation = (float)Math.Atan2(Projectile.velocity.Y, Projectile.velocity.X) + MathHelper.PiOver2;
 			Color color = MetroidMod.powColor;
 			Lighting.AddLight(Projectile.Center, color.R / 255f, color.G / 255f, color.B / 255f);
 
@@ -36,34 +32,33 @@ namespace MetroidMod.Content.Projectiles.BattleHammer
 		}
 		public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
 		{
-			if (Projectile.timeLeft >= 1)
-				modifiers.ArmorPenetration += 10;
+			if (oof)
+			{
+				modifiers.ArmorPenetration += Luminite ? 15 : DiffBeam ? 10 : 5;
+			}
+
 			base.ModifyHitNPC(target, ref modifiers);
 		}
 		public override void OnKill(int timeLeft)
 		{
-			Projectile.width += 76;
-			Projectile.height += 76;
-			Projectile.scale = 5f;
-			Projectile.position.X = Projectile.position.X - (Projectile.width / 2);
-			Projectile.position.Y = Projectile.position.Y - (Projectile.height / 2);
+			SoundEngine.PlaySound(Sounds.Items.Weapons.BattleHammerImpactSound, Projectile.position);
+			mProjectile.Explode(Luminite ? 80 : DiffBeam ? 60 : 20, Luminite ? 10 : DiffBeam ? 5 : 3);
 			mProjectile.Diffuse(Projectile, 110);
 			mProjectile.Diffuse(Projectile, 55);
-			SoundEngine.PlaySound(Sounds.Items.Weapons.BattleHammerImpactSound, Projectile.position);
-			//Projectile.Damage(); //battlehammer double hits on direct(ish) hit
-			Projectile.usesLocalNPCImmunity = true;
-			Projectile.localNPCHitCooldown = 1;
-			/*foreach (NPC target in Main.npc)
-			{
-				if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height))
-				{
-					Projectile.Damage();
-					Projectile.usesLocalNPCImmunity = true;
-					Projectile.localNPCHitCooldown = 1;
-				}
-			}*/
 		}
-
+		public override bool OnTileCollide(Vector2 oldVelocity)
+		{
+			oof = false;
+			return base.OnTileCollide(oldVelocity);
+		}
+		public override bool? CanHitNPC(NPC target)
+		{
+			if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height) && Projectile.Hitbox.Intersects(target.Hitbox))
+			{
+				return null;
+			}
+			return false;
+		}
 		public override bool PreDraw(ref Color lightColor)
 		{
 			mProjectile.DrawCentered(Projectile, Main.spriteBatch);

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using MetroidMod.Content.Items.Weapons;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -16,11 +17,15 @@ namespace MetroidMod.Content.Projectiles.spazer
 		Color color = MetroidMod.powColor;
 		public override void OnSpawn(IEntitySource source)
 		{
-			if (source is EntitySource_Parent parent && parent.Entity is Player player && player.HeldItem.type == ModContent.ItemType<PowerBeam>())
+			if (source is EntitySource_Parent parent && parent.Entity is Player player && (player.HeldItem.type == ModContent.ItemType<PowerBeam>() ||player.HeldItem.type == ModContent.ItemType<ArmCannon>()))
 			{
 				if (player.HeldItem.ModItem is PowerBeam hold)
 				{
 					shot = hold.shotEffect.ToString();
+				}
+				else if (player.HeldItem.ModItem is ArmCannon hold2)
+				{
+					shot = hold2.shotEffect.ToString();
 				}
 			}
 			base.OnSpawn(source);
@@ -51,7 +56,7 @@ namespace MetroidMod.Content.Projectiles.spazer
 				dustType = 62;
 				color = MetroidMod.waveColor;
 			}
-			Projectile.rotation = (float)Math.Atan2((double)Projectile.velocity.Y, (double)Projectile.velocity.X) + 1.57f;
+			Projectile.rotation = (float)Math.Atan2((double)Projectile.velocity.Y, (double)Projectile.velocity.X) + MathHelper.PiOver2;
 			Lighting.AddLight(Projectile.Center, color.R / 255f, color.G / 255f, color.B / 255f);
 			if (Projectile.numUpdates == 0)
 			{
@@ -99,13 +104,13 @@ namespace MetroidMod.Content.Projectiles.spazer
 			base.SetDefaults();
 			Projectile.Name = "Ice Spazer Charge Shot";
 		}
-		public override void OnSpawn(IEntitySource source)
+		public override void AI()
 		{
-			base.OnSpawn(source);
+			base.AI();
 			if (shot.Contains("wave"))
 			{
-				Projectile.tileCollide = false;
 				Projectile.Name = "Ice Wave Spazer Charge Shot";
+				Projectile.tileCollide = false;
 				mProjectile.amplitude = 12f * Projectile.scale;
 				mProjectile.wavesPerSecond = 1f;
 			}

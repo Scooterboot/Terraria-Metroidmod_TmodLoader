@@ -16,7 +16,7 @@ namespace MetroidMod.Content.Items.Addons
 				string.Format("[c/78BE78:+100% damage]\n") +
 				string.Format("[c/BE7878:+75% overheat use]\n") +
 				string.Format("[c/BE7878:-15% speed]")); */
-			ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<PlasmaBeamRedAddon>();
+			//ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<PlasmaBeamRedAddon>(); //Leftover from when it was an alt
 			Item.ResearchUnlockCount = 1;
 		}
 		public override void SetDefaults()
@@ -42,11 +42,11 @@ namespace MetroidMod.Content.Items.Addons
 
 		public override void AddRecipes()
 		{
-			CreateRecipe(1)
+			CreateRecipe()
 				.AddIngredient<Miscellaneous.UnknownPlasmaBeam>(1)
 				.AddRecipeGroup(MUtils.CalamityActive() ? MetroidMod.T1HMBarRecipeGroupID : MetroidMod.T3HMBarRecipeGroupID, 5)
-				.AddIngredient(ItemID.CursedFlame, 10)
 				.AddIngredient(ItemID.SoulofLight, 5)
+				.AddIngredient(ItemID.Emerald, 1)
 				.AddTile(TileID.MythrilAnvil)
 				.Register();
 		}

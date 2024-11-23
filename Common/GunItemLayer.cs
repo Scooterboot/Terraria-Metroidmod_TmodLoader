@@ -5,16 +5,19 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using static MetroidMod.Sounds;
 
 namespace MetroidMod.Common
 {
+	// "Aiming" sprite
 	public class GunItemLayer : PlayerDrawLayer
 	{
-		public override Position GetDefaultPosition() => new AfterParent(PlayerDrawLayers.HeldItem);
+		public override Position GetDefaultPosition() => new AfterParent(PlayerDrawLayers.ArmOverItem);
 		public override bool GetDefaultVisibility(PlayerDrawSet drawInfo) =>
 			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>() ||
 			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>() ||
-			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Tools.NovaLaserDrill>();
+			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Tools.NovaLaserDrill>() ||
+			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Weapons.ArmCannon>();
 		protected override void Draw(ref PlayerDrawSet drawInfo)
 		{
 			Player P = drawInfo.drawPlayer;
@@ -25,7 +28,7 @@ namespace MetroidMod.Common
 				return;
 			}
 
-			if (I.type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>() || I.type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>() || I.type == ModContent.ItemType<Content.Items.Tools.NovaLaserDrill>())
+			if (I.type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>()|| I.type == ModContent.ItemType<Content.Items.Weapons.ArmCannon>() || I.type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>() || I.type == ModContent.ItemType<Content.Items.Tools.NovaLaserDrill>())
 			{
 				Texture2D tex = Terraria.GameContent.TextureAssets.Item[I.type].Value;
 				MGlobalItem mi = I.GetGlobalItem<MGlobalItem>();
@@ -37,7 +40,7 @@ namespace MetroidMod.Common
 
 				int num80 = 10;
 				Vector2 vector7 = new(tex.Width / 2, tex.Height / 2);
-				Vector2 vector8 = new(24f / 2, tex.Height / 2);
+				Vector2 vector8 = Main.DrawPlayerItemPos(P.gravDir, I.type);
 				num80 = (int)vector8.X;
 				vector7.Y = vector8.Y;
 				Vector2 origin4 = new(-num80, tex.Height / 2);
@@ -45,26 +48,28 @@ namespace MetroidMod.Common
 				{
 					origin4 = new Vector2(tex.Width + num80, tex.Height / 2);
 				}
-				DrawData item2 = new(tex, new Vector2((int)(drawInfo.ItemLocation.X - Main.screenPosition.X + vector7.X), (int)(drawInfo.ItemLocation.Y - Main.screenPosition.Y + vector7.Y)), new Rectangle(0, 0, tex.Width, tex.Height), drawInfo.colorArmorBody, P.itemRotation, origin4, I.scale, drawInfo.itemEffect, 0);
+				DrawData item2 = new(tex, new Vector2((int)(drawInfo.ItemLocation.X - Main.screenPosition.X), (int)(drawInfo.ItemLocation.Y - Main.screenPosition.Y + vector7.Y)), new Rectangle(0, 0, tex.Width, tex.Height), drawInfo.colorArmorBody, P.itemRotation, origin4, I.scale, drawInfo.itemEffect, 0);
 				item2.shader = drawInfo.cBody;
 				drawInfo.DrawDataCache.Add(item2);
 			}
 		}
 	}
+	// Idle
 	public class GunLayer : PlayerDrawLayer
 	{
 		public override Position GetDefaultPosition() => new AfterParent(PlayerDrawLayers.HandOnAcc);
 		public override bool GetDefaultVisibility(PlayerDrawSet drawInfo) =>
 			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>() ||
 			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>() ||
-			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Tools.NovaLaserDrill>();
+			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Tools.NovaLaserDrill>() ||
+			drawInfo.drawPlayer.inventory[drawInfo.drawPlayer.selectedItem].type == ModContent.ItemType<Content.Items.Weapons.ArmCannon>();
 		protected override void Draw(ref PlayerDrawSet drawInfo)
 		{
 			Player P = drawInfo.drawPlayer;
 			MPlayer mPlayer = P.GetModPlayer<MPlayer>();
 			Item I = P.inventory[P.selectedItem];
-			int frame = (int)(P.bodyFrame.Y / P.bodyFrame.Height);
-			if ((I.type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>() || I.type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>() || I.type == ModContent.ItemType<Content.Items.Tools.NovaLaserDrill>()) && ((P.itemAnimation == 0 && (frame < 1 || frame > 4)) || (mPlayer.statCharge > 0 && mPlayer.somersault)) && !P.dead)
+			int frame = (P.bodyFrame.Y / P.bodyFrame.Height);
+			if ((I.type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>()|| I.type == ModContent.ItemType<Content.Items.Weapons.ArmCannon>() || I.type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>() || I.type == ModContent.ItemType<Content.Items.Tools.NovaLaserDrill>()) && ((P.itemAnimation == 0 && (frame < 1 || frame > 4)) || (mPlayer.statCharge > 0 && mPlayer.somersault)) && !P.dead)
 			{
 				Texture2D tex = Terraria.GameContent.TextureAssets.Item[I.type].Value;//Main.itemTexture[I.type];
 				MGlobalItem mi = I.GetGlobalItem<MGlobalItem>();
@@ -75,7 +80,7 @@ namespace MetroidMod.Common
 
 				if (tex != null)
 				{
-					Vector2 origin = new(14f, (float)((int)(tex.Height / 2)));
+					Vector2 origin = new(14f, tex.Height / 2);
 					if (P.direction == -1)
 					{
 						origin.X = tex.Width - 14;

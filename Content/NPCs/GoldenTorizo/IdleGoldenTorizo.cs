@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using MetroidMod.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -42,7 +44,7 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 			NPC.boss = false;
 			NPC.BossBar = ModContent.GetInstance<BossBars.BossBarNone>();
 		}
-		public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
+		/*public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
 		{
 			int associatedNPCType = ModContent.NPCType<GoldenTorizo>();
 			bestiaryEntry.UIInfoProvider = new CommonEnemyUICollectionInfoProvider(ContentSamples.NpcBestiaryCreditIdsByNpcNetIds[associatedNPCType], quickUnlock: true);
@@ -51,7 +53,7 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.UndergroundDesert,
 				new FlavorTextBestiaryInfoElement("Nope, nothing's wrong at all.")
 			});
-		}
+		}*/
 		public override bool CanChat()
 		{
 			return false;
@@ -74,21 +76,10 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 		}
 		public override void PostAI()
 		{
-			Rectangle room = Common.Systems.MSystem.TorizoRoomLocation;
-			if (room.X > 0 && room.Y > 0)
+			var system = ModContent.GetInstance<GoldenTorizoSpawningSystem>();
+			if (system.Initialized)
 			{
-				Vector2 pos = new Vector2(room.X + 8, room.Y + room.Height - 4);
-				NPC.direction = 1;
-				if (room.X > Main.maxTilesX / 2)
-				{
-					pos.X = (room.X + room.Width - 8);
-					NPC.direction = -1;
-				}
-				pos *= 16f;
-				NPC.spriteDirection = NPC.direction;
-
-				NPC.position.X = pos.X - NPC.width / 2;
-				NPC.position.Y = pos.Y - NPC.height;
+				system.UpdateNpcAttributes(NPC);
 
 				for (int i = 0; i < 255; i++)
 				{

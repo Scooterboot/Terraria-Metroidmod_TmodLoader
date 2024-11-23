@@ -30,14 +30,9 @@ namespace MetroidMod
 		public int TileType { get; internal set; }
 
 		/// <summary>
-		/// The translations for the display name of this item.
-		/// </summary>
-		public LocalizedText DisplayName { get; internal set; }
-
-		/// <summary>
 		/// The translations for the tooltip of this item.
 		/// </summary>
-		public LocalizedText Tooltip { get; internal set; }
+		public virtual LocalizedText Tooltip => ModItem.GetLocalization(nameof(Tooltip), () => "");
 
 		public abstract string ItemTexture { get; }
 
@@ -102,13 +97,13 @@ namespace MetroidMod
 		/// </summary>
 		/// <param name="x">The X location of the tile</param>
 		/// <param name="y">The Y location of the tile</param>
-		public virtual bool CanGenerateOnChozoStatue(int x, int y) => false;
+		public virtual bool CanGenerateOnChozoStatue() => false;
 		/// <summary>
 		/// Determines how likely the addon will generate on Chozo Statues.
 		/// </summary>
 		/// <param name="x">The X location of the tile</param>
 		/// <param name="y">The Y location of the tile</param>
-		public virtual double GenerationChance(int x, int y) { return 0; }
+		public virtual double GenerationChance() { return 0; }
 		public override sealed void SetupContent()
 		{
 			SetStaticDefaults();
@@ -154,8 +149,6 @@ namespace MetroidMod
 
 		protected override sealed void Register()
 		{
-			DisplayName = Language.GetOrRegister(Mod, $"SuitAddonName.{Name}");
-			Tooltip = Language.GetOrRegister(Mod, $"SuitAddonTooltip.{Name}");
 			if (!AddOnlyAddonItem)
 			{
 				Type = SuitAddonLoader.AddonCount;
@@ -171,7 +164,7 @@ namespace MetroidMod
 		public override void SetStaticDefaults()
 		{
 			Main.tileSpelunker[TileType] = true;
-			Main.tileOreFinderPriority[Type] = 806;
+			Main.tileOreFinderPriority[TileType] = 806;
 			base.SetStaticDefaults();
 		}
 

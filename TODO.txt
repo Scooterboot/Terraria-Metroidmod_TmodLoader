@@ -11,7 +11,6 @@
 	 -	Echo Visor (implement in Metroid Prime 2: Echoes update)
 	 -	Command Visor (implement in Metroid Prime 3: Corruption update)
  -	Fix Kraid multiplayer loot bag
- -	Fix Nightmare Core-X not spawning in multiplayer
  -	Make Scan Visor lock onto enemies
  -	Find a better way to alert players to the new location of the suit ui, because apparently telling them through the suit's set bonus tooltip isn't good enough.
  -	Sprites for things relating to the Chozo Ruins 'biome' (for use in the Bestiary)
@@ -20,4 +19,36 @@
  -	Balance the new addon system (somehow)
  -	Figure out how to make Hazard Shield shoulderpads draw on primary suits
  -	Make Space Jump Boots conform to the new jump loader
+- Netsync the following:
+	imperialist invisibiltiy
+	powerbeam shotsound
+	powerbeam and missile launcher appearance
+	SHOCKCOIL
+add right click parry for arm cannon
 
+BOSS OVERHAUL:
+-Current behavior is for classic difficulty
+-More item drops, generally more aggressive/agile with difficulty, unique FTW mechanics
+Torizo:
+-spews bombs less often, more of them, faster, less items dropped
+-make him jump around more often, possibly "juke" the player when above him
+	FTW: destroys platforms and ropes, headless phase unavoidable?
+Serris:
+-less vuln time, x phase spews x parasites that slow, make core face player
+-enrages out of ocean
+	FTW: must be fought underwater
+Pantoon:
+gradually enrages from being hit with missiles, moves faster, more fireballs but make them slower?
+	FTW:???
+Nightmare:
+X phase spews gravity-warping x parasites
+	FTW: must be fought in space?
+OP:
+-super high defense when shield is up
+-spawns pirates when regenerating
+-enrages when player is above for too long?
+	FTW:also spawns weavel
+Goldie:
+-missiles are useless
+-supers reflect back at player
+	FTW: can space jump after the player

@@ -1,3 +1,4 @@
+using System;
 using MetroidMod.Common.Configs;
 using MetroidMod.Common.GlobalItems;
 using MetroidMod.Common.Players;
@@ -11,6 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -23,7 +25,7 @@ namespace MetroidMod.Common.UI
 	 */
 	public class PowerBeamUI : UIState
 	{
-		public static bool Visible => Main.playerInventory && Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].type == ModContent.ItemType<PowerBeam>();
+		public static bool Visible => Main.playerInventory && Main.LocalPlayer.chest == -1 && (Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].type == ModContent.ItemType<PowerBeam>() || Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].type == ModContent.ItemType<ArmCannon>() && Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].TryGetGlobalItem(out MGlobalItem ac) && ac.isBeam);
 
 		private PowerBeamPanel powerBeamPanel;
 		private PowerBeamScrewAttackButton pbsaButton;
@@ -80,7 +82,8 @@ namespace MetroidMod.Common.UI
 			new Vector2(174, 14),
 			new Vector2(32, 14),
 			new Vector2(32, 94),
-			new Vector2(174, 94)
+			new Vector2(174, 94),
+			new Vector2(98, 152)
 		};
 
 		public override void OnInitialize()
@@ -109,7 +112,7 @@ namespace MetroidMod.Common.UI
 		public override void Update(GameTime gameTime)
 		{
 			Width.Pixels = 256;
-			Height.Pixels = 164;
+			Height.Pixels = 224;
 			enabled = MConfigClient.Instance.PowerBeam.enabled;
 			if (!enabled && MConfigClient.Instance.PowerBeam.auto)
 			{
@@ -181,206 +184,477 @@ namespace MetroidMod.Common.UI
 		{
 			//TODO No failsafe. Should maybe be implemented?
 			// How do I get BeamChange[beamSlotType] to not always equal 0 so it isnt this disguting trainwreck? --Dr
-			PowerBeam powerBeamTarget = Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].ModItem as PowerBeam;
-			if (powerBeamTarget == null || powerBeamTarget.BeamMods == null) { return; }
-
-			if (powerBeamTarget.BeamMods[addonSlotType] != null && !powerBeamTarget.BeamMods[addonSlotType].IsAir)
+			if(Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].ModItem.Type == ModContent.ItemType<PowerBeam>())
 			{
-				//pickup
-				if (Main.mouseItem.IsAir)
-				{
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ChargeBeamAddon>())
-					{
-						powerBeamTarget.BeamChange[0].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<VoltDriverAddon>())
-					{
-						powerBeamTarget.BeamChange[1].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<MagMaulAddon>())
-					{
-						powerBeamTarget.BeamChange[2].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ImperialistAddon>())
-					{
-						powerBeamTarget.BeamChange[3].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<JudicatorAddon>())
-					{
-						powerBeamTarget.BeamChange[4].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ShockCoilAddon>())
-					{
-						powerBeamTarget.BeamChange[5].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<BattleHammerAddon>())
-					{
-						powerBeamTarget.BeamChange[6].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<OmegaCannonAddon>())
-					{
-						powerBeamTarget.BeamChange[7].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<HyperBeamAddon>())
-					{
-						powerBeamTarget.BeamChange[8].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<PhazonBeamAddon>())
-					{
-						powerBeamTarget.BeamChange[9].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ChargeBeamV2Addon>())
-					{
-						powerBeamTarget.BeamChange[10].TurnToAir();
-					}
-					if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<LuminiteBeamAddon>())
-					{
-						powerBeamTarget.BeamChange[11].TurnToAir();
-					}
-					Main.mouseItem = powerBeamTarget.BeamMods[addonSlotType].Clone();
+				PowerBeam powerBeamTarget = Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].ModItem as PowerBeam;
+				if (powerBeamTarget == null || powerBeamTarget.BeamMods == null) { return; }
 
-					powerBeamTarget.BeamMods[addonSlotType].TurnToAir();
-					//powerBeamTarget.BeamChange[beamSlotType].TurnToAir();
+				if (powerBeamTarget.BeamMods[addonSlotType] != null && !powerBeamTarget.BeamMods[addonSlotType].IsAir)
+				{
+					//pickup
+					if (Main.mouseItem.IsAir)
+					{
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ChargeBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[0].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<VoltDriverAddon>())
+						{
+							powerBeamTarget.BeamChange[1].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<MagMaulAddon>())
+						{
+							powerBeamTarget.BeamChange[2].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ImperialistAddon>())
+						{
+							powerBeamTarget.BeamChange[3].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<JudicatorAddon>())
+						{
+							powerBeamTarget.BeamChange[4].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ShockCoilAddon>())
+						{
+							powerBeamTarget.BeamChange[5].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<BattleHammerAddon>())
+						{
+							powerBeamTarget.BeamChange[6].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<OmegaCannonAddon>())
+						{
+							powerBeamTarget.BeamChange[7].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<HyperBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[8].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<PhazonBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[9].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ChargeBeamV2Addon>())
+						{
+							powerBeamTarget.BeamChange[10].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<LuminiteBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[11].TurnToAir();
+						}
+						Main.mouseItem = powerBeamTarget.BeamMods[addonSlotType].Clone();
+
+						powerBeamTarget.BeamMods[addonSlotType].TurnToAir();
+						//powerBeamTarget.BeamChange[beamSlotType].TurnToAir();
+					}
+					else if (condition == null || (condition != null && condition(Main.mouseItem)) && addonSlotType != 0)
+					{
+						SoundEngine.PlaySound(SoundID.Grab);
+						if (Main.mouseItem.type == powerBeamTarget.BeamMods[addonSlotType].type)
+						{
+							int stack = Main.mouseItem.stack + powerBeamTarget.BeamMods[addonSlotType].stack;
+
+							if (powerBeamTarget.BeamMods[addonSlotType].maxStack >= stack)
+							{
+								powerBeamTarget.BeamMods[addonSlotType].stack = stack;
+								Main.mouseItem.TurnToAir();
+							}
+							else
+							{
+								int stackDiff = stack - powerBeamTarget.BeamMods[addonSlotType].maxStack;
+								powerBeamTarget.BeamMods[addonSlotType].stack = powerBeamTarget.BeamMods[addonSlotType].maxStack;
+								Main.mouseItem.stack = stackDiff;
+							}
+						}
+						else
+						{
+							Item tempBoxItem = powerBeamTarget.BeamMods[addonSlotType].Clone();
+							Item tempMouseItem = Main.mouseItem.Clone();
+
+							powerBeamTarget.BeamMods[addonSlotType] = tempMouseItem;
+							Main.mouseItem = tempBoxItem;
+						}
+					}
 				}
-				else if (condition == null || (condition != null && condition(Main.mouseItem)) && addonSlotType != 0)
+				//place
+				else if (!Main.mouseItem.IsAir)
 				{
-					SoundEngine.PlaySound(SoundID.Grab);
-
-					Item tempBoxItem = powerBeamTarget.BeamMods[addonSlotType].Clone();
-					Item tempMouseItem = Main.mouseItem.Clone();
-
-					powerBeamTarget.BeamMods[addonSlotType] = tempMouseItem;
-					Main.mouseItem = tempBoxItem;
+					if (condition == null || (condition != null && condition(Main.mouseItem)))
+					{
+						if (Main.mouseItem.type == ModContent.ItemType<ChargeBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[0] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<VoltDriverAddon>())
+						{
+							powerBeamTarget.BeamChange[1] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.VoltDriverLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<MagMaulAddon>())
+						{
+							powerBeamTarget.BeamChange[2] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.MagMaulLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<ImperialistAddon>())
+						{
+							powerBeamTarget.BeamChange[3] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ImperialistLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<JudicatorAddon>())
+						{
+							powerBeamTarget.BeamChange[4] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.JudicatorLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<ShockCoilAddon>())
+						{
+							powerBeamTarget.BeamChange[5] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ShockCoilLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<BattleHammerAddon>())
+						{
+							powerBeamTarget.BeamChange[6] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.BattleHammerLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<OmegaCannonAddon>())
+						{
+							powerBeamTarget.BeamChange[7] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.OmegaCannonLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<HyperBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[8] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.BeamAquired);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<PhazonBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[9] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.BeamAquired);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<ChargeBeamV2Addon>())
+						{
+							powerBeamTarget.BeamChange[10] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<LuminiteBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[11] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
+						}
+						SoundEngine.PlaySound(SoundID.Grab);
+						powerBeamTarget.BeamMods[addonSlotType] = Main.mouseItem.Clone();
+						Main.mouseItem.TurnToAir();
+					}
 				}
 			}
-			//place
-			else if (!Main.mouseItem.IsAir)
+			else if(Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].ModItem.Type == ModContent.ItemType<ArmCannon>())
 			{
-				if (condition == null || (condition != null && condition(Main.mouseItem)))
+				ArmCannon powerBeamTarget = Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].ModItem as ArmCannon;
+				if (powerBeamTarget == null || powerBeamTarget.BeamMods == null) { return; }
+
+				if (powerBeamTarget.BeamMods[addonSlotType] != null && !powerBeamTarget.BeamMods[addonSlotType].IsAir)
 				{
-					if (Main.mouseItem.type == ModContent.ItemType<ChargeBeamAddon>())
+					//pickup
+					if (Main.mouseItem.IsAir)
 					{
-						powerBeamTarget.BeamChange[0] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ChargeBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[0].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<VoltDriverAddon>())
+						{
+							powerBeamTarget.BeamChange[1].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<MagMaulAddon>())
+						{
+							powerBeamTarget.BeamChange[2].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ImperialistAddon>())
+						{
+							powerBeamTarget.BeamChange[3].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<JudicatorAddon>())
+						{
+							powerBeamTarget.BeamChange[4].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ShockCoilAddon>())
+						{
+							powerBeamTarget.BeamChange[5].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<BattleHammerAddon>())
+						{
+							powerBeamTarget.BeamChange[6].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<OmegaCannonAddon>())
+						{
+							powerBeamTarget.BeamChange[7].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<HyperBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[8].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<PhazonBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[9].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<ChargeBeamV2Addon>())
+						{
+							powerBeamTarget.BeamChange[10].TurnToAir();
+						}
+						if (powerBeamTarget.BeamMods[addonSlotType].type == ModContent.ItemType<LuminiteBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[11].TurnToAir();
+						}
+						Main.mouseItem = powerBeamTarget.BeamMods[addonSlotType].Clone();
+
+						powerBeamTarget.BeamMods[addonSlotType].TurnToAir();
+						//powerBeamTarget.BeamChange[beamSlotType].TurnToAir();
 					}
-					if (Main.mouseItem.type == ModContent.ItemType<VoltDriverAddon>())
+					else if (condition == null || (condition != null && condition(Main.mouseItem)) && addonSlotType != 0)
 					{
-						powerBeamTarget.BeamChange[1] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.VoltDriverLoad);
+						SoundEngine.PlaySound(SoundID.Grab);
+						if (Main.mouseItem.type == powerBeamTarget.BeamMods[addonSlotType].type)
+						{
+							int stack = Main.mouseItem.stack + powerBeamTarget.BeamMods[addonSlotType].stack;
+
+							if (powerBeamTarget.BeamMods[addonSlotType].maxStack >= stack)
+							{
+								powerBeamTarget.BeamMods[addonSlotType].stack = stack;
+								Main.mouseItem.TurnToAir();
+							}
+							else
+							{
+								int stackDiff = stack - powerBeamTarget.BeamMods[addonSlotType].maxStack;
+								powerBeamTarget.BeamMods[addonSlotType].stack = powerBeamTarget.BeamMods[addonSlotType].maxStack;
+								Main.mouseItem.stack = stackDiff;
+							}
+						}
+						else
+						{
+							Item tempBoxItem = powerBeamTarget.BeamMods[addonSlotType].Clone();
+							Item tempMouseItem = Main.mouseItem.Clone();
+
+							powerBeamTarget.BeamMods[addonSlotType] = tempMouseItem;
+							Main.mouseItem = tempBoxItem;
+						}
 					}
-					if (Main.mouseItem.type == ModContent.ItemType<MagMaulAddon>())
+				}
+				//place
+				else if (!Main.mouseItem.IsAir)
+				{
+					if (condition == null || (condition != null && condition(Main.mouseItem)))
 					{
-						powerBeamTarget.BeamChange[2] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.MagMaulLoad);
+						if (Main.mouseItem.type == ModContent.ItemType<ChargeBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[0] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<VoltDriverAddon>())
+						{
+							powerBeamTarget.BeamChange[1] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.VoltDriverLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<MagMaulAddon>())
+						{
+							powerBeamTarget.BeamChange[2] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.MagMaulLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<ImperialistAddon>())
+						{
+							powerBeamTarget.BeamChange[3] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ImperialistLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<JudicatorAddon>())
+						{
+							powerBeamTarget.BeamChange[4] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.JudicatorLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<ShockCoilAddon>())
+						{
+							powerBeamTarget.BeamChange[5] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ShockCoilLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<BattleHammerAddon>())
+						{
+							powerBeamTarget.BeamChange[6] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.BattleHammerLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<OmegaCannonAddon>())
+						{
+							powerBeamTarget.BeamChange[7] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.OmegaCannonLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<HyperBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[8] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.BeamAquired);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<PhazonBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[9] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.BeamAquired);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<ChargeBeamV2Addon>())
+						{
+							powerBeamTarget.BeamChange[10] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
+						}
+						if (Main.mouseItem.type == ModContent.ItemType<LuminiteBeamAddon>())
+						{
+							powerBeamTarget.BeamChange[11] = Main.mouseItem.Clone();
+							SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
+						}
+						SoundEngine.PlaySound(SoundID.Grab);
+						powerBeamTarget.BeamMods[addonSlotType] = Main.mouseItem.Clone();
+						Main.mouseItem.TurnToAir();
 					}
-					if (Main.mouseItem.type == ModContent.ItemType<ImperialistAddon>())
-					{
-						powerBeamTarget.BeamChange[3] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.ImperialistLoad);
-					}
-					if (Main.mouseItem.type == ModContent.ItemType<JudicatorAddon>())
-					{
-						powerBeamTarget.BeamChange[4] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.JudicatorLoad);
-					}
-					if (Main.mouseItem.type == ModContent.ItemType<ShockCoilAddon>())
-					{
-						powerBeamTarget.BeamChange[5] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.ShockCoilLoad);
-					}
-					if (Main.mouseItem.type == ModContent.ItemType<BattleHammerAddon>())
-					{
-						powerBeamTarget.BeamChange[6] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.BattleHammerLoad);
-					}
-					if (Main.mouseItem.type == ModContent.ItemType<OmegaCannonAddon>())
-					{
-						powerBeamTarget.BeamChange[7] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.OmegaCannonLoad);
-					}
-					if (Main.mouseItem.type == ModContent.ItemType<HyperBeamAddon>())
-					{
-						powerBeamTarget.BeamChange[8] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.BeamAquired);
-					}
-					if (Main.mouseItem.type == ModContent.ItemType<PhazonBeamAddon>())
-					{
-						powerBeamTarget.BeamChange[9] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.BeamAquired);
-					}
-					if (Main.mouseItem.type == ModContent.ItemType<ChargeBeamV2Addon>())
-					{
-						powerBeamTarget.BeamChange[10] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
-					}
-					if (Main.mouseItem.type == ModContent.ItemType<LuminiteBeamAddon>())
-					{
-						powerBeamTarget.BeamChange[11] = Main.mouseItem.Clone();
-						SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeBeamLoad);
-					}
-					SoundEngine.PlaySound(SoundID.Grab);
-					powerBeamTarget.BeamMods[addonSlotType] = Main.mouseItem.Clone();
-					Main.mouseItem.TurnToAir();
 				}
 			}
+			
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
 			//base.DrawSelf(spriteBatch);
 			Item target = Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem];
-			if (target == null || target.type != ModContent.ItemType<PowerBeam>()) { return; }
-			PowerBeam powerBeamTarget = (PowerBeam)target.ModItem;
+			if (target == null || (target.type != ModContent.ItemType<PowerBeam>() && target.type != ModContent.ItemType<ArmCannon>())) { return; }
 
-			spriteBatch.Draw(itemBoxTexture, DrawRectangle, new Color(255, 255, 255));
 
-			// Item drawing.
-			if (powerBeamTarget == null || powerBeamTarget.BeamMods == null || powerBeamTarget.BeamMods[addonSlotType].IsAir) { return; }
-
-			Color itemColor = powerBeamTarget.BeamMods[addonSlotType].GetAlpha(Color.White);
-			Texture2D itemTexture = Terraria.GameContent.TextureAssets.Item[powerBeamTarget.BeamMods[addonSlotType].type].Value;
-			CalculatedStyle innerDimensions = GetDimensions();
-
-			if (IsMouseHovering)
+			if (target.type == ModContent.ItemType<PowerBeam>())
 			{
-				Main.hoverItemName = powerBeamTarget.BeamMods[addonSlotType].Name;
-				Main.HoverItem = powerBeamTarget.BeamMods[addonSlotType].Clone();
-			}
+				PowerBeam powerBeamTarget = (PowerBeam)target.ModItem;
+				spriteBatch.Draw(itemBoxTexture, DrawRectangle, new Color(255, 255, 255));
 
-			Rectangle frame = Main.itemAnimations[powerBeamTarget.BeamMods[addonSlotType].type] != null
-						? Main.itemAnimations[powerBeamTarget.BeamMods[addonSlotType].type].GetFrame(itemTexture)
-						: itemTexture.Frame(1, 1, 0, 0);
+				// Item drawing.
+				if (powerBeamTarget == null || powerBeamTarget.BeamMods == null || powerBeamTarget.BeamMods[addonSlotType].IsAir) { return; }
 
-			float drawScale = 1f;
-			if (frame.Width > innerDimensions.Width || frame.Height > innerDimensions.Width)
-			{
-				if (frame.Width > frame.Height)
+				Color itemColor = powerBeamTarget.BeamMods[addonSlotType].GetAlpha(Color.White);
+				Texture2D itemTexture = Terraria.GameContent.TextureAssets.Item[powerBeamTarget.BeamMods[addonSlotType].type].Value;
+				CalculatedStyle innerDimensions = GetDimensions();
+
+				if (IsMouseHovering)
 				{
-					drawScale = innerDimensions.Width / frame.Width;
+					Main.hoverItemName = powerBeamTarget.BeamMods[addonSlotType].Name;
+					Main.HoverItem = powerBeamTarget.BeamMods[addonSlotType].Clone();
 				}
-				else
+
+				Rectangle frame = Main.itemAnimations[powerBeamTarget.BeamMods[addonSlotType].type] != null
+							? Main.itemAnimations[powerBeamTarget.BeamMods[addonSlotType].type].GetFrame(itemTexture)
+							: itemTexture.Frame(1, 1, 0, 0);
+
+				float drawScale = 1f;
+				if (frame.Width > innerDimensions.Width || frame.Height > innerDimensions.Width)
 				{
-					drawScale = innerDimensions.Width / frame.Height;
+					if (frame.Width > frame.Height)
+					{
+						drawScale = innerDimensions.Width / frame.Width;
+					}
+					else
+					{
+						drawScale = innerDimensions.Width / frame.Height;
+					}
+				}
+
+				float unreflectedScale = drawScale;
+				Color tmpcolor = Color.White;
+
+				ItemSlot.GetItemLight(ref tmpcolor, ref drawScale, powerBeamTarget.BeamMods[addonSlotType].type);
+
+				Vector2 drawPosition = new(innerDimensions.X, innerDimensions.Y);
+
+				drawPosition.X += (float)innerDimensions.Width * 1f / 2f - (float)frame.Width * drawScale / 2f;
+				drawPosition.Y += (float)innerDimensions.Height * 1f / 2f - (float)frame.Height * drawScale / 2f;
+
+				spriteBatch.Draw(itemTexture, drawPosition, new Rectangle?(frame), itemColor, 0f,
+					Vector2.Zero, drawScale, SpriteEffects.None, 0f);
+
+				if (powerBeamTarget.BeamMods[addonSlotType].color != default(Color))
+				{
+					spriteBatch.Draw(itemTexture, drawPosition, itemColor);//, 0f,
+																		   //Vector2.Zero, drawScale, SpriteEffects.None, 0f);
+				}
+
+				if (powerBeamTarget.BeamMods[addonSlotType].stack > 1)
+				{
+					Utils.DrawBorderStringFourWay(
+						spriteBatch,
+						FontAssets.ItemStack.Value,
+						Math.Min(9999, powerBeamTarget.BeamMods[addonSlotType].stack).ToString(),
+						innerDimensions.Position().X + 10f,
+						innerDimensions.Position().Y + 26f,
+						Color.White,
+						Color.Black,
+						Vector2.Zero,
+						unreflectedScale * 0.8f);
 				}
 			}
-
-			//float unreflectedScale = drawScale;
-			Color tmpcolor = Color.White;
-
-			ItemSlot.GetItemLight(ref tmpcolor, ref drawScale, powerBeamTarget.BeamMods[addonSlotType].type);
-
-			Vector2 drawPosition = new(innerDimensions.X, innerDimensions.Y);
-
-			drawPosition.X += (float)innerDimensions.Width * 1f / 2f - (float)frame.Width * drawScale / 2f;
-			drawPosition.Y += (float)innerDimensions.Height * 1f / 2f - (float)frame.Height * drawScale / 2f;
-
-			spriteBatch.Draw(itemTexture, drawPosition, new Rectangle?(frame), itemColor, 0f,
-				Vector2.Zero, drawScale, SpriteEffects.None, 0f);
-
-			if (powerBeamTarget.BeamMods[addonSlotType].color != default(Color))
+			else if(target.type == ModContent.ItemType<ArmCannon>())
 			{
-				spriteBatch.Draw(itemTexture, drawPosition, itemColor);//, 0f,
-																	   //Vector2.Zero, drawScale, SpriteEffects.None, 0f);
+				ArmCannon cannonTarget = (ArmCannon)target.ModItem;
+				spriteBatch.Draw(itemBoxTexture, DrawRectangle, new Color(255, 255, 255));
+
+				// Item drawing.
+				if (cannonTarget == null || cannonTarget.BeamMods == null || cannonTarget.BeamMods[addonSlotType].IsAir) { return; }
+
+				Color itemColor = cannonTarget.BeamMods[addonSlotType].GetAlpha(Color.White);
+				Texture2D itemTexture = Terraria.GameContent.TextureAssets.Item[cannonTarget.BeamMods[addonSlotType].type].Value;
+				CalculatedStyle innerDimensions = GetDimensions();
+
+				if (IsMouseHovering)
+				{
+					Main.hoverItemName = cannonTarget.BeamMods[addonSlotType].Name;
+					Main.HoverItem = cannonTarget.BeamMods[addonSlotType].Clone();
+				}
+
+				Rectangle frame = Main.itemAnimations[cannonTarget.BeamMods[addonSlotType].type] != null
+							? Main.itemAnimations[cannonTarget.BeamMods[addonSlotType].type].GetFrame(itemTexture)
+							: itemTexture.Frame(1, 1, 0, 0);
+
+				float drawScale = 1f;
+				if (frame.Width > innerDimensions.Width || frame.Height > innerDimensions.Width)
+				{
+					if (frame.Width > frame.Height)
+					{
+						drawScale = innerDimensions.Width / frame.Width;
+					}
+					else
+					{
+						drawScale = innerDimensions.Width / frame.Height;
+					}
+				}
+
+				float unreflectedScale = drawScale;
+				Color tmpcolor = Color.White;
+
+				ItemSlot.GetItemLight(ref tmpcolor, ref drawScale, cannonTarget.BeamMods[addonSlotType].type);
+
+				Vector2 drawPosition = new(innerDimensions.X, innerDimensions.Y);
+
+				drawPosition.X += (float)innerDimensions.Width * 1f / 2f - (float)frame.Width * drawScale / 2f;
+				drawPosition.Y += (float)innerDimensions.Height * 1f / 2f - (float)frame.Height * drawScale / 2f;
+
+				spriteBatch.Draw(itemTexture, drawPosition, new Rectangle?(frame), itemColor, 0f,
+					Vector2.Zero, drawScale, SpriteEffects.None, 0f);
+
+				if (cannonTarget.BeamMods[addonSlotType].color != default(Color))
+				{
+					spriteBatch.Draw(itemTexture, drawPosition, itemColor);//, 0f,
+																		   //Vector2.Zero, drawScale, SpriteEffects.None, 0f);
+				}
+
+				if (cannonTarget.BeamMods[addonSlotType].stack > 1)
+				{
+					Utils.DrawBorderStringFourWay(
+						spriteBatch,
+						FontAssets.ItemStack.Value,
+						Math.Min(9999, cannonTarget.BeamMods[addonSlotType].stack).ToString(),
+						innerDimensions.Position().X + 10f,
+						innerDimensions.Position().Y + 26f,
+						Color.White,
+						Color.Black,
+						Vector2.Zero,
+						unreflectedScale * 0.8f);
+				}
 			}
 		}
 	}
@@ -666,6 +940,7 @@ namespace MetroidMod.Common.UI
 		protected override void DrawSelf(SpriteBatch sb)
 		{
 			PowerBeam powerBeamTarget = Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].ModItem as PowerBeam;
+			ArmCannon cannonTarget = Main.LocalPlayer.inventory[Main.LocalPlayer.MetroidPlayer().selectedItem].ModItem as ArmCannon;
 			if (powerBeamTarget != null && (powerBeamTarget.comboError1 || powerBeamTarget.comboError2 || powerBeamTarget.comboError3 || powerBeamTarget.comboError4))
 			{
 				//MPlayer mp = Main.LocalPlayer.GetModPlayer<MPlayer>();
@@ -687,6 +962,36 @@ namespace MetroidMod.Common.UI
 						text += "\nPrimary A";
 					}
 					if (powerBeamTarget.comboError4)
+					{
+						text += "\nPrimary B";
+					}
+					text += "\n \n" +
+					"Note: Addon stat bonuses are still applied.";
+
+					Main.hoverItemName = text;
+				}
+
+				sb.Draw(iconTex, DrawRectangle, Color.White);
+			}
+			else if (cannonTarget != null && (cannonTarget.comboError1 || cannonTarget.comboError2 || cannonTarget.comboError3 || cannonTarget.comboError4))
+			{
+				if (IsMouseHovering)
+				{
+					string text = "Error: addon version mistmatch detected.\n" +
+					"The following slots have had their addon effects disabled:";
+					if (cannonTarget.comboError1)
+					{
+						text += "\nSecondary";
+					}
+					if (cannonTarget.comboError2)
+					{
+						text += "\nUtility";
+					}
+					if (cannonTarget.comboError3)
+					{
+						text += "\nPrimary A";
+					}
+					if (cannonTarget.comboError4)
 					{
 						text += "\nPrimary B";
 					}

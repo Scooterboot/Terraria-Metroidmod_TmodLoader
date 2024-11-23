@@ -26,7 +26,7 @@ namespace MetroidMod.Content.Projectiles.missiles
 
 		public override void AI()
 		{
-			Projectile.rotation = (float)Math.Atan2((double)Projectile.velocity.Y, (double)Projectile.velocity.X) + 1.57f;
+			Projectile.rotation = (float)Math.Atan2((double)Projectile.velocity.Y, (double)Projectile.velocity.X) + MathHelper.PiOver2;
 
 			int dustType = 6;
 			float scale = 2f;
@@ -107,23 +107,24 @@ namespace MetroidMod.Content.Projectiles.missiles
 			{
 				size = 100;
 			}
-			P.position.X = P.position.X + (float)(P.width / 2);
+			/*P.position.X = P.position.X + (float)(P.width / 2);
 			P.position.Y = P.position.Y + (float)(P.height / 2);
 			P.width += size;
 			P.height += size;
 			P.position.X = P.position.X - (float)(P.width / 2);
-			P.position.Y = P.position.Y - (float)(P.height / 2);
+			P.position.Y = P.position.Y - (float)(P.height / 2);*/
+			mProjectile.Explode(size);
 
 			//SoundEngine.PlaySound(SoundID.Item14,P.position);
 
+			int dustType = 6;
+			int dustType2 = 30;
+			float scale = 1f;
 			if (mProjectile.homing)
 			{
 				SoundEngine.PlaySound(Sounds.Items.Weapons.MissileExplodeHunters, Projectile.position);
 			}
-			int dustType = 6;
-			int dustType2 = 30;
-			float scale = 1f;
-			if (P.Name.Contains("Ice"))
+			else if (P.Name.Contains("Ice"))
 			{
 				dustType = 135;
 				SoundEngine.PlaySound(Sounds.Items.Weapons.IceMissileExplode, Projectile.position);
@@ -153,16 +154,6 @@ namespace MetroidMod.Content.Projectiles.missiles
 				Main.dust[num72].velocity *= 1.4f;
 				Main.dust[num72].noGravity = true;
 			}
-			P.Damage();
-			foreach (NPC target in Main.npc)
-			{
-				if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height))
-				{
-					Projectile.Damage();
-					Projectile.usesLocalNPCImmunity = true;
-					Projectile.localNPCHitCooldown = 1;
-				}
-			}
 
 			if (P.Name.Contains("Nebula"))
 			{
@@ -170,7 +161,14 @@ namespace MetroidMod.Content.Projectiles.missiles
 				int n = Projectile.NewProjectile(entitySource, P.Center.X, P.Center.Y, 0f, 0f, ModContent.ProjectileType<NebulaMissileImpact>(), P.damage, P.knockBack, P.owner);
 			}
 		}
-
+		public override bool? CanHitNPC(NPC target)
+		{
+			if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height) && Projectile.Hitbox.Intersects(target.Hitbox))
+			{
+				return null;
+			}
+			return false;
+		}
 		public override bool PreDraw(ref Color lightColor)
 		{
 			mProjectile.PlasmaDraw(Projectile, Main.player[Projectile.owner], Main.spriteBatch);
@@ -179,23 +177,11 @@ namespace MetroidMod.Content.Projectiles.missiles
 	}
 	public class IceSuperMissileShot : SuperMissileShot
 	{
-		public override void SetStaticDefaults()
-		{
-			// DisplayName.SetDefault("Ice Super Missile Shot");
-		}
 	}
 	public class StardustMissileShot : SuperMissileShot
 	{
-		public override void SetStaticDefaults()
-		{
-			// DisplayName.SetDefault("Stardust Missile Shot");
-		}
 	}
 	public class NebulaMissileShot : SuperMissileShot
 	{
-		public override void SetStaticDefaults()
-		{
-			// DisplayName.SetDefault("Nebula Missile Shot");
-		}
 	}
 }

@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
 using MetroidMod.Common.Configs;
+using MetroidMod.Common.GlobalItems;
+using MetroidMod.Content.NPCs.Serris;
+using MetroidMod.Content.Pets;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.Enums;
 using Terraria.GameContent.Bestiary;
+using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Utilities;
@@ -16,6 +21,12 @@ namespace MetroidMod.Content.NPCs.Mobs.Crawler
 		{
 			// DisplayName.SetDefault("Geemer");
 			Main.npcFrameCount[NPC.type] = 5;
+			var drawModifier = new NPCID.Sets.NPCBestiaryDrawModifiers()  //Alright so this here method thingy lets you tweak the bestiary display
+			{
+				Position = new Vector2(0f, 15f), // these two variables ONLY APPLY TO THE LIST TILES
+				PortraitPositionYOverride = 23f,
+			};
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, drawModifier);
 		}
 
 		public override float SpawnChance(NPCSpawnInfo spawnInfo)
@@ -55,7 +66,8 @@ namespace MetroidMod.Content.NPCs.Mobs.Crawler
 			{
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Underground,
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Caverns,
-				new FlavorTextBestiaryInfoElement("A small creature that crawls on walls. If you are a victim to this creature, you need to consider getting a different career.")
+				new FlavorTextBestiaryInfoElement("Mods.MetroidMod.Bestiary.Geemer")
+				
 			});
 		}
 		private void SetStats()
@@ -118,23 +130,51 @@ namespace MetroidMod.Content.NPCs.Mobs.Crawler
 				}
 			}
 		}
+		public override void ModifyNPCLoot(NPCLoot npcLoot)
+		{
+			npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<GeemerSupps>(), 100));
+		}
 	}
 	public class Geemer_85 : Geemer
 	{
 		public override string Texture => $"{Mod.Name}/Content/NPCs/Mobs/Crawler/Geemer";
+		public override void SetStaticDefaults()
+		{
+			NPCID.Sets.NPCBestiaryDrawModifiers value = new NPCID.Sets.NPCBestiaryDrawModifiers() { Hide = true };
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, value); //this and above line hides the entity from the bestiary
+			Main.npcFrameCount[NPC.type] = 5;
+		}
 		public override void SetDefaults()
 		{
 			NPC.scale = 0.85f;
 			base.SetDefaults();
 		}
+		public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
+		{
+			int associatedNPCType = ModContent.NPCType<Geemer>();
+			bestiaryEntry.UIInfoProvider = new CommonEnemyUICollectionInfoProvider(ContentSamples.NpcBestiaryCreditIdsByNpcNetIds[associatedNPCType], quickUnlock: true);
+		}
 	}
 	public class Geemer_75 : Geemer
 	{
 		public override string Texture => $"{Mod.Name}/Content/NPCs/Mobs/Crawler/Geemer";
+		public override void SetStaticDefaults()
+		{
+			NPCID.Sets.NPCBestiaryDrawModifiers value = new NPCID.Sets.NPCBestiaryDrawModifiers() { Hide = true };
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, value); //this and above line hides the entity from the bestiary
+			Main.npcFrameCount[NPC.type] = 5;
+		}
 		public override void SetDefaults()
 		{
 			NPC.scale = 0.75f;
 			base.SetDefaults();
+			//Banner = Item.NPCtoBanner(ModContent.NPCType<Geemer>());
+			//BannerItem = Item.BannerToItem(Banner);
+		}
+		public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
+		{
+			int associatedNPCType = ModContent.NPCType<Geemer>();
+			bestiaryEntry.UIInfoProvider = new CommonEnemyUICollectionInfoProvider(ContentSamples.NpcBestiaryCreditIdsByNpcNetIds[associatedNPCType], quickUnlock: true);
 		}
 	}
 }

@@ -8,16 +8,13 @@ namespace MetroidMod.Content.Items.Accessories
 {
 	// legacy name because old suit addon system
 	[LegacyName("SpaceJumpBootsAddon")]
+	[AutoloadEquip(EquipType.Shoes)]
 	public class SpaceJumpBoots : ModItem
 	{
 		public override void SetStaticDefaults()
 		{
-			//DisplayName.SetDefault("Space Jump Boots");
-			//Tooltip.SetDefault("Allows the wearer to double jump\n" + 
-			/*"Allows somersaulting\n" +
-			"Increases jump height");*/
-
 			Item.ResearchUnlockCount = 1;
+			ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<SpinBoost>();
 		}
 		public override void SetDefaults()
 		{
@@ -36,7 +33,13 @@ namespace MetroidMod.Content.Items.Accessories
 			Item.consumable = true;
 			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.SpaceJumpBootsTile>();
 		}
-		public override void AddRecipes()
+
+		public override bool CanAccessoryBeEquippedWith(Item equippedItem, Item incomingItem, Player player)
+		{
+			return incomingItem.type != ModContent.ItemType<SpinBoost>();
+		}
+
+		/*public override void AddRecipes()    //This big block is how it used to be crafted before Spin Boost
 		{
 			CreateRecipe(1)
 				.AddIngredient<HiJumpBoots>(1)
@@ -65,11 +68,12 @@ namespace MetroidMod.Content.Items.Accessories
 				.AddIngredient(SuitAddonLoader.GetAddon<EnergyTank>().ItemType, 1)
 				.AddTile(TileID.Anvils)
 				.Register();
-		}
+		}*/
 		public override void UpdateAccessory(Player player, bool hideVisual)
 		{
 			MPlayer mp = player.GetModPlayer<MPlayer>();
 			mp.spaceJumpBoots = true;
+			mp.itsSpinBoost = false;
 			mp.hiJumpBoost = true;
 		}
 	}

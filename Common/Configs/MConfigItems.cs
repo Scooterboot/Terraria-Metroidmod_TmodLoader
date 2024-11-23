@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using Terraria.Localization;
 using Terraria.ModLoader.Config;
 
 namespace MetroidMod.Common.Configs
@@ -13,15 +14,15 @@ namespace MetroidMod.Common.Configs
 
 		internal CanEditServerConfig condition;
 
-		internal delegate bool CanEditServerConfig(ModConfig pendingConfig, int whoAmI, ref string message);
+		internal delegate bool CanEditServerConfig(ModConfig pendingConfig, int whoAmI, ref NetworkText message);
 
-		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref string message) => condition(pendingConfig, whoAmI, ref message);
+		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref NetworkText message) => condition(pendingConfig, whoAmI, ref message);
 
 		public static MConfigItems Instance;
 
 		public MConfigItems()
 		{
-			condition = delegate (ModConfig pendingConfig, int whoAmI, ref string message) {
+			condition = delegate (ModConfig pendingConfig, int whoAmI, ref NetworkText message) {
 				return whoAmI == 0;
 			};
 		}
@@ -126,7 +127,7 @@ namespace MetroidMod.Common.Configs
 		[DefaultValue(0.1f)]
 		public float energyExpenseEfficiency;
 
-		[Header("[i:MetroidMod/PowerGripAddon]SuitAddons")]
+		[Header("SuitAddons")]
 
 		[Label("[i:MetroidMod/ReserveTankAddon] Reserve Tank Stack")]
 		[Range(1, 10)]
@@ -155,13 +156,17 @@ namespace MetroidMod.Common.Configs
 		[DefaultValue(true)]
 		public bool enableLedgeClimbPowerGrip;
 
+		//[Label("[i:MetroidMod/SpeedBoosterAddon] Speedbooster is silent")]
+		[DefaultValue(false)]
+		public bool muteSpeedBooster;
+
 		[Header("[i:MetroidMod/PowerBeam]StandardWeapons")]
 
 		//[Label("[i:MetroidMod/PowerBeam] Power Beam Damage")]
 		[Range(1, 50)]
 		[Increment(1)]
 		[Slider]
-		[DefaultValue(10)]
+		[DefaultValue(9)]
 		public int damagePowerBeam;
 
 		//[Label("[i:MetroidMod/PowerBeam] Power Beam Use Time")]
@@ -170,6 +175,20 @@ namespace MetroidMod.Common.Configs
 		[Slider]
 		[DefaultValue(14)]
 		public int useTimePowerBeam;
+
+		//[Label("[i:MetroidMod/MissileLauncher] Power Beam Starting Ammo")]
+		[Range(0, 100)]
+		[Increment(1)]
+		[Slider]
+		[DefaultValue(40)]
+		public int ammoPowerBeam;
+
+		//[Label("[i:MetroidMod/MissileExpansion] Ammo per UA Expansion")]
+		[Range(20, 100)]
+		[Increment(10)]
+		[Slider]
+		[DefaultValue(30)]
+		public int ammoUA;
 
 		//[Label("[i:MetroidMod/PowerBeam] Power Beam Overheat")]
 		[Range(1, 100)]
@@ -182,7 +201,7 @@ namespace MetroidMod.Common.Configs
 		[Range(1, 100)]
 		[Increment(1)]
 		[Slider]
-		[DefaultValue(30)]
+		[DefaultValue(32)]
 		public int damageMissileLauncher;
 
 		//[Label("[i:MetroidMod/MissileLauncher] Missile Launcher Use Time")]
@@ -193,7 +212,7 @@ namespace MetroidMod.Common.Configs
 		public int useTimeMissileLauncher;
 
 		//[Label("[i:MetroidMod/MissileLauncher] Missile Launcher Starting Ammo")]
-		[Range(1, 10)]
+		[Range(0, 10)]
 		[Increment(1)]
 		[Slider]
 		[DefaultValue(5)]
@@ -208,11 +227,15 @@ namespace MetroidMod.Common.Configs
 
 		[Header("[i:MetroidMod/PowerBeam]SpecialBeams")]
 
+		//[Label("check localization")]
+		[DefaultValue(false)]
+		public bool disengageSuitLock;
+
 		//[Label("[i:MetroidMod/HyperBeamAddon] Hyper Beam Damage")]
 		[Range(1, 100)]
 		[Increment(1)]
 		[Slider]
-		[DefaultValue(35)]
+		[DefaultValue(36)]
 		public int damageHyperBeam;
 
 		//[Label("[i:MetroidMod/HyperBeamAddon] Hyper Beam Use Time")]
@@ -270,7 +293,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(0.75f)]
+		[DefaultValue(0.4f)]
 		public float damageIceBeam;
 
 		//[Label("[i:MetroidMod/IceBeamAddon] Ice Beam Overheat Multiplier")]
@@ -291,7 +314,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(0.5f)]
+		[DefaultValue(0.25f)]
 		public float damageWaveBeam;
 
 		//[Label("[i:MetroidMod/WaveBeamAddon] Wave Beam Overheat Multiplier")]
@@ -312,7 +335,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(0.25f)]
+		[DefaultValue(0.10f)]
 		public float damageSpazer;
 
 		//[Label("[i:MetroidMod/SpazerAddon] Spazer Overheat Multiplier")]
@@ -333,7 +356,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(1f)]
+		[DefaultValue(0.5f)]
 		public float damagePlasmaBeamGreen;
 
 		//[Label("[i:MetroidMod/PlasmaBeamGreenAddon] Plasma Beam (Green) Overheat Multiplier")]
@@ -354,7 +377,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(1f)]
+		[DefaultValue(0.5f)]
 		public float damagePlasmaBeamRed;
 
 		//[Label("[i:MetroidMod/PlasmaBeamRedAddon] Plasma Beam (Red) Overheat Multiplier")]
@@ -391,7 +414,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(1f)]
+		[DefaultValue(0.5f)]
 		public float damageWideBeam;
 
 		//[Label("[i:MetroidMod/WideBeamAddon] Wide Beam Overheat Multiplier")]
@@ -412,7 +435,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(2.25f)]
+		[DefaultValue(1.15f)]
 		public float damageIceBeamV2;
 
 		//[Label("[i:MetroidMod/IceBeamV2Addon] Ice Beam V2 Overheat Multiplier")]
@@ -433,7 +456,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(1.25f)]
+		[DefaultValue(0.65f)]
 		public float damageWaveBeamV2;
 
 		//[Label("[i:MetroidMod/WaveBeamV2Addon] Wave Beam V2 Overheat Multiplier")]
@@ -454,7 +477,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(2.25f)]
+		[DefaultValue(1.15f)]
 		public float damageNovaBeam;
 
 		//[Label("[i:MetroidMod/NovaBeamAddon] Nova Beam Overheat Multiplier")]
@@ -491,7 +514,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(2.25f)]
+		[DefaultValue(1.15f)]
 		public float damageNebulaBeam;
 
 		//[Label("[i:MetroidMod/NebulaBeamAddon] Nebula Beam Overheat Multiplier")]
@@ -512,7 +535,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(3f)]
+		[DefaultValue(1.5f)]
 		public float damageSolarBeam;
 
 		//[Label("[i:MetroidMod/SolarBeamAddon] Solar Beam Overheat Multiplier")]
@@ -533,7 +556,7 @@ namespace MetroidMod.Common.Configs
 		[Range(-0.5f, 4f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(2.6f)]
+		[DefaultValue(1.3f)]
 		public float damageStardustBeam;
 
 		//[Label("[i:MetroidMod/StardustBeamAddon] Stardust Beam Overheat Multiplier")]
@@ -574,10 +597,10 @@ namespace MetroidMod.Common.Configs
 		[Header("[i:MetroidMod/PowerBeam]PowerBeamHuntersAddons")]
 
 		//[Label("[i:MetroidMod/VoltDriverAddon] VoltDriver Damage Modifier")]
-		[Range(0f, 2f)]
+		[Range(0f, 10f)]
 		[Increment(0.1f)]
 		[Slider]
-		[DefaultValue(.1f)]
+		[DefaultValue(.8f)]
 		public float damageVoltDriver;
 
 		//[Label("[i:MetroidMod/VoltDriverAddon] VoltDriver Use Time")]
@@ -587,39 +610,25 @@ namespace MetroidMod.Common.Configs
 		[DefaultValue(17f)]
 		public float useTimeVoltDriver;
 
-		//[Label("[i:MetroidMod/VoltDriverAddon] VoltDriver Overheat Modifer")]
-		[Range(0f, 2f)]
-		[Increment(0.5f)]
-		[Slider]
-		[DefaultValue(0.5f)]
-		public float overheatVoltDriver;
-
 		//[Label("[i:MetroidMod/MagMaulAddon] MagMaul Damage Modifier")]
-		[Range(0f, 2f)]
+		[Range(0f, 5f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(.45f)]
+		[DefaultValue(2.8f)]
 		public float damageMagMaul;
 
 		//[Label("[i:MetroidMod/MagMaulAddon] MagMaul Use Time")]
 		[Range(1f, 60f)]
 		[Increment(1f)]
 		[Slider]
-		[DefaultValue(36f)]
+		[DefaultValue(42f)]
 		public float useTimeMagMaul;
-
-		//[Label("[i:MetroidMod/MagMaulAddon] MagMaul Overheat Modifer")]
-		[Range(0f, 2f)]
-		[Increment(0.05f)]
-		[Slider]
-		[DefaultValue(.75f)]
-		public float overheatMagMaul;
 
 		//[Label("[i:MetroidMod/ImperialistAddon] Imperialist Damage Modifier")]
 		[Range(0f, 10f)]
 		[Increment(0.5f)]
 		[Slider]
-		[DefaultValue(5f)]
+		[DefaultValue(3f)]
 		public float damageImperialist;
 
 		//[Label("[i:MetroidMod/ImperialistAddon] Imperialist Use Time")]
@@ -629,18 +638,11 @@ namespace MetroidMod.Common.Configs
 		[DefaultValue(92f)]
 		public float useTimeImperialist;
 
-		//[Label("[i:MetroidMod/ImperialistAddon] Imperialist Overheat Modifer")]
-		[Range(0f, 5f)]
-		[Increment(0.5f)]
-		[Slider]
-		[DefaultValue(2.5f)]
-		public float overheatImperialist;
-
 		//[Label("[i:MetroidMod/JudicatorAddon] Judicator Damage Modifier")]
 		[Range(0f, 2f)]
 		[Increment(0.05f)]
 		[Slider]
-		[DefaultValue(.45f)]
+		[DefaultValue(1.9f)]
 		public float damageJudicator;
 
 		//[Label("[i:MetroidMod/JudicatorAddon] Judicator Use Time")]
@@ -649,13 +651,6 @@ namespace MetroidMod.Common.Configs
 		[Slider]
 		[DefaultValue(27f)]
 		public float useTimeJudicator;
-
-		//[Label("[i:MetroidMod/JudicatorAddon] Judicator Overheat Modifer")]
-		[Range(0f, 2f)]
-		[Increment(0.05f)]
-		[Slider]
-		[DefaultValue(.75f)]
-		public float overheatJudicator;
 
 		//[Label("[i:MetroidMod/ShockCoilAddon] ShockCoil Damage Modifier")]
 		[Range(-0.9f, 2f)]
@@ -668,7 +663,7 @@ namespace MetroidMod.Common.Configs
 		[Range(.1f, 1f)]
 		[Increment(0.1f)]
 		[Slider]
-		[DefaultValue(0.5f)]
+		[DefaultValue(0.7f)]
 		public float minSpeedShockCoil;
 
 		//[Label("[i:MetroidMod/ShockCoilAddon] ShockCoil Damage Modifier")]
@@ -685,18 +680,11 @@ namespace MetroidMod.Common.Configs
 		[DefaultValue(14f)]
 		public float useTimeShockCoil;
 
-		//[Label("[i:MetroidMod/ShockCoilAddon] ShockCoil Heat Modifier")]
-		[Range(-1f, 2f)]
-		[Increment(0.5f)]
-		[Slider]
-		[DefaultValue(0f)]
-		public float heatShockCoil;
-
 		//[Label("[i:MetroidMod/BattleHammerAddon] BattleHammer Damage Modifier")]
-		[Range(-0.5f, 2f)]
+		[Range(-0.5f, 5f)]
 		[Increment(0.25f)]
 		[Slider]
-		[DefaultValue(0f)]
+		[DefaultValue(1f)]
 		public float damageBattleHammer;
 
 		//[Label("[i:MetroidMod/BattleHammerAddon] BattleHammer Use Time")]
@@ -706,18 +694,11 @@ namespace MetroidMod.Common.Configs
 		[DefaultValue(27f)]
 		public float useTimeBattleHammer;
 
-		//[Label("[i:MetroidMod/BattleHammerAddon] BattleHammer Overheat Modifer")]
-		[Range(0f, 3f)]
-		[Increment(0.1f)]
-		[Slider]
-		[DefaultValue(.5f)]
-		public float overheatBattleHammer;
-
 		//[Label("[i:MetroidMod/OmegaCannonAddon] OmegaCannon Damage Modifier")]
 		[Range(0f, 50f)]
 		[Increment(1f)]
 		[Slider]
-		[DefaultValue(20f)]
+		[DefaultValue(21f)]
 		public float damageOmegaCannon;
 
 		//[Label("[i:MetroidMod/OmegaCannonAddon] OmegaCannon Use Time")]

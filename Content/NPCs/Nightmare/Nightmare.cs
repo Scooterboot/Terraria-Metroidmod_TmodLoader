@@ -21,6 +21,16 @@ namespace MetroidMod.Content.NPCs.Nightmare
 			// DisplayName.SetDefault("Nightmare");
 			NPCID.Sets.MPAllowedEnemies[Type] = true;
 			NPCID.Sets.BossBestiaryPriority.Add(Type);
+			var drawModifier = new NPCID.Sets.NPCBestiaryDrawModifiers()  //Alright so this here method thingy lets you tweak the bestiary display
+			{
+				CustomTexturePath = $"{nameof(MetroidMod)}/Content/NPCs/Nightmare/Nightmare_BossLog",
+				Position = new Vector2(-20f, 38f), // these two variables ONLY APPLY TO THE LIST TILES
+				Scale = 0.6f,
+				PortraitPositionXOverride = -30f,
+				PortraitPositionYOverride = 40f,
+				PortraitScale = 0.8f // Portrait refers to the full picture when clicking on the icon in the bestiary
+			};
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, drawModifier);
 
 			NPCID.Sets.SpecificDebuffImmunity[Type][20] = true;
 			NPCID.Sets.SpecificDebuffImmunity[Type][24] = true;
@@ -60,7 +70,7 @@ namespace MetroidMod.Content.NPCs.Nightmare
 			bestiaryEntry.Info.AddRange(new List<IBestiaryInfoElement>
 			{
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Times.NightTime,
-				new FlavorTextBestiaryInfoElement("A bio mechanical monstrosity created by a space faring species of humans. It can change it's positioning almost instantly and increase gravity to extreme conditions. If encountered it is best to destroy the gravity generator so avoiding its energy lasers is possible. While mechanical, its organic parts are not fully immune to damage. Blast the faceplate off to get to its true form! Sometimes however... a creature isn't what it appears to be...")
+				new FlavorTextBestiaryInfoElement("Mods.MetroidMod.Bestiary.Nightmare")
 			});
 		}
 		public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)/* tModPorter Note: bossLifeScale -> balance (bossAdjustment is different, see the docs for details) */
@@ -286,6 +296,7 @@ namespace MetroidMod.Content.NPCs.Nightmare
 
 		int state = 0;
 		int currentState = 0;
+		int resets = 4;
 		public override void AI()
 		{
 			bool despawn = false;
@@ -913,8 +924,9 @@ namespace MetroidMod.Content.NPCs.Nightmare
 						immuneFlash = true;
 						NPC.dontTakeDamage = true;
 					}
-					if (NPC.justHit && hitDelay <= 0)
+					if (NPC.justHit && hitDelay <= 0 && NPC.life <= NPC.lifeMax * resets / 5)
 					{
+						resets--;
 						hitDelay = 1;
 					}
 					if (hitDelay > 0)

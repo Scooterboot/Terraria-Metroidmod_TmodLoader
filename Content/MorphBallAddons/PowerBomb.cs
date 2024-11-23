@@ -1,8 +1,9 @@
 ﻿using System;
+using MetroidMod.Common.GlobalProjectiles;
 using MetroidMod.Common.Players;
 using MetroidMod.Common.Systems;
-using MetroidMod.Content.Tiles;
-using MetroidMod.Content.Tiles.Hatch;
+using MetroidMod.Content.Switches;
+using MetroidMod.Content.Switches.Variants;
 using MetroidMod.ID;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,9 +25,9 @@ namespace MetroidMod.Content.MorphBallAddons
 
 		public override bool AddOnlyAddonItem => false;
 
-		public override bool CanGenerateOnChozoStatue(int x, int y) => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || (NPC.downedMechBoss1 && NPC.downedMechBoss2 && NPC.downedMechBoss3);
+		public override bool CanGenerateOnChozoStatue() => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || (NPC.downedMechBoss1 && NPC.downedMechBoss2 && NPC.downedMechBoss3);
 
-		public override double GenerationChance(int x, int y) => 4;
+		public override double GenerationChance() => 4;
 
 		public override void SetStaticDefaults()
 		{
@@ -40,7 +41,7 @@ namespace MetroidMod.Content.MorphBallAddons
 		}
 		public override void SetItemDefaults(Item item)
 		{
-			item.damage = 25;
+			item.damage = 10;
 			item.noMelee = true;
 			item.value = Item.buyPrice(0, 3, 0, 0);
 			item.rare = ItemRarityID.LightRed;
@@ -115,12 +116,12 @@ namespace MetroidMod.Content.MorphBallAddons
 			}
 
 			ExplosionProjectile.scale = scaleSize * 0.02f;
-			ExplosionProjectile.position.X = ExplosionProjectile.position.X + (float)(ExplosionProjectile.width / 2);
-			ExplosionProjectile.position.Y = ExplosionProjectile.position.Y + (float)(ExplosionProjectile.height / 2);
-			ExplosionProjectile.width = (int)((float)width * ExplosionProjectile.scale);
-			ExplosionProjectile.height = (int)((float)height * ExplosionProjectile.scale);
-			ExplosionProjectile.position.X = ExplosionProjectile.position.X - (float)(ExplosionProjectile.width / 2);
-			ExplosionProjectile.position.Y = ExplosionProjectile.position.Y - (float)(ExplosionProjectile.height / 2);
+			ExplosionProjectile.position.X = (float)Math.Floor(ExplosionProjectile.position.X + (ExplosionProjectile.width / 2));
+			ExplosionProjectile.position.Y = (float)Math.Floor(ExplosionProjectile.position.Y + (ExplosionProjectile.height / 2));
+			ExplosionProjectile.width = (int)Math.Floor(width * ExplosionProjectile.scale);
+			ExplosionProjectile.height = (int)Math.Floor(height * ExplosionProjectile.scale);
+			ExplosionProjectile.position.X = (float)Math.Floor(ExplosionProjectile.position.X - (ExplosionProjectile.width / 2));
+			ExplosionProjectile.position.Y = (float)Math.Floor(ExplosionProjectile.position.Y - (ExplosionProjectile.height / 2));
 			ExplosionProjectile.netUpdate = true;
 
 			if (ExplosionProjectile.frameCounter == maxDistance)
@@ -130,14 +131,6 @@ namespace MetroidMod.Content.MorphBallAddons
 				{
 					for (int y = tileRect.Y; y < tileRect.Y + tileRect.Height; y++)
 					{
-						if (Main.tile[x, y] != null && Main.tile[x, y].HasTile)
-						{
-							if (Main.tile[x, y].TileType == ModContent.TileType<YellowHatch>()) { TileLoader.HitWire(x, y, ModContent.TileType<YellowHatch>()); }
-							if (Main.tile[x, y].TileType == ModContent.TileType<YellowHatchVertical>()) { TileLoader.HitWire(x, y, ModContent.TileType<YellowHatchVertical>()); }
-							if (Main.tile[x, y].TileType == ModContent.TileType<BlueHatch>()) { TileLoader.HitWire(x, y, ModContent.TileType<BlueHatch>()); }
-							if (Main.tile[x, y].TileType == ModContent.TileType<BlueHatchVertical>()) { TileLoader.HitWire(x, y, ModContent.TileType<BlueHatchVertical>()); }
-							if (Main.tile[x, y].TileType == ModContent.TileType<YellowSwitch>()) { Wiring.TripWire(x, y, 1, 1); }
-						}
 						if (MSystem.mBlockType[x, y] != BreakableTileID.None)
 						{
 							MSystem.hit[x, y] = true;

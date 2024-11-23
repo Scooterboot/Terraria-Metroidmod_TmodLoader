@@ -231,7 +231,9 @@ namespace MetroidMod.Common.Players
 		}
 		public void PostUpdateRunSpeeds_MorphBall()
 		{
-			if (spiderball && CurEdge != Edge.None)
+			Player player = Main.LocalPlayer;
+			MPlayer mp = player.GetModPlayer<MPlayer>();
+			if (mp.spiderball && mp.CurEdge != Edge.None)
 			{
 				Player.moveSpeed = 0f;
 				Player.maxRunSpeed = 0f;
@@ -472,7 +474,7 @@ namespace MetroidMod.Common.Players
 			Item drills = p.GetBestPickaxe();
 			bool noBuildFlag = false;
 			int drill;
-			if (Main.mouseLeft && !Player.mouseInterface && morphBall && drills != null)
+			if (Main.mouseLeft && !Player.mouseInterface && morphBall && drills != null && p.whoAmI==Main.myPlayer)
 			{
 				drill = drills.pick;
 				//p.controlUseItem = true;
@@ -628,7 +630,7 @@ namespace MetroidMod.Common.Players
 					}
 				if (!BoostRam)
 				{
-					Projectile.NewProjectile(Player.GetSource_FromAI(), Player.position.X + Player.width / 2, Player.position.Y + Player.height / 2, 0, 0, ModContent.ProjectileType<Content.Projectiles.RamBall>(), mp.PrimeHunter ? mp.boostEffect * 5 : mp.boostEffect, mp.PrimeHunter ? mp.boostEffect : mp.boostEffect / 5, Player.whoAmI);
+					Projectile.NewProjectile(Player.GetSource_FromAI(), Player.position.X + Player.width / 2, Player.position.Y + Player.height / 2, 0, 0, ModContent.ProjectileType<Content.Projectiles.RamBall>(), mp.PrimeHunter ? mp.boostEffect * 5 : mp.boostEffect, mp.PrimeHunter ? mp.boostEffect : mp.boostEffect / 3, Player.whoAmI);
 				}
 				Player.armorEffectDrawShadow = true;
 				boostEffect--;

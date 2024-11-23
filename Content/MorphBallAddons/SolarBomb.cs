@@ -1,8 +1,9 @@
 ﻿using System;
+using MetroidMod.Common.GlobalProjectiles;
 using MetroidMod.Common.Players;
 using MetroidMod.Common.Systems;
-using MetroidMod.Content.Tiles;
-using MetroidMod.Content.Tiles.Hatch;
+using MetroidMod.Content.Switches;
+using MetroidMod.Content.Switches.Variants;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -25,9 +26,9 @@ namespace MetroidMod.Content.MorphBallAddons
 
 		public override bool AddOnlyAddonItem => false;
 
-		public override bool CanGenerateOnChozoStatue(int x, int y) => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || NPC.downedAncientCultist;
+		public override bool CanGenerateOnChozoStatue() => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || NPC.downedAncientCultist;
 
-		public override double GenerationChance(int x, int y) => 1;
+		public override double GenerationChance() => 1;
 		public override void SetStaticDefaults()
 		{
 			// DisplayName.SetDefault("Solar Bomb");
@@ -40,7 +41,7 @@ namespace MetroidMod.Content.MorphBallAddons
 		}
 		public override void SetItemDefaults(Item item)
 		{
-			item.damage = 25;
+			item.damage = 15;
 			item.noMelee = true;
 			item.value = Item.buyPrice(0, 3, 0, 0);
 			item.rare = ItemRarityID.LightRed;
@@ -161,19 +162,6 @@ namespace MetroidMod.Content.MorphBallAddons
 					for (int y = tileRect.Y; y < tileRect.Y + tileRect.Height; y++)
 					{
 						if (x < 0 || y < 0) { continue; }
-						if (Main.tile[x, y] != null && Main.tile[x, y].HasTile)
-						{
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<YellowHatch>())
-								TileLoader.HitWire(x, y, ModContent.TileType<YellowHatch>());
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<YellowHatchVertical>())
-								TileLoader.HitWire(x, y, ModContent.TileType<YellowHatchVertical>());
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<BlueHatch>())
-								TileLoader.HitWire(x, y, ModContent.TileType<BlueHatch>());
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<BlueHatchVertical>())
-								TileLoader.HitWire(x, y, ModContent.TileType<BlueHatchVertical>());
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<YellowSwitch>())
-								Wiring.TripWire(x, y, 1, 1);
-						}
 						if (MSystem.mBlockType[x, y] != 0)
 						{
 							MSystem.hit[x, y] = true;

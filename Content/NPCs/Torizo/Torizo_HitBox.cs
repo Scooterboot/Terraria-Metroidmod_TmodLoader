@@ -18,6 +18,11 @@ namespace MetroidMod.Content.NPCs.Torizo
 			// DisplayName.SetDefault("Torizo");
 			Main.npcFrameCount[NPC.type] = 3;
 			NPCID.Sets.MPAllowedEnemies[Type] = true;
+			NPCID.Sets.NPCBestiaryDrawModifiers value = new NPCID.Sets.NPCBestiaryDrawModifiers()
+			{
+				Hide = true // Hides this NPC from the Bestiary, useful for multi-part NPCs whom you only want one entry.
+			};
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, value);
 
 			NPCID.Sets.SpecificDebuffImmunity[Type][31] = true;
 			NPCID.Sets.SpecificDebuffImmunity[Type][ModContent.BuffType<Buffs.IceFreeze>()] = true;
@@ -27,11 +32,11 @@ namespace MetroidMod.Content.NPCs.Torizo
 		{
 			int associatedNPCType = ModContent.NPCType<Torizo>();
 			bestiaryEntry.UIInfoProvider = new CommonEnemyUICollectionInfoProvider(ContentSamples.NpcBestiaryCreditIdsByNpcNetIds[associatedNPCType], quickUnlock: true);
-			bestiaryEntry.Info.AddRange(new List<IBestiaryInfoElement>
+			/*bestiaryEntry.Info.AddRange(new List<IBestiaryInfoElement>
 			{
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.UndergroundDesert,
 				new FlavorTextBestiaryInfoElement("Nothing mysterious at all about this thing.")
-			});
+			});*/
 		}
 		public override void SetDefaults()
 		{
@@ -54,7 +59,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 		public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)/* tModPorter Note: bossLifeScale -> balance (bossAdjustment is different, see the docs for details) */
 		{
 			NPC.lifeMax = (int)(NPC.lifeMax * 0.7f * balance);
-			NPC.damage = (int)(NPC.damage * 0.7f);
+			//NPC.damage = (int)(NPC.damage * 0.7f);
 		}
 
 		internal NPC Base => Main.npc[(int)NPC.ai[0]];
@@ -142,14 +147,14 @@ namespace MetroidMod.Content.NPCs.Torizo
 		{
 			if (NPC.ai[1] == 0f)
 			{
-				Base.StrikeNPC(hit);
+				//Base.StrikeNPC(hit);
 			}
 		}
 		public override void OnHitByItem(Player player, Item item, NPC.HitInfo hit, int damageDone)
 		{
 			if (NPC.ai[1] == 0f)
 			{
-				Base.StrikeNPC(hit);
+				//Base.StrikeNPC(hit);
 			}
 		}
 

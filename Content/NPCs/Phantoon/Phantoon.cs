@@ -19,6 +19,15 @@ namespace MetroidMod.Content.NPCs.Phantoon
 			// DisplayName.SetDefault("Phantoon");
 			NPCID.Sets.MPAllowedEnemies[Type] = true;
 			NPCID.Sets.BossBestiaryPriority.Add(Type);
+			var drawModifier = new NPCID.Sets.NPCBestiaryDrawModifiers()  //Alright so this here method thingy lets you tweak the bestiary display
+			{
+				CustomTexturePath = $"{nameof(MetroidMod)}/Content/NPCs/Phantoon/Phantoon",
+				//Position = new Vector2(0f, 5f), // these two variables ONLY APPLY TO THE LIST TILES
+				//PortraitPositionXOverride = 0f,
+				//PortraitPositionYOverride = 6f,
+				PortraitScale = 0.5f, // Portrait refers to the full picture when clicking on the icon in the bestiary
+			};
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, drawModifier);
 
 			NPCID.Sets.SpecificDebuffImmunity[Type][20] = true;
 			NPCID.Sets.SpecificDebuffImmunity[Type][24] = true;
@@ -58,7 +67,7 @@ namespace MetroidMod.Content.NPCs.Phantoon
 			bestiaryEntry.Info.AddRange(new List<IBestiaryInfoElement>
 			{
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Times.NightTime,
-				new FlavorTextBestiaryInfoElement("An interdimensional anomaly drawn in by places of great negative emotions. Usually shipwrecks with lingering energy. The creature's only weakness is the eye in its mouth. It is capable of dematerializing at will... It's capable of spawning flaming eyes and rage hands to attack anything that gets in its way! To think that this is only the creature's head... it bears a resemblance to a certain deity...")
+				new FlavorTextBestiaryInfoElement("Mods.MetroidMod.Bestiary.Phantoon")
 			});
 		}
 		public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)/* tModPorter Note: bossLifeScale -> balance (bossAdjustment is different, see the docs for details) */
@@ -81,7 +90,7 @@ namespace MetroidMod.Content.NPCs.Phantoon
 			npcLoot.Add(ItemDropRule.BossBag(ModContent.ItemType<Items.Boss.PhantoonBag>()));
 
 			LeadingConditionRule notExpertRule = new LeadingConditionRule(new Conditions.NotExpert());
-			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Miscellaneous.GravityFlare>(), 1, 20, 51));
+			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Miscellaneous.GravityFlare>(), 1));
 			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Tiles.KraidPhantoonMusicBox>(), 6));
 			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Vanity.PhantoonMask>(), 8));
 			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Tiles.PhantoonTrophy>(), 11));

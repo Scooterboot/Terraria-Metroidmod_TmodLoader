@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MetroidMod.Common.Players;
-using MetroidMod.Common.UI;
+using MetroidMod.Content.Hatches;
+using MetroidMod.Content.Hatches.Variants;
 using MetroidMod.Content.Items.Accessories;
 using MetroidMod.Content.Items.Addons;
 using MetroidMod.Content.Items.Addons.Hunters;
@@ -13,12 +14,9 @@ using MetroidMod.Content.Items.Addons.V2;
 using MetroidMod.Content.Items.Addons.V3;
 using MetroidMod.Content.Items.MissileAddons;
 using MetroidMod.Content.Items.MissileAddons.BeamCombos;
-using MetroidMod.Content.Items.Tools;
-using MetroidMod.Content.NPCs.GoldenTorizo;
 using MetroidMod.Content.NPCs.Torizo;
 using MetroidMod.Content.SuitAddons;
 using MetroidMod.Content.Tiles;
-using MetroidMod.Content.Tiles.Hatch;
 using MetroidMod.Content.Tiles.ItemTile;
 using MetroidMod.Content.Tiles.ItemTile.Beam;
 using MetroidMod.Content.Tiles.ItemTile.Beam.Hunters;
@@ -36,6 +34,7 @@ using Terraria.ModLoader.IO;
 using Terraria.WorldBuilding;
 
 
+
 #endregion
 
 namespace MetroidMod.Common.Systems
@@ -44,7 +43,6 @@ namespace MetroidMod.Common.Systems
 	public partial class MSystem : ModSystem
 	{
 		public static MetroidBossDown bossesDown;
-		public static Rectangle TorizoRoomLocation = new(0, 0, 80, 40);
 
 		public static ushort[,] mBlockType = new ushort[Main.maxTilesX, Main.maxTilesY];
 
@@ -58,9 +56,6 @@ namespace MetroidMod.Common.Systems
 		public static Queue<Tuple<int, Vector2>> nextTick = new();
 		public static Queue<Tuple<int, Vector2>> regenTimers = new();
 		public static Queue<Tuple<int, Vector2>> quickRegenTimers = new();
-
-		public static Queue<Tuple<int, Vector2>> doorTimers = new();
-		public static Queue<Tuple<int, Vector2>> nextDoorTimers = new();
 
 		public static int Timer = 0;
 		public static int regenTime = 300;
@@ -125,7 +120,8 @@ namespace MetroidMod.Common.Systems
 				ModContent.ItemType<Content.Items.Tiles.Destroyable.CrumbleBlockSlow>(),
 				ModContent.ItemType<Content.Items.Tiles.Destroyable.BombBlockChain>(),
 				ModContent.ItemType<Content.Items.Tools.ChoziteCutter>(),
-				ModContent.ItemType<Content.Items.Tools.ChoziteWrench>()
+				ModContent.ItemType<Content.Items.Tools.ChoziteWrench>(),
+				ModContent.ItemType<Content.Items.Tools.ChoziteDualtool>(),
 			};
 			bossesDown = MetroidBossDown.downedNone;
 			mBlockType = new ushort[Main.maxTilesX, Main.maxTilesY];
@@ -285,54 +281,6 @@ namespace MetroidMod.Common.Systems
 					UpdateRegenTimers();
 				}
 			}
-			if (doorTimers.Count > 0)
-			{
-				Tuple<int, Vector2> timer = doorTimers.Peek();
-				if (timer.Item1 <= Timer)
-				{
-					Vector2 pos = timer.Item2;
-					int hatchtype = Main.tile[(int)pos.X, (int)pos.Y].TileType;
-					bool open = (hatchtype == (ushort)ModContent.TileType<BlueHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<BlueHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<RedHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<RedHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<GreenHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<GreenHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<YellowHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<YellowHatchOpenVertical>());
-					if (open)
-					{
-						BlueHatch hatch = (TileLoader.GetTile(hatchtype) as BlueHatch);
-						hatch.ToggleHatch((int)pos.X, (int)pos.Y, (ushort)hatch.otherDoorID, true);
-					}
-					doorTimers.Dequeue();
-					UpdateRegenTimers();
-				}
-			}
-			if (nextDoorTimers.Count > 0)
-			{
-				Tuple<int, Vector2> timer = nextDoorTimers.Peek();
-				if (timer.Item1 <= Timer)
-				{
-					Vector2 pos = timer.Item2;
-					int hatchtype = Main.tile[(int)pos.X, (int)pos.Y].TileType;
-					bool open = (hatchtype == (ushort)ModContent.TileType<BlueHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<BlueHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<RedHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<RedHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<GreenHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<GreenHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<YellowHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<YellowHatchOpenVertical>());
-					if (open)
-					{
-						BlueHatch hatch = (TileLoader.GetTile(hatchtype) as BlueHatch);
-						hatch.ToggleHatch((int)pos.X, (int)pos.Y, (ushort)hatch.otherDoorID, true);
-					}
-					nextDoorTimers.Dequeue();
-					UpdateRegenTimers();
-				}
-			}
 		}
 
 		public override void SaveWorldData(TagCompound tag)
@@ -354,21 +302,29 @@ namespace MetroidMod.Common.Systems
 			}
 			tag["downed"] = (int)bossesDown;
 			tag["spawnedPhazonMeteor"] = spawnedPhazonMeteor;
-			tag["TorizoRoomLocation.X"] = TorizoRoomLocation.X;
-			tag["TorizoRoomLocation.Y"] = TorizoRoomLocation.Y;
 			tag["BlockTypePositions"] = positions;
 			tag["BlockTypes"] = types;
 			tag["BlockRegen"] = regens;
 		}
 
+		private void ReadTorizoRoomLocationCompatibility(TagCompound tag)
+		{
+			Point torizoRoomLocation = new();
+			if (tag.TryGet("TorizoRoomLocation.X", out torizoRoomLocation.X) &&
+				tag.TryGet("TorizoRoomLocation.Y", out torizoRoomLocation.Y))
+			{
+				ModContent.GetInstance<TorizoSpawningSystem>().SetLocationFromLegacy(torizoRoomLocation);
+				ModContent.GetInstance<GoldenTorizoSpawningSystem>().SetLocationFromLegacy(torizoRoomLocation);
+			}
+		}
+
 		public override void LoadWorldData(TagCompound tag)
 		{
+			ReadTorizoRoomLocationCompatibility(tag);
+
 			int downed = tag.GetAsInt("downed");
 			bossesDown = (MetroidBossDown)downed;
 			spawnedPhazonMeteor = tag.Get<bool>("spawnedPhazonMeteor");
-
-			TorizoRoomLocation.X = tag.Get<int>("TorizoRoomLocation.X");
-			TorizoRoomLocation.Y = tag.Get<int>("TorizoRoomLocation.Y");
 			IList<Vector2> positions = tag.GetList<Vector2>("BlockTypePositions");
 			IList<ushort> types = tag.GetList<ushort>("BlockTypes");
 			IList<bool> regens = tag.GetList<bool>("BlockRegen");
@@ -385,34 +341,12 @@ namespace MetroidMod.Common.Systems
 					Wiring.ReActive((int)pos.X, (int)pos.Y);
 				}
 			}
-			for (int row = 0; row < Main.maxTilesX; row++)
-			{
-				for (int column = 0; column < Main.maxTilesY; column++)
-				{
-					int hatchtype = Main.tile[row, column].TileType;
-					bool open = (hatchtype == (ushort)ModContent.TileType<BlueHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<BlueHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<RedHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<RedHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<GreenHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<GreenHatchOpenVertical>()
-							|| hatchtype == (ushort)ModContent.TileType<YellowHatchOpen>()
-							|| hatchtype == (ushort)ModContent.TileType<YellowHatchOpenVertical>());
-					if (open)
-					{
-						BlueHatch hatch = (TileLoader.GetTile(hatchtype) as BlueHatch);
-						hatch.ToggleHatch(row, column, (ushort)hatch.otherDoorID, true);
-					}
-				}
-			}
 		}
 
 		public override void NetSend(BinaryWriter writer)
 		{
 			writer.Write((int)bossesDown);
 			writer.Write(spawnedPhazonMeteor);
-			writer.Write(TorizoRoomLocation.X);
-			writer.Write(TorizoRoomLocation.Y);
 			List<Vector2> positions = new();
 			List<ushort> types = new();
 			List<bool> regens = new();
@@ -442,8 +376,6 @@ namespace MetroidMod.Common.Systems
 		{
 			bossesDown = (MetroidBossDown)reader.ReadInt32();
 			spawnedPhazonMeteor = reader.ReadBoolean();
-			TorizoRoomLocation.X = reader.ReadInt32();
-			TorizoRoomLocation.Y = reader.ReadInt32();
 			mBlockType = new ushort[Main.maxTilesX, Main.maxTilesY];
 			dontRegen = new bool[Main.maxTilesX, Main.maxTilesY];
 			int count = reader.ReadInt32();
@@ -489,10 +421,10 @@ namespace MetroidMod.Common.Systems
 				for (int j = y1; j < y2; j++)
 				{
 					//Tile tile = Main.tile[i, j];
-					Color color = Lighting.GetColor(i, j);
+					Color color = Lighting.GetColor(i, j); //TODO this is overly costly
 					if (!Main.tile[i, j].HasTile || Main.tile[i, j].IsActuated || !Main.tileSolid[Main.tile[i, j].TileType])
 					{
-						color *= 0.5f;
+						 color *= 0.5f;
 					}
 					bool draw = false;
 					if (Main.myPlayer < 256 && Main.myPlayer >= 0)
@@ -505,63 +437,87 @@ namespace MetroidMod.Common.Systems
 					int yOff = -12 * 16;
 					Vector2 drawPos = new Vector2((float)(i * 16 + xOff - (int)screenPos.X), (float)(j * 16 + yOff - (int)screenPos.Y)) + zero;
 
-					spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
-
 					bool revealed = (hit[i, j] && (Main.tile[i, j].HasTile && !Main.tile[i, j].IsActuated));
 					if (draw || revealed)
 					{
 						if (dontRegen[i, j] && draw)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							color.B /= 2;
 							color.G /= 2;
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 1)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/CrumbleBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 2)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/CrumbleBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 3)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/BombBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 4)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/MissileBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 5)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/FakeBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 6)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/BoostBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 7)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/PowerBombBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 8)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/SuperMissileBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 9)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/ScrewAttackBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 10)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/FakeBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 11)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/CrumbleBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 						if (mBlockType[i, j] == 12)
 						{
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/BombBlock").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 					}
 					if (!revealed)
@@ -569,11 +525,11 @@ namespace MetroidMod.Common.Systems
 						if (mBlockType[i, j] == 10)
 						{
 							color = new Color(color.R, color.G, color.B, 64);
+							spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.GameViewMatrix.ZoomMatrix);
 							spriteBatch.Draw(ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/Breakable/FakeBlockHint").Value, drawPos, new Rectangle(0, 0, 16, 16), color, 0f, default(Vector2), scale, SpriteEffects.None, 0f);
+							spriteBatch.End();
 						}
 					}
-
-					spriteBatch.End();
 				}
 			}
 		}
@@ -636,7 +592,7 @@ namespace MetroidMod.Common.Systems
 							else
 							{
 								num3++;
-								if (num3 >= 15000)
+								if (num3 >= 20500) //16400
 								{
 									flag = true;
 								}
@@ -649,7 +605,7 @@ namespace MetroidMod.Common.Systems
 				tasks.Insert(PotsIndex - 1, new PassLegacy("Chozo Ruins", ChozoRuins));
 			}
 		}
-		public static int OrbItem(int i, int j)
+		public static int OrbItem()
 		{
 			int range = GenVars.jungleMaxX - GenVars.jungleMinX;
 			bool dungeon = Main.LocalPlayer.ZoneDungeon;
@@ -662,11 +618,11 @@ namespace MetroidMod.Common.Systems
 			int index = 0;
 			foreach (ModSuitAddon addon in SuitAddonLoader.addons)
 			{
-				if (addon.CanGenerateOnChozoStatue(i, j)) { list[index++] = new WeightedChance(() => { item = addon.TileType; }, addon.GenerationChance(i, j)); }
+				if (addon.CanGenerateOnChozoStatue()) { list[index++] = new WeightedChance(() => { item = addon.TileType; }, addon.GenerationChance()); }
 			}
 			foreach (ModMBAddon addon in MBAddonLoader.addons)
 			{
-				if (addon.CanGenerateOnChozoStatue(i, j)) { list[index++] = new WeightedChance(() => { item = addon.TileType; }, addon.GenerationChance(i, j)); }
+				if (addon.CanGenerateOnChozoStatue()) { list[index++] = new WeightedChance(() => { item = addon.TileType; }, addon.GenerationChance()); }
 			}
 			/*list[index++] = new WeightedChance(() => { item = ModContent.TileType<ShockCoilTile>(); }, 6);
 			list[index++] = new WeightedChance(() => { item = ModContent.TileType<MagMaulTile>(); }, 6);
@@ -676,17 +632,22 @@ namespace MetroidMod.Common.Systems
 			list[index++] = new WeightedChance(() => { item = ModContent.TileType<JudicatorTile>(); }, 6);*/
 			//list[index++] = new WeightedChance(() => { item = (ushort)ModContent.TileType<Content.Tiles.ItemTile.MorphBallTile>(); }, RarityLoader.RarityCount - 4);
 			//list[index++] = new WeightedChance(() => { item = (ushort)ModContent.TileType<Content.Tiles.ItemTile.XRayScopeTile>(); }, RarityLoader.RarityCount - 4);
-			list[index++] = new WeightedChance(() => { item = ModContent.TileType<ChargeBeamTile>(); }, 24);
-			list[index++] = new WeightedChance(() => { item = ModContent.TileType<HiJumpBootsTile>(); }, 24);
-			list[index++] = new WeightedChance(() => { item = ModContent.TileType<WaveBeamTile>(); }, 24);
+			list[index++] = new WeightedChance(() => { item = ModContent.TileType<ChargeBeamTile>(); }, 8);
+			list[index++] = new WeightedChance(() => { item = ModContent.TileType<HiJumpBootsTile>(); }, 8);
+			list[index++] = new WeightedChance(() => { item = ModContent.TileType<WaveBeamTile>(); }, 8);
 			list[index++] = new WeightedChance(() => { item = ModContent.TileType<HomingMissile>(); }, 4);
+			list[index++] = new WeightedChance(() => { item = ModContent.TileType<SpaceJumpBootsTile>(); }, 4);
+			if(Main.LocalPlayer.ZoneUnderworldHeight)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.TileType<PlasmaBeamRedTile>(); }, 6);
+			}
 			if (NPC.downedQueenBee || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
-				list[index++] = new WeightedChance(() => { item = ModContent.TileType<SpazerTile>(); }, 12);
+				list[index++] = new WeightedChance(() => { item = ModContent.TileType<SpazerTile>(); }, 8);
 			}
 			if (NPC.downedBoss3 || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
-				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceBeamTile>(); }, 12);
+				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceBeamTile>(); }, 8);
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceMissile>(); }, 4);
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<SpazerCombo>(); }, 4);
 			}
@@ -707,8 +668,6 @@ namespace MetroidMod.Common.Systems
 			if (bossesDown.HasFlag(MetroidBossDown.downedKraid) || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<PlasmaBeamGreenTile>(); }, 4);
-				list[index++] = new WeightedChance(() => { item = ModContent.TileType<PlasmaBeamRedTile>(); }, 4);
-				list[index++] = new WeightedChance(() => { item = ModContent.TileType<SpaceJumpBootsTile>(); }, 4);
 			}
 			if (Main.hardMode || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
@@ -737,7 +696,7 @@ namespace MetroidMod.Common.Systems
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<OmegaCannonTile>(); }, 4);
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<PhazonBeamTile>(); }, 4);
 			}
-			if (NPC.downedMechBoss1 && NPC.downedMechBoss2 && NPC.downedMechBoss3)
+			if (NPC.downedMechBossAny || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<DiffusionMissile>(); }, 4);
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<SpaceJumpTile>(); }, 4);
@@ -746,6 +705,112 @@ namespace MetroidMod.Common.Systems
 			{
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceBeamV2Tile>(); }, 4);
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceSuperMissile>(); }, 4);
+			}
+			Array.Resize(ref list, index);
+			double numericValue = WorldGen.genRand.Next(0, (int)list.Sum(p => p.Ratio));
+
+			foreach (WeightedChance parameter in list)
+			{
+				numericValue -= parameter.Ratio;
+
+				if (!(numericValue <= 0)) { continue; }
+
+				parameter.Func();
+				break;
+			}
+			return item;
+		}
+		public static int OORB()
+		{
+			int item = ModContent.ItemType<MorphBall>();
+			WeightedChance[] list = new WeightedChance[SuitAddonLoader.AddonCount + 5 + MBAddonLoader.AddonCount + 35];
+			int index = 0;
+			foreach (ModSuitAddon addon in SuitAddonLoader.addons)
+			{
+				if (addon.CanGenerateOnChozoStatue()) { list[index++] = new WeightedChance(() => { item = addon.ItemType; }, addon.GenerationChance()); }
+			}
+			foreach (ModMBAddon addon in MBAddonLoader.addons)
+			{
+				if (addon.CanGenerateOnChozoStatue()) { list[index++] = new WeightedChance(() => { item = addon.ItemType; }, addon.GenerationChance()); }
+			}
+			/*list[index++] = new WeightedChance(() => { item = ModContent.ItemType<ShockCoilItem>(); }, 6);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<MagMaulItem>(); }, 6);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<BattleHammerItem>(); }, 6);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<VoltDriverItem>(); }, 6);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<ImperialistItem>(); }, 6);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<JudicatorItem>(); }, 6);*/
+			//list[index++] = new WeightedChance(() => { item = (ushort)ModContent.ItemType<Content.Items.ItemItem.MorphBallItem>(); }, RarityLoader.RarityCount - 4);
+			//list[index++] = new WeightedChance(() => { item = (ushort)ModContent.ItemType<Content.Items.ItemItem.XRayScopeItem>(); }, RarityLoader.RarityCount - 4);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<ChargeBeamAddon>(); }, 8);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<HiJumpBoots>(); }, 8);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<WaveBeamAddon>(); }, 8);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<HomingMissileAddon>(); }, 4);
+			list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SpaceJumpBoots>(); }, 4);
+			if (NPC.downedQueenBee || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SpazerAddon>(); }, 8);
+			}
+			if (NPC.downedBoss3 || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceBeamAddon>(); }, 8);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceMissileAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SpazerComboAddon>(); }, 4);
+			}
+			if (NPC.downedMechBoss2 || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<ChargeBeamV2Addon>(); }, 4);
+			}
+			if (NPC.downedMechBoss1 || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<WaveBeamV2Addon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<FlamethrowerAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<PlasmaMachinegunAddon>(); }, 4);
+			}
+			if (NPC.downedMechBoss3 || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<WideBeamAddon>(); }, 4);
+			}
+			if (bossesDown.HasFlag(MetroidBossDown.downedKraid) || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<PlasmaBeamGreenAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<PlasmaBeamRedAddon>(); }, 4);
+			}
+			if (Main.hardMode || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SuperMissileAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceSpreaderAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SeekerMissileAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<WavebusterAddon>(); }, 4);
+			}
+			if (NPC.downedPlantBoss || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<NovaComboAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<NovaBeamAddon>(); }, 4);
+			}
+			if (NPC.downedMoonlord || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<StardustComboAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<StardustMissileAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SolarComboAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<NebulaComboAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<NebulaMissileAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SolarBeamAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<StardustBeamAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<VortexBeamAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<LuminiteBeamAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<NebulaBeamAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<OmegaCannonAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<PhazonBeamAddon>(); }, 4);
+			}
+			if (NPC.downedMechBossAny || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<DiffusionMissileAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SpaceJump>(); }, 4);
+			}
+			if (NPC.downedChristmasIceQueen || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceBeamV2Addon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceSuperMissileAddon>(); }, 4);
 			}
 			Array.Resize(ref list, index);
 			double numericValue = WorldGen.genRand.Next(0, (int)list.Sum(p => p.Ratio));
@@ -1059,7 +1124,18 @@ namespace MetroidMod.Common.Systems
 					Main.tile[i, k].Get<TileWallWireStateData>().IsHalfBlock = false;
 					Main.tile[i, num].Get<TileWallWireStateData>().HasTile = true;
 					ushort output = (ushort)ModContent.TileType<MissileExpansionTile>();
-					switch (Main.rand.Next(12))
+					WeightedChance[] list = new WeightedChance[9];
+					int index = 0;
+					list[index++] = new WeightedChance(() => { output = (ushort)ModContent.TileType<MissileExpansionTile>(); }, 50);
+					list[index++] = new WeightedChance(() => { output = (ushort)SuitAddonLoader.GetAddon<EnergyTank>().TileType; }, 14);
+					list[index++] = new WeightedChance(() => { output = (ushort)ModContent.TileType<ImperialistTile>(); }, 1);
+					list[index++] = new WeightedChance(() => { output = (ushort)ModContent.TileType<JudicatorTile>(); }, 1);
+					list[index++] = new WeightedChance(() => { output = (ushort)ModContent.TileType<MagMaulTile>(); }, 1);
+					list[index++] = new WeightedChance(() => { output = (ushort)ModContent.TileType<BattleHammerTile>(); }, 1);
+					list[index++] = new WeightedChance(() => { output = (ushort)ModContent.TileType<VoltDriverTile>(); }, 1);
+					list[index++] = new WeightedChance(() => { output = (ushort)ModContent.TileType<ShockCoilTile>(); }, 1);
+					list[index++] = new WeightedChance(() => { output = (ushort)ModContent.TileType<UAExpansionTile>(); }, 12);
+					/*switch (Main.rand.Next(14))
 					{
 						case 0: 
 						case 1:
@@ -1073,6 +1149,20 @@ namespace MetroidMod.Common.Systems
 						case 9: output = (ushort)ModContent.TileType<BattleHammerTile>(); break;
 						case 10: output = (ushort)ModContent.TileType<VoltDriverTile>(); break;
 						case 11: output = (ushort)ModContent.TileType<ShockCoilTile>(); break;
+						case 12:
+						case 13: output = (ushort)ModContent.TileType<UAExpansionTile>(); break;
+					}*/
+					Array.Resize(ref list, index);
+					double numericValue = WorldGen.genRand.Next(0, (int)list.Sum(p => p.Ratio));
+
+					foreach (WeightedChance parameter in list)
+					{
+						numericValue -= parameter.Ratio;
+
+						if (!(numericValue <= 0)) { continue; }
+
+						parameter.Func();
+						break;
 					}
 					Main.tile[i, num].Get<TileTypeData>().Type = output;
 
@@ -1204,7 +1294,7 @@ namespace MetroidMod.Common.Systems
 		}
 		private static void ChozoRuins_Temple(int x, int y, int width, int height, int dir)
 		{
-			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 1);
+			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 0); //I set these to 0 pro temore
 
 			Hatch(x, y + height - 8);
 			Hatch(x + width - 4, y + height - 8);
@@ -1254,7 +1344,7 @@ namespace MetroidMod.Common.Systems
 		}
 		private static void ChozoRuins_FirstShaft(int x, int y, int width, int height, int dir)
 		{
-			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 1);
+			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 0);
 
 			VerticalHatch(x + width / 2 - 2, y);
 
@@ -1340,7 +1430,7 @@ namespace MetroidMod.Common.Systems
 		}
 		private static void ChozoRuins_MorphHall(int x, int y, int width, int height, int dir)
 		{
-			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 1);
+			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 0);
 
 			Mod mod = MetroidMod.Instance;
 
@@ -1408,7 +1498,7 @@ namespace MetroidMod.Common.Systems
 		{
 			Mod mod = MetroidMod.Instance;
 
-			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 1);
+			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 0);
 
 			for (int i = 0; i < 20; i++)
 			{
@@ -1473,7 +1563,7 @@ namespace MetroidMod.Common.Systems
 		}
 		private static void ChozoRuins_SecondShaft(int x, int y, int width, int height, int dir)
 		{
-			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 1);
+			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 0);
 
 			for (int j = 11; j < height - 5; j += 5)
 			{
@@ -1571,7 +1661,7 @@ namespace MetroidMod.Common.Systems
 
 			int width = 36;
 			int height = 16;
-			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 1);
+			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 0);
 
 			for (int i = 0; i < 4; i++)
 			{
@@ -1626,7 +1716,7 @@ namespace MetroidMod.Common.Systems
 			WorldGen.PlaceObject(statueX2, statueY, ModContent.TileType<ChozoStatueArmNatural>(), false, 0, 0, -1, -dir);
 
 			Main.tile[statueX2, statueY - 2].Get<TileWallWireStateData>().HasTile = true;
-			Main.tile[statueX2, statueY - 2].Get<TileTypeData>().Type = (ushort)ModContent.TileType<Content.Tiles.ItemTile.PowerGripTile>();
+			Main.tile[statueX2, statueY - 2].Get<TileTypeData>().Type = (ushort)ModContent.TileType<PowerGripTile>();
 
 			Main.tile[statueX2, statueY - 2].Get<TileWallWireStateData>().TileFrameX = 0;
 			Main.tile[statueX2, statueY - 2].Get<TileWallWireStateData>().TileFrameY = 0;
@@ -1634,7 +1724,7 @@ namespace MetroidMod.Common.Systems
 		}
 		private static void ChozoRuins_BossRoom(int x, int y, int width, int height, int dir)
 		{
-			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(), 1);
+			BasicStructure(x, y, width, height, 4, ModContent.TileType<ChozoBrickNatural>(), ModContent.WallType<ChozoBrickWallNatural>(),0);
 
 			int stepsX = x + 4;
 			if (dir == -1)
@@ -1645,9 +1735,10 @@ namespace MetroidMod.Common.Systems
 			WorldGen.PlaceTile(stepsX, y + height - 5, ModContent.TileType<ChozoBrickNatural>());
 			WorldGen.PlaceTile(stepsX + dir, y + height - 5, ModContent.TileType<ChozoBrickNatural>());
 
-			NPC.NewNPC(NPC.GetSource_NaturalSpawn(), 8 + (x + width - 6) * 16, (y + height - 4) * 16, ModContent.NPCType<Content.NPCs.Torizo.IdleTorizo>());
-			TorizoRoomLocation.X = x;
-			TorizoRoomLocation.Y = y;
+			NPC.NewNPC(NPC.GetSource_NaturalSpawn(), 8 + (x + width - 6) * 16, (y + height - 4) * 16, ModContent.NPCType<IdleTorizo>());
+			Point location = new(x, y);
+			ModContent.GetInstance<TorizoSpawningSystem>().SetLocationFromLegacy(location);
+			ModContent.GetInstance<GoldenTorizoSpawningSystem>().SetLocationFromLegacy(location);
 		}
 
 		private static void ChozoRuins_SaveRoom(int x, int y)
@@ -1760,29 +1851,13 @@ namespace MetroidMod.Common.Systems
 		}
 		private static void Hatch(int i, int j)
 		{
-			Mod mod = MetroidMod.Instance;
-			for (int x = i; x < i + 4; x++)
-			{
-				for (int y = j; y < j + 4; y++)
-				{
-					DestroyChest(x, y);
-					WorldGen.KillTile(x, y);
-				}
-			}
-			WorldGen.PlaceObject(i + 1, j + 2, ModContent.TileType<BlueHatch>(), false, 0, 0, -1, 1);
+			HatchTilePlacement.PlaceHatchAt(
+				ModContent.GetInstance<BlueHatch>().GetTileType(), i, j);
 		}
 		private static void VerticalHatch(int i, int j)
 		{
-			Mod mod = MetroidMod.Instance;
-			for (int x = i; x < i + 4; x++)
-			{
-				for (int y = j; y < j + 4; y++)
-				{
-					DestroyChest(x, y);
-					WorldGen.KillTile(x, y);
-				}
-			}
-			WorldGen.PlaceObject(i + 1, j + 2, ModContent.TileType<BlueHatchVertical>(), false, 0, 0, -1, 1);
+			HatchTilePlacement.PlaceHatchAt(
+				ModContent.GetInstance<BlueHatch>().GetTileType(vertical: true), i, j);
 		}
 		private static void DestroyChest(int x, int y)
 		{
@@ -1807,80 +1882,6 @@ namespace MetroidMod.Common.Systems
 			{
 				meteorSpawnAttempt--;
 			}
-
-			if (!bossesDown.HasFlag(MetroidBossDown.downedTorizo) && !NPC.AnyNPCs(ModContent.NPCType<Torizo>()) && !NPC.AnyNPCs(ModContent.NPCType<IdleTorizo>()) && TorizoRoomLocation.X > 0 && TorizoRoomLocation.Y > 0)
-			{
-				Rectangle room = TorizoRoomLocation;
-				if (spawnCounter <= 0)
-				{
-					Vector2 pos = new Vector2(room.X + 8, room.Y + room.Height - 4);
-					if (room.X > Main.maxTilesX / 2)
-					{
-						pos.X = (room.X + room.Width - 8);
-					}
-					pos *= 16f;
-
-					NPC.NewNPC(NPC.GetSource_NaturalSpawn(), (int)pos.X, (int)pos.Y, ModContent.NPCType<IdleTorizo>());
-				}
-				else
-				{
-					spawnCounter--;
-				}
-			}
-			else
-			{
-				spawnCounter = 300;
-			}
-
-			if (NPC.downedGolemBoss && bossesDown.HasFlag(MetroidBossDown.downedTorizo) &&
-				!bossesDown.HasFlag(MetroidBossDown.downedGoldenTorizo) && !NPC.AnyNPCs(ModContent.NPCType<GoldenTorizo>()) && !NPC.AnyNPCs(ModContent.NPCType<IdleGoldenTorizo>()) && TorizoRoomLocation.X > 0 && TorizoRoomLocation.Y > 0)
-			{
-				Rectangle room = TorizoRoomLocation;
-				if (spawnCounter2 <= 0)
-				{
-					Vector2 pos = new Vector2(room.X + 8, room.Y + room.Height - 4);
-					if (room.X > Main.maxTilesX / 2)
-					{
-						pos.X = (room.X + room.Width - 8);
-					}
-					pos *= 16f;
-
-					NPC.NewNPC(NPC.GetSource_NaturalSpawn(), (int)pos.X, (int)pos.Y, ModContent.NPCType<IdleGoldenTorizo>());
-				}
-				else
-				{
-					spawnCounter2--;
-				}
-			}
-			else
-			{
-				spawnCounter2 = 300;
-			}
-		}
-
-		public override void PreUpdateEntities()
-		{
-			Main.tileSolid[ModContent.TileType<BlueHatchOpen>()] = false;
-			Main.tileSolid[ModContent.TileType<BlueHatchOpenVertical>()] = false;
-			Main.tileSolid[ModContent.TileType<RedHatchOpen>()] = false;
-			Main.tileSolid[ModContent.TileType<RedHatchOpenVertical>()] = false;
-			Main.tileSolid[ModContent.TileType<GreenHatchOpen>()] = false;
-			Main.tileSolid[ModContent.TileType<GreenHatchOpenVertical>()] = false;
-			Main.tileSolid[ModContent.TileType<YellowHatchOpen>()] = false;
-			Main.tileSolid[ModContent.TileType<YellowHatchOpenVertical>()] = false;
-		}
-
-		//public override void MidUpdateTimeWorld()
-		public override void PostUpdateTime()
-		{
-			Main.tileSolid[ModContent.TileType<BlueHatchOpen>()] = true;
-			Main.tileSolid[ModContent.TileType<BlueHatchOpenVertical>()] = true;
-			Main.tileSolid[ModContent.TileType<RedHatchOpen>()] = true;
-			Main.tileSolid[ModContent.TileType<RedHatchOpenVertical>()] = true;
-			Main.tileSolid[ModContent.TileType<GreenHatchOpen>()] = true;
-			Main.tileSolid[ModContent.TileType<GreenHatchOpenVertical>()] = true;
-			Main.tileSolid[ModContent.TileType<YellowHatchOpen>()] = true;
-			Main.tileSolid[ModContent.TileType<YellowHatchOpenVertical>()] = true;
 		}
 	}
 }

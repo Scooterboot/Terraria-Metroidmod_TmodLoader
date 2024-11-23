@@ -29,7 +29,7 @@ namespace MetroidMod.Content.NPCs.Serris
 			// DisplayName.SetDefault("Serris");
 			Main.npcFrameCount[NPC.type] = 10;
 			NPCID.Sets.MPAllowedEnemies[Type] = true;
-			NPCID.Sets.NPCBestiaryDrawModifiers value = new NPCID.Sets.NPCBestiaryDrawModifiers(0)
+			NPCID.Sets.NPCBestiaryDrawModifiers value = new NPCID.Sets.NPCBestiaryDrawModifiers()
 			{
 				Hide = true // Hides this NPC from the Bestiary, useful for multi-part NPCs whom you only want one entry.
 			};
@@ -95,8 +95,8 @@ namespace MetroidMod.Content.NPCs.Serris
 			int bodyHeight = texBody.Height / 10,
 				finsHeight = texFins.Height / 15;
 
-			float bodyRot = NPC.rotation - 1.57f;
-			float headRot = head.rotation - 1.57f;
+			float bodyRot = NPC.rotation - MathHelper.PiOver2;
+			float headRot = head.rotation - MathHelper.PiOver2;
 			Color bodyColor = NPC.GetAlpha(Lighting.GetColor((int)NPC.Center.X / 16, (int)NPC.Center.Y / 16));
 
 			SpriteEffects effects = SpriteEffects.None;

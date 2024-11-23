@@ -2,6 +2,7 @@
 using MetroidMod.Content.Projectiles.Paralyzer;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MetroidMod.Common.GlobalProjectiles
@@ -11,6 +12,7 @@ namespace MetroidMod.Common.GlobalProjectiles
 		public override bool InstancePerEntity => true;
 		bool init = false;
 		float projSpeed = 1f;
+
 		public override bool PreAI(Projectile projectile)
 		{
 			if (!projectile.tileCollide && projectile.aiStyle != 26 && !projectile.minion && projectile.damage > 0 && projectile.friendly)
@@ -19,18 +21,6 @@ namespace MetroidMod.Common.GlobalProjectiles
 				int y = (int)MathHelper.Clamp(projectile.Center.Y / 16, 0, Main.maxTilesY - 2);
 				if (Main.tile[x, y] != null && Main.tile[x, y].HasTile)
 				{
-					if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.Hatch.BlueHatch>())
-					{
-						TileLoader.HitWire(x, y, ModContent.TileType<Content.Tiles.Hatch.BlueHatch>());
-					}
-					if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.Hatch.BlueHatchVertical>())
-					{
-						TileLoader.HitWire(x, y, ModContent.TileType<Content.Tiles.Hatch.BlueHatchVertical>());
-					}
-					if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.BlueSwitch>())
-					{
-						Wiring.TripWire(x, y, 1, 1);
-					}
 					if (MSystem.mBlockType[x, y] == 5)
 					{
 						MSystem.AddRegenBlock(x, y);
@@ -55,10 +45,10 @@ namespace MetroidMod.Common.GlobalProjectiles
 			float distance = 250f;
 			if (projectile.active && projectile.penetrate > 0 && projectile.damage > 0 && projectile.friendly && projectile.velocity != Vector2.Zero && projectile.aiStyle != 3 && projectile.aiStyle != 15 && !Main.projPet[projectile.type])
 			{
-				for (int i = 0; i < Main.npc.Length; i++)
+				foreach (NPC who in Main.ActiveNPCs)
 				{
-					NPC npc = Main.npc[i];
-					if (npc != null && npc.active && npc.type == ModContent.NPCType<Content.NPCs.OmegaPirate.OmegaPirateAbsorbField>() && npc.ai[3] != 1)
+					NPC npc = Main.npc[who.whoAmI];
+					if (npc != null && npc.type == ModContent.NPCType<Content.NPCs.OmegaPirate.OmegaPirateAbsorbField>() && npc.ai[3] != 1)
 					{
 						if (Vector2.Distance(npc.Center, projectile.Center) < distance * npc.ai[1])
 						{
@@ -91,6 +81,12 @@ namespace MetroidMod.Common.GlobalProjectiles
 		}
 		public override void OnKill(Projectile projectile, int timeLeft)
 		{
+			// Prevent wiring from opening hatches
+			if(projectile.type == ProjectileID.WireKite)
+			{
+				return;
+			}
+
 			int tilex = (int)(projectile.position.X / 16) - 1;
 			int tiley = (int)(projectile.position.Y / 16) - 1;
 			int tilex2 = (int)((projectile.position.X + projectile.width) / 16) + 1;
@@ -117,14 +113,6 @@ namespace MetroidMod.Common.GlobalProjectiles
 				{
 					if (Main.tile[x, y] != null && Main.tile[x, y].HasTile)
 					{
-						if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.Hatch.BlueHatch>())
-						{
-							TileLoader.HitWire(x, y, ModContent.TileType<Content.Tiles.Hatch.BlueHatch>());
-						}
-						if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.Hatch.BlueHatchVertical>())
-						{
-							TileLoader.HitWire(x, y, ModContent.TileType<Content.Tiles.Hatch.BlueHatchVertical>());
-						}
 						if (projectile.Name.Contains("Screw Attack"))
 						{
 							if (MSystem.mBlockType[x, y] == 3)
@@ -146,10 +134,6 @@ namespace MetroidMod.Common.GlobalProjectiles
 						}
 						else if (!projectile.Name.Contains("Charge Attack"))
 						{
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.BlueSwitch>())
-							{
-								Wiring.TripWire(x, y, 1, 1);
-							}
 							if (MSystem.mBlockType[x, y] != 0)
 							{
 								MSystem.hit[x, y] = true;
@@ -183,36 +167,12 @@ namespace MetroidMod.Common.GlobalProjectiles
 						}
 						if (projectile.Name.Contains("Missile"))
 						{
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.Hatch.RedHatch>())
-							{
-								TileLoader.HitWire(x, y, ModContent.TileType<Content.Tiles.Hatch.RedHatch>());
-							}
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.Hatch.RedHatchVertical>())
-							{
-								TileLoader.HitWire(x, y, ModContent.TileType<Content.Tiles.Hatch.RedHatchVertical>());
-							}
 							if (MSystem.mBlockType[x, y] == 4)
 							{
 								MSystem.AddRegenBlock(x, y);
 							}
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.RedSwitch>())
-							{
-								Wiring.TripWire(x, y, 1, 1);
-							}
 							if (projectile.Name.Contains("Super") || projectile.Name.Contains("Nebula") || projectile.Name.Contains("Stardust"))
 							{
-								if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.Hatch.GreenHatch>())
-								{
-									TileLoader.HitWire(x, y, ModContent.TileType<Content.Tiles.Hatch.GreenHatch>());
-								}
-								if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.Hatch.GreenHatchVertical>())
-								{
-									TileLoader.HitWire(x, y, ModContent.TileType<Content.Tiles.Hatch.GreenHatchVertical>());
-								}
-								if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<Content.Tiles.GreenSwitch>())
-								{
-									Wiring.TripWire(x, y, 1, 1);
-								}
 								if (MSystem.mBlockType[x, y] == 8)
 								{
 									MSystem.AddRegenBlock(x, y);

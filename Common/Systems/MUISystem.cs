@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using MetroidMod.Common.GlobalItems;
 using MetroidMod.Common.Players;
+using MetroidMod.Common.UI;
+using MetroidMod.Content.Items.Weapons;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
@@ -30,6 +32,7 @@ namespace MetroidMod.Common.Systems
 		internal static UserInterface reserveUserInterface;
 		internal static UserInterface visorUserInterface;
 		internal static UserInterface smUserInterface;
+		internal static ChoziteDualtoolUI choziteDualtoolUI;
 
 		// bri'ish innit?
 		internal bool isPBInit = false;
@@ -66,6 +69,7 @@ namespace MetroidMod.Common.Systems
 				reserveUserInterface = new UserInterface();
 				smUserInterface = new UserInterface();
 				visorUserInterface = new UserInterface();
+				choziteDualtoolUI = new();
 
 				/*powerBeamUI = new UI.PowerBeamUI();
 				powerBeamUI.Activate();
@@ -102,6 +106,7 @@ namespace MetroidMod.Common.Systems
 			reserveUserInterface = null;
 			smUserInterface = null;
 			visorUserInterface = null;
+			choziteDualtoolUI = null;
 		}
 
 		public override void UpdateUI(GameTime gameTime)
@@ -226,10 +231,10 @@ namespace MetroidMod.Common.Systems
 			// (debug) draw npc hitboxes
 			if (MetroidMod.DebugDH)
 			{
-				for (int j = 0; j < Main.maxNPCs; j++)
+				foreach (NPC who in Main.ActiveNPCs)
 				{
-					NPC npc = Main.npc[j];
-					if (npc.active && npc.life > 0)
+					NPC npc = Main.npc[who.whoAmI];
+					if (npc.life > 0)
 					{
 						Color color = new(0, 255, 0);
 						if (npc.dontTakeDamage)
@@ -256,7 +261,7 @@ namespace MetroidMod.Common.Systems
 						for (int j = 0; j < Main.maxTilesY; j++)
 						{
 							if (!Main.tile[i, j].HasTile) { continue; }
-							if (SuitAddonLoader.IsASuitTile(Main.tile[i, j]) /*|| BeamLoader.IsABeamTile(Main.tile[i, j])*/ || MBAddonLoader.IsAMorphTile(Main.tile[i, j]))
+							if (SuitAddonLoader.IsASuitTile(Main.tile[i, j]) /*|| BeamLoader.IsABeamTile(Main.tile[i, j])*/ || MBAddonLoader.IsAMorphTile(Main.tile[i, j]) || Main.tile[i,j].TileType == ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb>() || Main.tile[i, j].TileType == ModContent.TileType<Content.Tiles.ItemTile.UAExpansionTile>())
 							{
 								itemCoords.Add(new Vector2(i, j));
 							}
@@ -270,7 +275,6 @@ namespace MetroidMod.Common.Systems
 					if (tile != null && tile.HasTile)
 					{
 						Texture2D tex = Terraria.GameContent.TextureAssets.Tile[tile.TileType].Value;
-
 						Vector2 screenCenter = Main.screenPosition + new Vector2(Main.screenWidth, Main.screenHeight) / 2;
 
 						Vector2 pos = itemCoords[i] * 16f;
@@ -278,7 +282,14 @@ namespace MetroidMod.Common.Systems
 						float dist = Math.Min(Vector2.Distance(pos, screenCenter), Main.screenHeight / 2 - 32);
 
 						Vector2 drawPos = screenCenter + rot.ToRotationVector2() * dist - Main.screenPosition;
-						sb.Draw(tex, drawPos, new Rectangle?(new Rectangle(0, 0, tex.Width, tex.Height)), Color.White, 0, new Vector2(tex.Width / 2, tex.Height / 2), 1f, SpriteEffects.None, 0f);
+						if (tex == Terraria.GameContent.TextureAssets.Tile[ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb>()].Value)
+						{
+							sb.Draw(tex, drawPos, new Rectangle?(new Rectangle(0, 0, tex.Width, tex.Height/4)), Color.White, 0, new Vector2(tex.Width / 2, tex.Height / 8), 1f, SpriteEffects.None, 0f);
+						}
+						else
+						{
+							sb.Draw(tex, drawPos, new Rectangle?(new Rectangle(0, 0, tex.Width, tex.Height)), Color.White, 0, new Vector2(tex.Width / 2, tex.Height / 2), 1f, SpriteEffects.None, 0f);
+						}
 					}
 				}
 			}
@@ -548,10 +559,32 @@ namespace MetroidMod.Common.Systems
 					InterfaceScaleType.UI)
 				);
 			}
+
+			AddLayerUI(layers, "Vanilla: Wire Selection", 1, new LegacyGameInterfaceLayer(
+				"MetroidMod: Chozite Dualtool",
+				delegate
+				{
+					choziteDualtoolUI.Update();
+					choziteDualtoolUI.Draw(Main.spriteBatch);
+					return true;
+				},
+				InterfaceScaleType.UI
+				));
 		}
+
+		private void AddLayerUI(List<GameInterfaceLayer> layers, string posRefLayerName, int layerOffset, GameInterfaceLayer layer)
+		{
+			int refLayerIndex = layers.FindIndex(layer => layer.Name.Equals(posRefLayerName));
+			if (refLayerIndex == -1) return;
+
+			layers.Insert(refLayerIndex + layerOffset, layer);
+		}
+
 		public override void PreDrawMapIconOverlay(IReadOnlyList<IMapLayer> layers, MapOverlayDrawContext mapOverlayDrawContext)
 		{
-			IdleTorizoMapLayer.Instance.Visible = Configs.MConfigClient.Instance.showTorizoRoomIcon;
+			bool visible = Configs.MConfigClient.Instance.showTorizoRoomIcon;
+			ModContent.GetInstance<IdleTorizoMapLayer>().Visible = visible;
+			ModContent.GetInstance<IdleGoldenTorizoMapLayer>().Visible = visible;
 		}
 		float tRot = 0f;
 		float[] tScale = { 1f, 1f, 1f, 1f, 1f };
@@ -562,7 +595,7 @@ namespace MetroidMod.Common.Systems
 			MPlayer mp = P.GetModPlayer<MPlayer>();
 			Item item = P.inventory[P.selectedItem];
 
-			if (item.type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>())
+			if (item.type == ModContent.ItemType<MissileLauncher>() || item.type == ModContent.ItemType<ArmCannon>() && item.TryGetGlobalItem(out MGlobalItem pb) && !pb.isBeam)
 			{
 				tRot += 0.05f;
 				MGlobalItem mi = item.GetGlobalItem<MGlobalItem>();
@@ -662,7 +695,7 @@ namespace MetroidMod.Common.Systems
 				Texture2D texBar = ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/ChargeBar").Value,
 					texBarBorder = ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/ChargeBarBorder").Value,
 					texBarBorder2 = ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/ChargeBarBorder2").Value;
-				if (item.type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>() || item.type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>() || mp.ballstate || mp.PrimeHunter)
+				if (item.type == ModContent.ItemType<PowerBeam>() || item.type == ModContent.ItemType<MissileLauncher>() || item.type == ModContent.ItemType<ArmCannon>() || mp.ballstate || mp.PrimeHunter)
 				{
 					int hp = (int)mp.hyperCharge, hpMax = (int)MPlayer.maxHyper;
 					int ch = (int)mp.statCharge, chMax = (int)MPlayer.maxCharge;
@@ -722,7 +755,7 @@ namespace MetroidMod.Common.Systems
 					}
 					sb.Draw(texBarBorder, new Vector2(x, y), new Rectangle(0, 0, texBarBorder.Width, texBarBorder.Height), Color.White);
 
-					if (item.type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>())
+					if (item.type == ModContent.ItemType<MissileLauncher>() || item.type == ModContent.ItemType<ArmCannon>() && item.TryGetGlobalItem(out MGlobalItem gg) && !gg.isBeam)
 					{
 						MGlobalItem mi = item.GetGlobalItem<MGlobalItem>();
 						int num = Math.Min(mi.statMissiles, mi.maxMissiles);
@@ -731,8 +764,22 @@ namespace MetroidMod.Common.Systems
 						Color color = new Color((int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)));
 						sb.DrawString(Terraria.GameContent.FontAssets.MouseText.Value, text, new Vector2(x + 38 - (vect.X / 2), y), color, 0f, default(Vector2), 1f, SpriteEffects.None, 0f);
 					}
+					if (item.type == ModContent.ItemType<PowerBeam>() || item.type == ModContent.ItemType<ArmCannon>() && item.TryGetGlobalItem(out MGlobalItem gz) && gz.isBeam)
+					{
+						MGlobalItem mi = item.GetGlobalItem<MGlobalItem>();
+						int num = Math.Min((int)mi.statUA, mi.maxUA);
+						string text;
+						text = num.ToString("000");/*((int)Math.Round((double)num * 100 / mi.maxUA)).ToString() + "%";
+						if (Configs.MConfigClientDebug.Instance.DisplayDebugValues)
+						{
+							text = num.ToString("000");
+						}*/
+						Vector2 vect = Terraria.GameContent.FontAssets.MouseText.Value.MeasureString(text);
+						Color color = new Color((int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)));
+						sb.DrawString(Terraria.GameContent.FontAssets.MouseText.Value, text, new Vector2(x + 38 - (vect.X / 2), y), color, 0f, default(Vector2), 1f, SpriteEffects.None, 0f);
+					}
 				}
-				if (item.type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>() || mp.shineDirection != 0 || mp.shineActive)
+				if (item.type == ModContent.ItemType<PowerBeam>() || item.type == ModContent.ItemType<ArmCannon>() && item.TryGetGlobalItem(out MGlobalItem pb1) && pb1.isBeam || mp.shineDirection != 0 || mp.shineActive)
 				{
 					Texture2D overheatBar = ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/OverheatBar").Value,
 					overheatBorder = ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/OverheatBorder").Value;
@@ -760,7 +807,7 @@ namespace MetroidMod.Common.Systems
 					Color color = new Color((int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)), (int)((byte)((float)Main.mouseTextColor)));
 					sb.DrawString(Terraria.GameContent.FontAssets.MouseText.Value, text, new Vector2(x2 + 2, y2 + overheatBorder.Height + 2), color, 0f, default(Vector2), 0.75f, SpriteEffects.None, 0f);
 				}
-				if (item.type == ModContent.ItemType<Content.Items.Weapons.CopperParalyzer>() || item.type == ModContent.ItemType<Content.Items.Weapons.Paralyzer>())
+				if (item.type == ModContent.ItemType<CopperParalyzer>() || item.type == ModContent.ItemType<Paralyzer>())
 				{
 					Texture2D overheatBar = ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/OverheatBar").Value,
 					overheatBorder = ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/OverheatBorder").Value;

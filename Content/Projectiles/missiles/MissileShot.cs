@@ -25,7 +25,7 @@ namespace MetroidMod.Content.Projectiles.missiles
 
 		public override void AI()
 		{
-			Projectile.rotation = (float)Math.Atan2((double)Projectile.velocity.Y, (double)Projectile.velocity.X) + 1.57f;
+			Projectile.rotation = (float)Math.Atan2((double)Projectile.velocity.Y, (double)Projectile.velocity.X) + MathHelper.PiOver2;
 
 			int dustType = 6;
 			if (Projectile.Name.Contains("Ice"))
@@ -78,19 +78,22 @@ namespace MetroidMod.Content.Projectiles.missiles
 		}
 		public override void OnKill(int timeLeft)
 		{
-			Projectile.position.X = Projectile.position.X + (float)(Projectile.width / 2);
+			/*Projectile.position.X = Projectile.position.X + (float)(Projectile.width / 2);
 			Projectile.position.Y = Projectile.position.Y + (float)(Projectile.height / 2);
 			Projectile.width += 48;
 			Projectile.height += 48;
 			Projectile.position.X = Projectile.position.X - (float)(Projectile.width / 2);
-			Projectile.position.Y = Projectile.position.Y - (float)(Projectile.height / 2);
+			Projectile.position.Y = Projectile.position.Y - (float)(Projectile.height / 2);*/
+			mProjectile.Explode(48);
 
 			//Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item14,Projectile.position);
-			SoundEngine.PlaySound(Sounds.Items.Weapons.MissileExplode, Projectile.position);
-
 			if (mProjectile.homing)
 			{
 				SoundEngine.PlaySound(Sounds.Items.Weapons.MissileExplodeHunters, Projectile.position);
+			}
+			else
+			{
+				SoundEngine.PlaySound(Sounds.Items.Weapons.MissileExplode, Projectile.position);
 			}
 			int dustType = 6;
 			if (Projectile.Name.Contains("Ice"))
@@ -105,16 +108,6 @@ namespace MetroidMod.Content.Projectiles.missiles
 				int num72 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, 30, 0f, 0f, 100, default(Color), 3f);
 				Main.dust[num72].velocity *= 1.4f;
 				Main.dust[num72].noGravity = true;
-			}
-			Projectile.Damage();
-			foreach (NPC target in Main.npc)
-			{
-				if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height))
-				{
-					Projectile.Damage();
-					Projectile.usesLocalNPCImmunity = true;
-					Projectile.localNPCHitCooldown = 1;
-				}
 			}
 		}
 

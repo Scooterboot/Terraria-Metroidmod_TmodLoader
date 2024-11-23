@@ -70,7 +70,6 @@ namespace MetroidMod.Content.Items.Weapons
 
 			Item.ResearchUnlockCount = 1;
 		}
-		//public override void SetDefaults()
 		public override void SetDefaults()
 		{
 			Item.damage = Common.Configs.MConfigItems.Instance.damageMissileLauncher;
@@ -95,19 +94,24 @@ namespace MetroidMod.Content.Items.Weapons
 			mi.statMissiles = Common.Configs.MConfigItems.Instance.ammoMissileLauncher;
 			mi.maxMissiles = Common.Configs.MConfigItems.Instance.ammoMissileLauncher;
 		}
-		public override void AddRecipes()
+		/*public override void AddRecipes()
 		{
 			CreateRecipe(1)
 				.AddIngredient<Miscellaneous.ChoziteBar>(10)
 				.AddIngredient(SuitAddonLoader.GetAddon<SuitAddons.EnergyTank>().ItemType, 1)
 				.AddTile(TileID.Anvils)
 				.Register();
-		}
+		}*/
 
 		public override void UseStyle(Player player, Rectangle heldItemFrame)
 		{
-			player.itemLocation.X = player.MountedCenter.X - (float)Item.width * 0.5f;
-			player.itemLocation.Y = player.MountedCenter.Y - (float)Item.height * 0.5f;
+			float armRot = player.itemRotation - (float)(Math.PI / 2) * player.direction;
+			player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, armRot);
+			Vector2 origin = player.GetFrontHandPosition(Player.CompositeArmStretchAmount.Full, armRot);
+			origin.Y -= heldItemFrame.Height / 2f;
+			player.itemLocation = origin + player.itemRotation.ToRotationVector2() * -14 * player.direction;
+			//player.itemLocation.X = player.MountedCenter.X - (float)Item.width * 0.5f;
+			//player.itemLocation.Y = player.MountedCenter.Y - (float)Item.height * 0.5f;
 		}
 		/*public override bool AltFunctionUse(Player player)
 		{
@@ -177,7 +181,7 @@ namespace MetroidMod.Content.Items.Weapons
 			}
 		}
 
-		public override bool CanReforge()/* tModPorter Note: Use CanReforge instead for logic determining if a reforge can happen. */
+		/*public override bool CanReforge()// tModPorter Note: Use CanReforge instead for logic determining if a reforge can happen. 
 		{
 			foreach (Item item in MissileMods)
 			{
@@ -194,7 +198,7 @@ namespace MetroidMod.Content.Items.Weapons
 			}
 			MissileChange = new Item[5];
 			return base.CanReforge();
-		}
+		}*/
 
 		int finalDmg = 0;
 
@@ -360,6 +364,7 @@ namespace MetroidMod.Content.Items.Weapons
 			if (slot1.type == hm)
 			{
 				isHoming = true;
+				chargeCost = 2;
 				chargeShot = shot;
 				chargeUpSound = "ChargeStartup_HomingMissile";
 				chargeShotSound = "HomingMissileShoot";
@@ -692,20 +697,7 @@ namespace MetroidMod.Content.Items.Weapons
 		}
 
 		int chargeLead = -1;
-		public bool AmmoUse(Player player) //really lazy ammo reservation --Dr
-		{
-			bool one = player.ammoBox || player.ammoPotion;
-			bool both = player.ammoBox && player.ammoPotion;
-			if (one && !both && Main.rand.NextBool(5))
-			{
-				return false;
-			}
-			if(both && Main.rand.NextBool(4))
-			{
-				return false;
-			}
-			return true;
-		}
+
 		public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockBack)
 		{
 			float speedX = velocity.X;
@@ -739,7 +731,7 @@ namespace MetroidMod.Content.Items.Weapons
 			}
 			else
 			{
-				mi.statMissiles -= AmmoUse(player)? 1 : 0;
+				mi.statMissiles -= (int)Math.Round(MGlobalItem.AmmoUsage(player, 1));
 				SoundEngine.PlaySound(new($"{Mod.Name}/Assets/Sounds/{shotSound}"), player.position);
 			}
 			return true;
@@ -775,7 +767,7 @@ namespace MetroidMod.Content.Items.Weapons
 					}
 				}
 
-				int chCost = (int)(AmmoUse(player) ? (chargeCost * (mp.missileCost + 0.001f)) : 0);
+				int chCost = (int)(chargeCost * (mp.missileCost + 0.001f));
 				comboCostUseTime = (int)Math.Round(60.0 / (double)(comboDrain * mp.missileCost));
 				isCharge &= (mi.statMissiles >= chCost || (isHeldCombo > 0 && initialShot));
 
@@ -848,7 +840,7 @@ namespace MetroidMod.Content.Items.Weapons
 												Main.projectile[proj].ai[0] = chargeLead;
 											}
 
-											mi.statMissiles = Math.Max(mi.statMissiles - chCost, 0);
+											mi.statMissiles = Math.Max(mi.statMissiles - (int)Math.Round(MGlobalItem.AmmoUsage(player, chCost)), 0);
 
 											initialShot = true;
 										}
@@ -858,7 +850,7 @@ namespace MetroidMod.Content.Items.Weapons
 											//if(comboCostTime <= 0)
 											if (comboCostTime > comboCostUseTime)
 											{
-												mi.statMissiles = Math.Max(mi.statMissiles -= AmmoUse(player) ? 1 : 0,0);
+												mi.statMissiles = Math.Max(mi.statMissiles -= (int)Math.Round(MGlobalItem.AmmoUsage(player,1)),0);
 												//comboCostTime = comboCostUseTime;
 												comboCostTime = 0;
 											}
@@ -884,11 +876,11 @@ namespace MetroidMod.Content.Items.Weapons
 							}
 							if (isHeldCombo <= 0 || mp.statCharge < MPlayer.maxCharge)
 							{
+								var entitySource = player.GetSource_ItemUse(Item);
 								if (mp.statCharge >= MPlayer.maxCharge && mi.statMissiles >= chCost)
 								{
 									if (isShotgun)
 									{
-										var entitySource = player.GetSource_ItemUse(Item);
 										for (int i = 0; i < shotgunAmt; i++)
 										{
 											int k = i - (shotgunAmt / 2);
@@ -904,25 +896,22 @@ namespace MetroidMod.Content.Items.Weapons
 									}
 									if (isHoming)
 									{
-										var entitySource = player.GetSource_ItemUse(Item);
 										int shotProj = Projectile.NewProjectile(entitySource, oPos.X, oPos.Y, velocity.X, velocity.Y, Mod.Find<ModProjectile>(shot).Type, damage * 2, Item.knockBack, player.whoAmI);
 										MProjectile mProj = (MProjectile)Main.projectile[shotProj].ModProjectile;
 										mProj.homing = true;
-										mProj.Projectile.netUpdate2 = true;
-										mi.statMissiles = Math.Max(mi.statMissiles -= AmmoUse(player) ? 1 : 0, 0);
+										//mProj.Projectile.netUpdate2 = true;
+										//mi.statMissiles = Math.Max(mi.statMissiles -= (int)Math.Round(MGlobalItem.AmmoUsage(player, 2)), 0);
 									}
-									else
+									else if (!isShotgun) //dont know why this needs to be this way but it do
 									{
-										var entitySource = player.GetSource_ItemUse(Item);
 										int chargeProj = Projectile.NewProjectile(entitySource, oPos.X, oPos.Y, velocity.X, velocity.Y, Mod.Find<ModProjectile>(chargeShot).Type, (int)((float)damage * dmgMult), Item.knockBack, player.whoAmI);
 									}
-									mi.statMissiles -= chCost;
+									mi.statMissiles -= (int)Math.Round(MGlobalItem.AmmoUsage(player, chCost));
 								}
 								else if (mp.statCharge > 0)
 								{
-									var entitySource = player.GetSource_ItemUse(Item);
 									int shotProj = Projectile.NewProjectile(entitySource, oPos.X, oPos.Y, velocity.X, velocity.Y, Mod.Find<ModProjectile>(shot).Type, damage, Item.knockBack, player.whoAmI);
-									mi.statMissiles -= 1;
+									mi.statMissiles -= (int)Math.Round(MGlobalItem.AmmoUsage(player, 1));
 								}
 							}
 
@@ -980,10 +969,10 @@ namespace MetroidMod.Content.Items.Weapons
 						}
 						else
 						{
-							for (int i = 0; i < Main.maxNPCs; i++)
+							foreach (NPC who in Main.ActiveNPCs)
 							{
-								NPC npc = Main.npc[i];
-								if (npc.active && npc.chaseable && !npc.dontTakeDamage && !npc.friendly)// && !npc.immortal)
+								NPC npc = Main.npc[who.whoAmI];
+								if (npc.chaseable && !npc.dontTakeDamage && !npc.friendly)// && !npc.immortal)
 								{
 									Rectangle npcRect = new Rectangle((int)npc.position.X, (int)npc.position.Y, npc.width, npc.height);
 									bool flag = false;
@@ -1057,7 +1046,7 @@ namespace MetroidMod.Content.Items.Weapons
 									mProj.seekTarget = mi.seekerTarget[i];
 									mProj.seeking = true;
 									mProj.Projectile.netUpdate2 = true;
-									mi.statMissiles = Math.Max(mi.statMissiles -= AmmoUse(player) ? 1 : 0, 0);
+									mi.statMissiles = Math.Max(mi.statMissiles -= (int)Math.Round(MGlobalItem.AmmoUsage(player, 1)), 0);
 								}
 							}
 
@@ -1183,7 +1172,9 @@ namespace MetroidMod.Content.Items.Weapons
 		public override void SaveData(TagCompound tag)
 		{
 			for (int i = 0; i < MissileMods.Length; ++i)
+			{
 				tag.Add("missileItem" + i, ItemIO.Save(MissileMods[i]));
+			}
 
 			if (Item.TryGetGlobalItem(out MGlobalItem mi))
 			{
@@ -1233,7 +1224,7 @@ namespace MetroidMod.Content.Items.Weapons
 		{
 			for (int i = 0; i < MissileMods.Length; ++i)
 			{
-				ItemIO.Send(MissileMods[i], writer);
+				ItemIO.Send(MissileMods[i], writer, true);
 			}
 			for (int i = 0; i < MissileChange.Length; ++i)
 			{
@@ -1245,7 +1236,7 @@ namespace MetroidMod.Content.Items.Weapons
 		{
 			for (int i = 0; i < MissileMods.Length; ++i)
 			{
-				MissileMods[i] = ItemIO.Receive(reader);
+				MissileMods[i] = ItemIO.Receive(reader, true);
 			}
 			for (int i = 0; i < MissileChange.Length; ++i)
 			{

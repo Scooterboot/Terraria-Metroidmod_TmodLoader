@@ -1,7 +1,9 @@
 #region Using directives
 
 using MetroidMod.Common.Systems;
+using MetroidMod.Content.Hatches;
 using MetroidMod.ID;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -14,9 +16,6 @@ namespace MetroidMod.Content.Items.Tools
 	{
 		public override void SetStaticDefaults()
 		{
-			// DisplayName.SetDefault("Chozite Wrench");
-			// Tooltip.SetDefault("Toggles regeneration of weapon-destructable blocks. \nBlocks with disabled regeneration will have a red tint.");
-
 			Item.ResearchUnlockCount = 1;
 		}
 		public override void SetDefaults()
@@ -30,18 +29,62 @@ namespace MetroidMod.Content.Items.Tools
 			Item.useTime = 15;
 			Item.useStyle = ItemUseStyleID.Swing;
 			Item.rare = ItemRarityID.Blue;
+			Item.tileBoost = 20;
 		}
 
 		public override bool? UseItem(Player player)
 		{
-			//Tile tile = Main.tile[Player.tileTargetX, Player.tileTargetY];
-			//Vector2 pos = new Vector2(Player.tileTargetX * 16, Player.tileTargetY * 16);
-			if (MSystem.mBlockType[Player.tileTargetX, Player.tileTargetY] != BreakableTileID.None)
+			if (player.whoAmI == Main.myPlayer && MUtils.CanReachWiring(player, Item))
 			{
-				MSystem.dontRegen[Player.tileTargetX, Player.tileTargetY] = !MSystem.dontRegen[Player.tileTargetX, Player.tileTargetY];
-				Wiring.ReActive(Player.tileTargetX, Player.tileTargetY);
+				bool leftClicked = Main.mouseLeft && Main.mouseLeftRelease;
+				if (leftClicked && InteractWithHatchLocal())
+				{
+					return true;
+				}
+
+				if(ModContent.GetInstance<ChoziteWrenchAssistSystem>().HitTile(Player.tileTargetX, Player.tileTargetY))
+				{
+					return true;
+				}
 			}
-			return base.UseItem(player);
+
+			return false;
+		}
+
+		public static bool  InteractWithHatchLocal()
+		{
+			// Presumably tileTargetX and Y are only for the LocalPlayer, so this code should only run for them.
+			// This does mean the visual effect won't actually show for others. That is acceptable for now?
+			if (!TileUtils.TryGetTileEntityAs(Player.tileTargetX, Player.tileTargetY, out HatchTileEntity tileEntity))
+			{
+				return false;
+			}
+			
+			DebugAssist.NewTextMP("Hit with Chozo Wrench");
+
+			tileEntity.State.ToggleBlueConversion();
+			tileEntity.SyncState();
+
+			Color color = tileEntity.State.BlueConversion == HatchBlueConversionStatus.Disabled ?
+				Color.Red : Color.Cyan;
+
+			int i = tileEntity.Position.X;
+			int j = tileEntity.Position.Y;
+			Vector2 topLeft = new Point(i, j).ToWorldCoordinates(0, 0);
+			Vector2 bottomRight = new Point(i + 4, j + 4).ToWorldCoordinates(0, 0);
+			Dust.QuickBox(topLeft, bottomRight, 8, color, null);
+
+			return true;
+		}
+
+
+		public override void HoldItem(Player player)
+		{
+			if (MUtils.CanReachWiring(player, Item))
+			{
+				player.cursorItemIconEnabled = true;
+				player.cursorItemIconID = Type;
+			}
 		}
 
 		public override void AddRecipes()
@@ -51,12 +94,6 @@ namespace MetroidMod.Content.Items.Tools
 				.AddIngredient<Miscellaneous.ChoziteBar>(5)
 				.AddTile(TileID.Anvils)
 				.Register();
-			/*ModRecipe recipe = new ModRecipe(mod);
-			recipe.AddIngredient(ItemID.Wrench);
-			recipe.AddIngredient(null, "ChoziteBar", 5);
-			recipe.AddTile(TileID.Anvils);
-			recipe.SetResult(this);
-			recipe.AddRecipe();*/
 		}
 	}
 }

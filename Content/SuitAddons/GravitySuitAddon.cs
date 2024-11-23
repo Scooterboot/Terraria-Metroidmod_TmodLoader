@@ -1,9 +1,11 @@
-﻿using MetroidMod.Common.Players;
+﻿using MetroidMod.Common.GlobalItems;
+using MetroidMod.Common.Players;
 using MetroidMod.Common.Systems;
 using MetroidMod.ID;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 
 namespace MetroidMod.Content.SuitAddons
 {
@@ -23,9 +25,25 @@ namespace MetroidMod.Content.SuitAddons
 
 		public override bool AddOnlyAddonItem => false;
 
-		public override bool CanGenerateOnChozoStatue(int x, int y) => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || MSystem.bossesDown.HasFlag(MetroidBossDown.downedPhantoon);
+		public override bool CanGenerateOnChozoStatue() => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || MSystem.bossesDown.HasFlag(MetroidBossDown.downedPhantoon) && NPC.downedMechBossAny;
 
-		public override double GenerationChance(int x, int y) => 4;
+		public override double GenerationChance() => 4;
+
+		//This is where all of the suit addon's stats are stored.
+		//They're outside a method so it can be directly accessed by the localization.
+		//Put in the numbers like they'd be seen on the tooltip. The values are automatically adjusted for the actual stats.
+		public static int suitDef = 9; //Added suit defense
+		public static int energyCap = 2; //Added E-tank capacity
+		public static float energyEff = 15f; //%Increased energy damage absorption
+		public static float energyRes = 7.5f; //%Increased energy DR
+		public static int overheatCap = 15; //Added maximum overheat
+		public static float overheatCost = 5f; //%Decreased overheat cost
+		public static float comboCost = 5f; //%Decreased Charge Combo cost
+		public static float huntDamage = 5f; //%Increased hunter damage
+		public static int huntCrit = 3; //Increased hunter crit
+		public static float extraBreath = 100f; //%Increased breath meter
+
+		public override LocalizedText Tooltip => base.Tooltip.WithFormatArgs(suitDef, energyCap, energyEff, energyRes, overheatCap, overheatCost, comboCost, huntDamage, huntCrit, extraBreath);
 
 		public override void SetStaticDefaults()
 		{
@@ -54,21 +72,22 @@ namespace MetroidMod.Content.SuitAddons
 		}
 		public override void OnUpdateArmorSet(Player player, int stack)
 		{
-			player.statDefense += 9;
+			player.statDefense += suitDef;
 			player.noKnockback = true;
 			player.ignoreWater = true;
 			player.lavaMax += 420; // blaze it
 			MPlayer mp = player.GetModPlayer<MPlayer>();
-			HunterDamagePlayer.ModPlayer(player).HunterDamageMult += 0.05f;
-			HunterDamagePlayer.ModPlayer(player).HunterCrit += 3;
-			mp.tankCapacity += 2;
-			mp.maxOverheat += 15;
-			mp.overheatCost -= 0.05f;
-			mp.missileCost -= 0.05f;
-			mp.breathMult = 2;
-			mp.EnergyDefenseEfficiency += 0.15f;
-			mp.EnergyExpenseEfficiency += 0.075f;
-			if (Collision.DrownCollision(player.position, player.width, player.height, player.gravDir))
+			HunterDamagePlayer.ModPlayer(player).HunterDamageMult += huntDamage / 100;
+			HunterDamagePlayer.ModPlayer(player).HunterCrit += huntCrit;
+			mp.tankCapacity += energyCap;
+			mp.maxOverheat += overheatCap;
+			mp.overheatCost -= overheatCost / 100;
+			mp.missileCost -= comboCost / 100;
+			mp.UACost -= 0.05f;
+			mp.breathMult = 1f - (extraBreath / 100);
+			mp.EnergyDefenseEfficiency += energyEff / 100;
+			mp.EnergyExpenseEfficiency += energyRes / 100;
+			if (Collision.DrownCollision(player.position, player.width, player.height, player.gravDir) || (!WorldGen.everythingWorldGen && !WorldGen.getGoodWorldGen))
 			{
 				player.gills = true;
 			}
@@ -81,7 +100,7 @@ namespace MetroidMod.Content.SuitAddons
 		{
 			CreateRecipe(1)
 				.AddIngredient(ItemID.HallowedBar, 54)
-				.AddIngredient<Items.Miscellaneous.GravityFlare>(54)
+				.AddIngredient<Items.Miscellaneous.GravityFlare>(1)
 				.AddTile(TileID.MythrilAnvil)
 				.Register();
 		}

@@ -1,4 +1,6 @@
 using System;
+using MetroidMod.Common.Configs;
+
 //using MetroidMod.Content.NPCs;
 //using MetroidMod.Content.Items;
 using MetroidMod.Common.Systems;
@@ -8,6 +10,7 @@ using MetroidMod.Content.Mounts;
 using MetroidMod.Content.Tiles;
 using MetroidMod.ID;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -48,7 +51,14 @@ namespace MetroidMod.Common.Players
 		public bool canWallJump = false;
 
 		public bool hiJumpBoost = false;
+		/// <summary>
+		/// Determines if you have a Metroid Mod double-jump equipped.
+		/// </summary>
 		public bool spaceJumpBoots = false;
+		///<summary>
+		///If true, use the Spin Boost effects instead of Space Jump Boots.
+		///</summary>
+		public bool itsSpinBoost = true;
 		public bool spaceJumped = false;
 		public bool spaceJump = false;
 		public static float maxSpaceJumps = 120;
@@ -60,6 +70,8 @@ namespace MetroidMod.Common.Players
 		public int screwAttackSpeedEffect = 0;
 		public int screwSpeedDelay = 0;
 		public int screwAttackDmg = 0;
+
+		public bool Eyed = false;
 
 		/// <summary>
 		/// The amount of Life Reserve tanks a player has.
@@ -91,6 +103,7 @@ namespace MetroidMod.Common.Players
 		{
 			powerGrip = false;
 
+			Eyed = false;
 			speedBooster = false;
 			speedBoosting = false;
 			speedBoostDmg = 0;
@@ -100,6 +113,7 @@ namespace MetroidMod.Common.Players
 
 			hiJumpBoost = false;
 			spaceJumpBoots = false;
+			itsSpinBoost = true;
 			spaceJump = false;
 
 			insigniaActive = false;
@@ -149,6 +163,10 @@ namespace MetroidMod.Common.Players
 			{
 				spaceJumpsRegenDelay--;
 			}
+			if (reserveHearts > reserveTanks)
+			{
+				reserveHearts = reserveTanks;
+			}
 
 			if (!Player.mount.Active)
 			{
@@ -160,13 +178,13 @@ namespace MetroidMod.Common.Players
 						rotMax = (float)Math.PI / 4;
 					}
 					rotation += MathHelper.Clamp((rotateCountX + rotateCountY) * Player.direction * Player.gravDir, -rotMax, rotMax);
-					if (rotation > (Math.PI * 2))
+					if (rotation > (Math.PI * 2f))
 					{
-						rotation -= (float)(Math.PI * 2);
+						rotation -= (float)(Math.PI * 2f);
 					}
-					if (rotation < -(Math.PI * 2))
+					if (rotation < -(Math.PI * 2f))
 					{
-						rotation += (float)(Math.PI * 2);
+						rotation += (float)(Math.PI * 2f);
 					}
 					Player.fullRotation = rotation;
 					Player.fullRotationOrigin = new Vector2((float)Player.width / 2, (float)Player.height * 0.55f);
@@ -257,7 +275,7 @@ namespace MetroidMod.Common.Players
 			Player player = Main.LocalPlayer;
 			MPlayer mp = player.GetModPlayer<MPlayer>();
 			//	These kinds of checks might be pretty messy, I think, so I think I'll consider reforming them later when I can think clearly.
-			if (Common.Configs.MConfigItems.Instance.enableLedgeClimbNoPowerSuit && !mp.IsPowerSuitBreastplate)
+			if (Configs.MConfigItems.Instance.enableLedgeClimbNoPowerSuit && !mp.IsPowerSuitBreastplate)
 			{
 				mp.powerGrip = true;
 			}
@@ -267,7 +285,7 @@ namespace MetroidMod.Common.Players
 			bool altJump = false;
 			if (EnableWallJump)
 			{
-				if (!Player.mount.Active || Player.mount.Active && Common.Configs.MConfigMain.Instance.enableMorphBallWallJump)
+				if (!Player.mount.Active || Player.mount.Active && Configs.MConfigMain.Instance.enableMorphBallWallJump)
 				{
 					CheckWallJump(Player, ref wallJumpDir, ref altJump);
 				}
@@ -419,7 +437,9 @@ namespace MetroidMod.Common.Players
 				SoundEngine.PlaySound(Sounds.Suit.MissilesReplenished, Player.position);
 				return false;
 			}
-			if (PrimeHunter)
+			Player player = Main.LocalPlayer;
+			MPlayer mp = player.GetModPlayer<MPlayer>();
+			if (mp.PrimeHunter)
 			{
 				bool wearingSuit = Player.armor[0].type == ModContent.ItemType<PowerSuitHelmet>() && Player.armor[1].type == ModContent.ItemType<PowerSuitBreastplate>() && Player.armor[2].type == ModContent.ItemType<PowerSuitGreaves>();
 				if (!wearingSuit)
@@ -639,22 +659,20 @@ namespace MetroidMod.Common.Players
 					reGripTimer = 10;
 				}
 				bool gripledge = MSystem.mBlockType[(int)num, (int)num2] == ModContent.TileType<GripLedge>();
-				if (isGripping && Player.controlRight && gripDir >= 1 && Player.releaseRight && !Player.mount.Active && Player.miscEquips[3].type == ModContent.ItemType<MorphBall>() && !gripledge)
+				if (isGripping && Player.controlRight && gripDir >= 1 && Player.releaseRight && !Player.mount.Active && Player.miscEquips[3].type == ModContent.ItemType<MorphBall>() && !gripledge && Main.keyState.IsKeyDown(Keys.LeftShift))
 				{
 					var ball = ModContent.MountType<MorphBallMount>();
 					Player.QuickMount();
-					//Player.mount.SetMount(ball, Player);
 					isGripping = false;
 					reGripTimer = 10;
 					Player.position.X += 16f * gripDir;
 					Player.position.Y -= 32f;
 					SoundEngine.PlaySound(Sounds.Suit.MorphIn, Player.position);
 				}
-				if (isGripping && Player.controlLeft && gripDir <= -1 && Player.releaseLeft && !Player.mount.Active && Player.miscEquips[3].type == ModContent.ItemType<MorphBall>() && !gripledge)
+				if (isGripping && Player.controlLeft && gripDir <= -1 && Player.releaseLeft && !Player.mount.Active && Player.miscEquips[3].type == ModContent.ItemType<MorphBall>() && !gripledge && Main.keyState.IsKeyDown(Keys.LeftShift))
 				{
 					var ball = ModContent.MountType<MorphBallMount>();
 					Player.QuickMount();
-					//Player.mount.SetMount(ball, Player);
 					isGripping = false;
 					reGripTimer = 10;
 					Player.position.X += 16f * gripDir;
@@ -773,25 +791,58 @@ namespace MetroidMod.Common.Players
 				{
 					num167 = 4;
 				}
-				SoundEngine.PlaySound(SoundID.Item20, Player.position);
-				for (int num168 = 0; num168 < 8; num168++)
+				if (mp.itsSpinBoost == true)  //Visual effects for specifically the spin boost. It's the special variable because SJB came first
 				{
-					int type4 = 6;
-					float scale2 = 2.5f;
-					int alpha2 = 100;
-					if (num168 <= 3)
+					SoundEngine.PlaySound(SoundID.Item21, Player.position);
+					for (int num168 = 0; num168 < 16; num168++)
 					{
-						int num169 = Dust.NewDust(new Vector2(Player.position.X - 4f, Player.position.Y + (float)num167 - 10f), 8, 8, type4, 0f, 0f, alpha2, default(Color), scale2);
-						Main.dust[num169].noGravity = true;
-						Main.dust[num169].velocity.X = Main.dust[num169].velocity.X * 1f - 2f - Player.velocity.X * 0.3f;
-						Main.dust[num169].velocity.Y = Main.dust[num169].velocity.Y * 1f + 2f * Player.gravDir - Player.velocity.Y * 0.3f;
+						int jumpDust = 263;
+						float scale2 = 2.5f;
+						int alpha2 = 0;
+						if (num168 % 2 == 1)
+						{
+							Dust jumpdust = Dust.NewDustPerfect(new Vector2(Player.position.X + 8f, Player.position.Y + (float)num167 - 10f), jumpDust, new Vector2((float)num168 / 3, 0f), alpha2, default(Color), scale2);
+							jumpdust.noGravity = true; //cool thing about perfectdust: you don't have to break out main.dust[], it just works    -Z
+							jumpdust.velocity.X = jumpdust.velocity.X * 1f - 2f;
+							/*int jumpFX1 = Dust.NewDust(new Vector2(Player.position.X - num168, Player.position.Y + (float)num167 - 10f), 0, 0, jumpDust, 0f, 0f, alpha2, default(Color), scale2);
+							Main.dust[jumpFX1].noGravity = true;
+							Main.dust[jumpFX1].velocity.X = Main.dust[jumpFX1].velocity.X * 1f - 2f - Player.velocity.X * 0.6f;*/
+							//Main.dust[jumpFX1].velocity.Y = Main.dust[jumpFX1].velocity.Y * 1f + 2f * Player.gravDir - Player.velocity.Y * 0.3f;
+						}
+						else
+						{
+							Dust jumpdust = Dust.NewDustPerfect(new Vector2(Player.position.X + 8f, Player.position.Y + (float)num167 - 10f), jumpDust, new Vector2(-(float)num168 / 3, 0f), alpha2, default(Color), scale2);
+							jumpdust.noGravity = true;
+							jumpdust.velocity.X = jumpdust.velocity.X * 1f + 2f;
+							/*int jumpFX2 = Dust.NewDust(new Vector2(Player.position.X - num168, Player.position.Y + (float)num167 - 10f), 0, 0, jumpDust, 0f, 0f, alpha2, default(Color), scale2);
+							Main.dust[jumpdust].noGravity = true;/
+							Main.dust[jumpFX2].velocity.X = Main.dust[jumpFX2].velocity.X * 1f + 2f - Player.velocity.X * 0.6f;*/
+							//Main.dust[jumpFX2].velocity.Y = Main.dust[jumpFX2].velocity.Y * 1f + 2f * Player.gravDir - Player.velocity.Y * 0.3f;
+						}
 					}
-					else
+				}
+				else
+				{
+					SoundEngine.PlaySound(SoundID.Item20, Player.position);
+					for (int num168 = 0; num168 < 8; num168++)
 					{
-						int num170 = Dust.NewDust(new Vector2(Player.position.X + (float)Player.width - 4f, Player.position.Y + (float)num167 - 10f), 8, 8, type4, 0f, 0f, alpha2, default(Color), scale2);
-						Main.dust[num170].noGravity = true;
-						Main.dust[num170].velocity.X = Main.dust[num170].velocity.X * 1f + 2f - Player.velocity.X * 0.3f;
-						Main.dust[num170].velocity.Y = Main.dust[num170].velocity.Y * 1f + 2f * Player.gravDir - Player.velocity.Y * 0.3f;
+						int type4 = 6;
+						float scale2 = 2.5f;
+						int alpha2 = 100;
+						if (num168 <= 3)
+						{
+							int num169 = Dust.NewDust(new Vector2(Player.position.X - 4f, Player.position.Y + (float)num167 - 10f), 8, 8, type4, 0f, 0f, alpha2, default(Color), scale2);
+							Main.dust[num169].noGravity = true;
+							Main.dust[num169].velocity.X = Main.dust[num169].velocity.X * 1f - 2f - Player.velocity.X * 0.3f;
+							Main.dust[num169].velocity.Y = Main.dust[num169].velocity.Y * 1f + 2f * Player.gravDir - Player.velocity.Y * 0.3f;
+						}
+						else
+						{
+							int num170 = Dust.NewDust(new Vector2(Player.position.X + (float)Player.width - 4f, Player.position.Y + (float)num167 - 10f), 8, 8, type4, 0f, 0f, alpha2, default(Color), scale2);
+							Main.dust[num170].noGravity = true;
+							Main.dust[num170].velocity.X = Main.dust[num170].velocity.X * 1f + 2f - Player.velocity.X * 0.3f;
+							Main.dust[num170].velocity.Y = Main.dust[num170].velocity.Y * 1f + 2f * Player.gravDir - Player.velocity.Y * 0.3f;
+						}
 					}
 				}
 				mp.spaceJumped = true;
@@ -894,6 +945,9 @@ namespace MetroidMod.Common.Players
 				speedBuildUp = 0f;
 			}
 			Player.maxRunSpeed += (speedBuildUp * 0.06f);
+			Player.runAcceleration *= 1.5f;
+			Player.runSlowdown *= 1.5f;
+			Player.accRunSpeed *= 1.5f;
 			if (mp.speedBoosting)
 			{
 				Player.armorEffectDrawShadow = true;
@@ -987,6 +1041,7 @@ namespace MetroidMod.Common.Players
 				{
 					Player.position.Y -= 2f * Player.gravDir;
 				}
+				//TODO this is clunky, is it not?
 				if (shineDischarge >= 30 && mp.statOverheat < mp.maxOverheat)
 				{
 					shineCharge = 0;
@@ -1029,7 +1084,7 @@ namespace MetroidMod.Common.Players
 			switch (shineDirection)
 			{
 				case 1: //right
-					Player.velocity.X = 7 * Player.accRunSpeed;
+					Player.velocity.X = Math.Max(2.5f * Player.accRunSpeed, 20);
 					Player.velocity.Y = 0;
 					Player.maxFallSpeed = 0f;
 					Player.direction = 1;
@@ -1039,8 +1094,8 @@ namespace MetroidMod.Common.Players
 					break;
 
 				case 2: //right and up
-					Player.velocity.X = 7 * Player.accRunSpeed;
-					Player.velocity.Y = -7 * Player.accRunSpeed * Player.gravDir;
+					Player.velocity.X = Math.Max(2.5f * Player.accRunSpeed, 20);
+					Player.velocity.Y = Math.Min(-2.5f * Player.accRunSpeed * Player.gravDir, -20);
 					Player.maxFallSpeed = 0f;
 					Player.direction = 1;
 					shineDischarge = 0;
@@ -1048,7 +1103,7 @@ namespace MetroidMod.Common.Players
 					break;
 
 				case 3: //left
-					Player.velocity.X = -7 * Player.accRunSpeed;
+					Player.velocity.X = Math.Min(-2.5f * Player.accRunSpeed, -20);
 					Player.velocity.Y = 0;
 					Player.maxFallSpeed = 0f;
 					Player.direction = -1;
@@ -1058,8 +1113,8 @@ namespace MetroidMod.Common.Players
 					break;
 
 				case 4: //left and up
-					Player.velocity.X = -7 * Player.accRunSpeed;
-					Player.velocity.Y = -7 * Player.accRunSpeed * Player.gravDir;
+					Player.velocity.X = Math.Min(-2.5f * Player.accRunSpeed, -20);
+					Player.velocity.Y = Math.Min(-2.5f * Player.accRunSpeed * Player.gravDir, -20);
 					Player.maxFallSpeed = 0f;
 					Player.direction = -1;
 					shineDischarge = 0;
@@ -1068,10 +1123,10 @@ namespace MetroidMod.Common.Players
 
 				case 5: //up
 					Player.velocity.X = 0;
-					Player.velocity.Y = -7 * Player.accRunSpeed * Player.gravDir;
+					Player.velocity.Y = Math.Min(-2.5f * Player.accRunSpeed * Player.gravDir, -20);
 					Player.maxFallSpeed = 0f;
 					shineDischarge = 0;
-					if (Player.miscCounter % 4 == 0 && !ballstate)
+					if (Player.miscCounter % 5 == 0 && !ballstate)
 					{
 						Player.direction *= -1;
 					}
@@ -1080,9 +1135,9 @@ namespace MetroidMod.Common.Players
 					break;
 
 				case 6: //right and down
-					Player.velocity.X = 7 * Player.accRunSpeed;
-					Player.velocity.Y = 7 * Player.accRunSpeed * Player.gravDir;
-					Player.maxFallSpeed = 7 * Player.accRunSpeed;
+					Player.velocity.X = Math.Max(2.5f * Player.accRunSpeed, 20);
+					Player.velocity.Y = Math.Max(2.5f * Player.accRunSpeed * Player.gravDir, 20);
+					Player.maxFallSpeed = Math.Max(2.5f* Player.accRunSpeed, 20);
 					Player.direction = 1;
 					shineDischarge = 0;
 					Player.controlLeft = false;
@@ -1090,9 +1145,9 @@ namespace MetroidMod.Common.Players
 					break;
 
 				case 7: //left and down
-					Player.velocity.X = -7 * Player.accRunSpeed;
-					Player.velocity.Y = 7 * Player.accRunSpeed * Player.gravDir;
-					Player.maxFallSpeed = 7 * Player.accRunSpeed;
+					Player.velocity.X = Math.Min(-2.5f * Player.accRunSpeed, -20);
+					Player.velocity.Y = Math.Max(2.5f * Player.accRunSpeed * Player.gravDir, 20);
+					Player.maxFallSpeed = Math.Max(2.5f * Player.accRunSpeed, 20);
 					Player.direction = -1;
 					shineDischarge = 0;
 					Player.controlRight = false;
@@ -1101,8 +1156,8 @@ namespace MetroidMod.Common.Players
 
 				case 8: //down
 					Player.velocity.X = 0;
-					Player.velocity.Y = 7 * Player.accRunSpeed * Player.gravDir;
-					Player.maxFallSpeed = 7 * Player.accRunSpeed;
+					Player.velocity.Y = Math.Max(2.5f * Player.accRunSpeed * Player.gravDir, 20);
+					Player.maxFallSpeed = Math.Max(2.5f * Player.accRunSpeed, 20);
 					shineDischarge = 0;
 					if (Player.miscCounter % 4 == 0 && !ballstate)
 					{
@@ -1113,7 +1168,6 @@ namespace MetroidMod.Common.Players
 					Player.GoingDownWithGrapple = true;
 					break;
 			}
-
 			if (shineDirection != 0)
 			{
 				mp.statOverheat += 0.5f;

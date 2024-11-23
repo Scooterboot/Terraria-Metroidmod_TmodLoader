@@ -25,20 +25,19 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 			Main.npcFrameCount[Type] = 2;
 			NPCID.Sets.MPAllowedEnemies[Type] = true;
 			NPCID.Sets.BossBestiaryPriority.Add(Type);
+			var drawModifier = new NPCID.Sets.NPCBestiaryDrawModifiers()  //Alright so this here method thingy lets you tweak the bestiary display
+			{
+				CustomTexturePath = $"{nameof(MetroidMod)}/Content/NPCs/GoldenTorizo/GoldenTorizo_BossLog",
+				Position = new Vector2(-10f, 20f), // these two variables ONLY APPLY TO THE LIST TILES
+				PortraitPositionYOverride = 0f,
+				PortraitScale = 1f, // Portrait refers to the full picture when clicking on the icon in the bestiary
+			};
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, drawModifier);
 
 			// buffs
 			NPCID.Sets.SpecificDebuffImmunity[Type][31] = true;
 			NPCID.Sets.SpecificDebuffImmunity[Type][ModContent.BuffType<Buffs.IceFreeze>()] = true;
 			NPCID.Sets.SpecificDebuffImmunity[Type][ModContent.BuffType<Buffs.InstantFreeze>()] = true;
-
-
-			NPCID.Sets.NPCBestiaryDrawModifiers drawModifiers = new NPCID.Sets.NPCBestiaryDrawModifiers()
-			{
-				CustomTexturePath = $"{nameof(MetroidMod)}/Content/NPCs/GoldenTorizo/GoldenTorizo_BossLog",
-				PortraitScale = 0.6f, // Portrait refers to the full picture when clicking on the icon in the bestiary
-				PortraitPositionYOverride = 0f,
-			};
-			NPCID.Sets.NPCBestiaryDrawOffset.Add(Type, drawModifiers);
 		}
 		public override void SetDefaults()
 		{
@@ -76,7 +75,7 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 			bestiaryEntry.Info.AddRange(new List<IBestiaryInfoElement>
 			{
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.UndergroundDesert,
-				new FlavorTextBestiaryInfoElement("An enhanced version of the Torizo Statue but with golden armor plating. While this one lacks the spiritual possession, it is far more dangerous than the lumbering machines the Gizzard tribe possess. Its energy waves are much faster and follow any hostile target. The Golden armor plating gives it extraordinary defenses and an energy shield while jumping. Be careful to avoid it if you don't want a nasty end!")
+				new FlavorTextBestiaryInfoElement("Mods." + Mod.Name + ".Bestiary.GoldenTorizo")
 			});
 		}
 		public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)/* tModPorter Note: bossLifeScale -> balance (bossAdjustment is different, see the docs for details) */
@@ -912,13 +911,13 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 									{
 										float dist = 50f;//54f;
 										Vector2 clawPos = RArmPos[2];
-										clawPos += Angle.AngleFlip(RArmRot[0] + 1.57f + 0.4f * i, NPC.direction).ToRotationVector2() * dist;
-										Vector2 clawVel = Angle.AngleFlip(RArmRot[0] + 1.57f + 0.4f * i, NPC.direction).ToRotationVector2() * 4f;
+										clawPos += Angle.AngleFlip(RArmRot[0] + MathHelper.PiOver2 + 0.4f * i, NPC.direction).ToRotationVector2() * dist;
+										Vector2 clawVel = Angle.AngleFlip(RArmRot[0] + MathHelper.PiOver2 + 0.4f * i, NPC.direction).ToRotationVector2() * 4f;
 										if (anim_Claw >= 7f)
 										{
 											clawPos = LArmPos[2];
-											clawPos += Angle.AngleFlip(LArmRot[0] + 1.57f + 0.4f * i, NPC.direction).ToRotationVector2() * dist;
-											clawVel = Angle.AngleFlip(LArmRot[0] + 1.57f + 0.4f * i, NPC.direction).ToRotationVector2() * 4f;
+											clawPos += Angle.AngleFlip(LArmRot[0] + MathHelper.PiOver2 + 0.4f * i, NPC.direction).ToRotationVector2() * dist;
+											clawVel = Angle.AngleFlip(LArmRot[0] + MathHelper.PiOver2 + 0.4f * i, NPC.direction).ToRotationVector2() * 4f;
 										}
 										int slash = Projectile.NewProjectile(NPC.GetSource_FromAI(), clawPos.X, clawPos.Y, clawVel.X, clawVel.Y, ModContent.ProjectileType<Projectiles.Boss.TorizoSwipe>(), (int)((float)clawDamage / 2f), 8f);
 									}
@@ -1213,6 +1212,10 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 						{
 							anim_BombTransition += 0.085f;//0.075f;
 							HeadFrame = 4;
+							if(anim_BombTransition >= 0.5f)
+							{
+								HeadFrame = 5;
+							}
 						}
 						else
 						{
@@ -1713,7 +1716,12 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 			float headRot = HeadRot;
 			if (HeadFrame >= 4)
 			{
-				headRot -= -(float)Angle.ConvertToRadians(45);
+				//headRot -= -(float)Angle.ConvertToRadians(45);
+				headRot -= -(float)Angle.ConvertToRadians(25);
+				if (HeadFrame >= 5)
+				{
+					headRot -= -(float)Angle.ConvertToRadians(20);
+				}
 			}
 
 			// back arm
@@ -1749,12 +1757,13 @@ namespace MetroidMod.Content.NPCs.GoldenTorizo
 			// head
 			if (Head != null && Head.active)
 			{
-				DrawLimbTexture(NPC, sb, texHead, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), headColor, headColor, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texHead_Glow, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), glowColor, glowColor, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texHead_Glow2, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), eyeGlowColor, eyeGlowColor, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texSpawnHead, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), headColor * spawnAlpha, headColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texSpawnHead_Glow, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), glowColor * spawnAlpha, glowColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texSpawnHead_Glow2, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), eyeGlowColor * spawnAlpha, eyeGlowColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
+				Vector2 headOrig = new Vector2(34,48);
+				DrawLimbTexture(NPC, sb, texHead, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, headColor, headColor, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texHead_Glow, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, glowColor, glowColor, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texHead_Glow2, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, eyeGlowColor, eyeGlowColor, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texSpawnHead, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, headColor * spawnAlpha, headColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texSpawnHead_Glow, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, glowColor * spawnAlpha, glowColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texSpawnHead_Glow2, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, eyeGlowColor * spawnAlpha, eyeGlowColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
 			}
 
 			// front calf

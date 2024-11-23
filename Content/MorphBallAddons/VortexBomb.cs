@@ -1,8 +1,9 @@
 ﻿using System;
+using MetroidMod.Common.GlobalProjectiles;
 using MetroidMod.Common.Players;
 using MetroidMod.Common.Systems;
-using MetroidMod.Content.Tiles;
-using MetroidMod.Content.Tiles.Hatch;
+using MetroidMod.Content.Switches;
+using MetroidMod.Content.Switches.Variants;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -23,9 +24,9 @@ namespace MetroidMod.Content.MorphBallAddons
 
 		public override bool AddOnlyAddonItem => false;
 
-		public override bool CanGenerateOnChozoStatue(int x, int y) => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || NPC.downedAncientCultist;
+		public override bool CanGenerateOnChozoStatue() => Common.Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues || NPC.downedAncientCultist;
 
-		public override double GenerationChance(int x, int y) => 1;
+		public override double GenerationChance() => 1;
 		public override void SetStaticDefaults()
 		{
 			// DisplayName.SetDefault("Vortex Bomb");
@@ -38,7 +39,7 @@ namespace MetroidMod.Content.MorphBallAddons
 		}
 		public override void SetItemDefaults(Item item)
 		{
-			item.damage = 25;
+			item.damage = 20;
 			item.noMelee = true;
 			item.value = Item.buyPrice(0, 3, 0, 0);
 			item.rare = ItemRarityID.LightRed;
@@ -111,19 +112,19 @@ namespace MetroidMod.Content.MorphBallAddons
 					}
 				}
 
-				for (int i = 0; i < Main.npc.Length; i++)
+				foreach (NPC who in Main.ActiveNPCs)
 				{
-					if (Main.npc[i].CanBeChasedBy(P, false) && Main.npc[i].knockBackResist != 0f)
+					NPC npc = Main.npc[who.whoAmI];
+					if (npc.CanBeChasedBy(P, false) && npc.knockBackResist != 0f)
 					{
-						NPC N = Main.npc[i];
-						if (P.Hitbox.Intersects(N.Hitbox))
+						if (P.Hitbox.Intersects(npc.Hitbox))
 						{
-							Vector2 center = new Vector2(P.Center.X, P.Center.Y - ((float)N.height / 2f));
-							Vector2 velocity = Vector2.Normalize(center - N.Center) * Math.Min(npcVacSpeed * N.knockBackResist, Vector2.Distance(center, N.Center));
-							if (Vector2.Distance(center, N.Center) > 1f)
+							Vector2 center = new Vector2(P.Center.X, P.Center.Y - ((float)npc.height / 2f));
+							Vector2 velocity = Vector2.Normalize(center - npc.Center) * Math.Min(npcVacSpeed * npc.knockBackResist, Vector2.Distance(center, npc.Center));
+							if (Vector2.Distance(center, npc.Center) > 1f)
 							{
-								N.position += velocity;
-								N.velocity *= 0f;
+								npc.position += velocity;
+								npc.velocity *= 0f;
 							}
 						}
 					}
@@ -178,19 +179,6 @@ namespace MetroidMod.Content.MorphBallAddons
 					for (int y = tileRect.Y; y < tileRect.Y + tileRect.Height; y++)
 					{
 						if (x < 0 || y < 0) { continue; }
-						if (Main.tile[x, y].HasTile)
-						{
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<YellowHatch>())
-								TileLoader.HitWire(x, y, ModContent.TileType<YellowHatch>());
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<YellowHatchVertical>())
-								TileLoader.HitWire(x, y, ModContent.TileType<YellowHatchVertical>());
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<BlueHatch>())
-								TileLoader.HitWire(x, y, ModContent.TileType<BlueHatch>());
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<BlueHatchVertical>())
-								TileLoader.HitWire(x, y, ModContent.TileType<BlueHatchVertical>());
-							if (Main.tile[x, y].TileType == (ushort)ModContent.TileType<YellowSwitch>())
-								Wiring.TripWire(x, y, 1, 1);
-						}
 						if (MSystem.mBlockType[x, y] != 0)
 						{
 							MSystem.hit[x, y] = true;

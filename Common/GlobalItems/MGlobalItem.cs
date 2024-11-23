@@ -16,11 +16,15 @@ namespace MetroidMod.Common.GlobalItems
 		public int addonSlotType = -1;
 		public int beamSlotType = -1;
 		public int missileChangeType = -1;
-		public float addonChargeDmg = 1;
-		public float addonChargeHeat = 1;
-		public float addonDmg = 0;
-		public float addonSpeed = 0;
-		public float addonHeat = 0;
+		public float addonChargeDmg = 1f;
+		public float addonChargeHeat = 1f;
+		public float addonDmg = 0f;
+		public float addonSpeed = 0f;
+		public float addonHeat = 0f;
+		/// <summary>
+		/// How much universal ammo to use per normal shot (NOT A PERCENTAGE)
+		/// </summary>
+		public float addonUACost = 0f;
 
 		public int missileSlotType = -1;
 
@@ -28,6 +32,9 @@ namespace MetroidMod.Common.GlobalItems
 		public int addonMissileDrain = 5;
 		#endregion
 
+		// float because funi - ChaosInsurgent49
+		public float statUA = 40f;
+		public int maxUA = 400;
 		public int statMissiles = 5;
 		public int maxMissiles = 5;
 
@@ -37,15 +44,29 @@ namespace MetroidMod.Common.GlobalItems
 		public static int seekerMaxCharge = 25;
 
 		public Texture2D itemTexture;
+		public bool isBeam=true;
 
 		public override bool InstancePerEntity => true;
 		protected override bool CloneNewInstances => true;
 
+		public static float AmmoUsage(Player player, float cost)
+		{
+			if ((player.huntressAmmoCost90 && Main.rand.NextBool(10)) || (player.ammoBox && Main.rand.NextBool(5)) || (player.ammoPotion && Main.rand.NextBool(5)) || (player.ammoCost80 && Main.rand.NextBool(5)) || (player.ammoCost75 && Main.rand.NextBool(4)))
+			{
+				return Main.rand.NextFloat(cost);
+			}
+			else
+			{
+				return cost;
+			}
+		}
 		public override GlobalItem Clone(Item item, Item itemClone)
 		{
 			MGlobalItem other = (MGlobalItem)MemberwiseClone();
 			other.maxMissiles = maxMissiles;
 			other.statMissiles = statMissiles;
+			other.statUA = statUA;
+			other.maxUA = maxUA;
 
 			return other;
 		}
@@ -139,6 +160,18 @@ namespace MetroidMod.Common.GlobalItems
 				IItemDropRule DreadGravity = expertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityGravityDreadSuitHelmet>(), 288));
 				DreadGravity.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityGravityDreadSuitBreastplate>(), 1));
 				DreadGravity.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityGravityDreadSuitGreaves>(), 1));
+				IItemDropRule Fusion = expertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionSuitHelmet>(), 288));
+				Fusion.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionSuitBreastplate>(), 1));
+				Fusion.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionSuitGreaves>(), 1));
+				IItemDropRule FusionVaria = expertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionVariaSuitHelmet>(), 288));
+				FusionVaria.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionVariaSuitBreastplate>(), 1));
+				FusionVaria.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionVariaSuitGreaves>(), 1));
+				IItemDropRule FusionGravity = expertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionGravitySuitHelmet>(), 288));
+				FusionGravity.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionGravitySuitBreastplate>(), 1));
+				FusionGravity.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionGravitySuitGreaves>(), 1));
+				IItemDropRule Omega = expertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionOmegaSuitHelmet>(), 288));
+				Omega.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionOmegaSuitBreastplate>(), 1));
+				Omega.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.VanityFusionOmegaSuitGreaves>(), 1));
 				IItemDropRule Retro = expertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.RetroSuitHelmet>(), 288));
 				Retro.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.RetroSuitBreastplate>(), 1));
 				Retro.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Content.Items.Vanity.RetroSuitGreaves>(), 1));

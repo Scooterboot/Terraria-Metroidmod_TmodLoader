@@ -100,7 +100,7 @@ namespace MetroidMod.Content.NPCs.Serris
 			bestiaryEntry.Info.AddRange(new List<IBestiaryInfoElement>
 			{
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Ocean,
-				new FlavorTextBestiaryInfoElement("An invasive species brought by the Gizzard tribe and released into the seas after the tribe's collapse. The creature moves at extremely high speeds and is hard to keep an eye on. Attacking it will cause it to immediately retaliate and rush into you. Be aware of the creature's speed and strike with a charged attack at the head when it's not moving. Sometimes however... a creature isn't what it appears to be...")
+				new FlavorTextBestiaryInfoElement("Mods.MetroidMod.Bestiary.Serris")
 			});
 		}
 		public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)/* tModPorter Note: bossLifeScale -> balance (bossAdjustment is different, see the docs for details) */
@@ -136,6 +136,7 @@ namespace MetroidMod.Content.NPCs.Serris
 		int glowNum = 1;
 		int glowFrameCounter = 0;
 		float oldRot = 0f;
+		int resets = 9;
 
 		public override void AI()
 		{
@@ -216,7 +217,7 @@ namespace MetroidMod.Content.NPCs.Serris
 					}
 
 					// activate speed boost on hit
-					if (NPC.justHit)
+					if (NPC.justHit && NPC.life <= NPC.lifeMax * resets / 10)
 					{
 						extra_state = 1;
 						NPC.TargetClosest(true);
@@ -232,6 +233,7 @@ namespace MetroidMod.Content.NPCs.Serris
 
 					if (NPC.localAI[3] == 1)
 					{
+						resets--;
 						SoundEngine.PlaySound(Sounds.NPCs.SerrisHurt, NPC.Center);
 					}
 
@@ -423,8 +425,9 @@ namespace MetroidMod.Content.NPCs.Serris
 					if (NPC.localAI[1] == 0)
 					{
 						NPC.chaseable = true;
-						if (NPC.justHit)
+						if (NPC.justHit && NPC.life <= NPC.lifeMax * resets / 10)
 						{
+							resets--;
 							NPC.localAI[1] = 1;
 							SoundEngine.PlaySound(Sounds.NPCs.CoreXHurt, NPC.Center);
 							NPC.TargetClosest(true);
@@ -576,7 +579,7 @@ namespace MetroidMod.Content.NPCs.Serris
 					sbFrame = 0;
 				}
 
-				float headRot = NPC.rotation - 1.57f;
+				float headRot = NPC.rotation - MathHelper.PiOver2;
 
 				Color headColor = NPC.GetAlpha(Lighting.GetColor((int)NPC.Center.X / 16, (int)NPC.Center.Y / 16));
 				Vector2 jawOrig = Vector2.Lerp(jawOrig1, jawOrig2, mouthFrame);

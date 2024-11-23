@@ -13,13 +13,14 @@ namespace MetroidMod.Content.Projectiles.VoltDriver
 		}
 		public override void SetDefaults()
 		{
-			base.SetDefaults();
 			Projectile.width = 32;
 			Projectile.height = 32;
 			Projectile.scale = 1f;
 			Projectile.usesLocalNPCImmunity = true;
 			Projectile.localNPCHitCooldown = 1;
 			Projectile.penetrate = 1;
+			Projectile.extraUpdates = 0;
+			base.SetDefaults();
 		}
 
 		public override void AI()
@@ -29,7 +30,7 @@ namespace MetroidMod.Content.Projectiles.VoltDriver
 				Projectile.tileCollide = false;
 				mProjectile.WaveBehavior(Projectile);
 			}
-			int shootSpeed = 2;
+			float shootSpeed = Luminite ? 4f : 2f;
 			Color color = MetroidMod.powColor;
 			Lighting.AddLight(Projectile.Center, color.R / 255f, color.G / 255f, color.B / 255f);
 			if (Projectile.numUpdates == 0)
@@ -43,20 +44,28 @@ namespace MetroidMod.Content.Projectiles.VoltDriver
 			}
 			int dustType = 269;
 			mProjectile.DustLine(Projectile.Center, Projectile.velocity, Projectile.rotation, 5, 3, dustType, 2f);
-			mProjectile.HomingBehavior(Projectile, shootSpeed);
+			mProjectile.HomingBehavior(Projectile, shootSpeed, 11f, !DiffBeam && !Luminite ? 0f : 300f);
 			int dust = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, 269, 0, 0, 100, default(Color), Projectile.scale);
 			Main.dust[dust].noGravity = true;
 		}
 
 		public override void OnKill(int timeLeft)
 		{
-			Projectile.width += 32;
-			Projectile.height += 32;
-			Projectile.scale = 3f;
-			mProjectile.Diffuse(Projectile, 269);
+			if (Luminite || DiffBeam)
+			{
+				mProjectile.Explode(Luminite ? 88 : DiffBeam ? 44 : 22, Luminite ? 4f : DiffBeam ? 3f : 2f);
+			}
+			mProjectile.DustyDeath(Projectile, 269);
 			SoundEngine.PlaySound(Sounds.Items.Weapons.VoltDriverChargeImpactSound, Projectile.position);
 		}
-
+		public override bool? CanHitNPC(NPC target)
+		{
+			if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height) && Projectile.Hitbox.Intersects(target.Hitbox))
+			{
+				return null;
+			}
+			return false;
+		}
 		public override bool PreDraw(ref Color lightColor)
 		{
 			mProjectile.DrawCentered(Projectile, Main.spriteBatch);
@@ -64,11 +73,12 @@ namespace MetroidMod.Content.Projectiles.VoltDriver
 		}
 		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
 		{
-			if(target.active && !target.buffImmune[31])
+			if(target.active && !target.buffImmune[31] && (Luminite || DiffBeam))
 			{
 				SoundEngine.PlaySound(Sounds.Items.Weapons.VoltDriverDaze, Projectile.position);
 				target.AddBuff(31, 180);
 			}
+			base.OnHitNPC(target, hit, damageDone);
 		}
 	}
 }

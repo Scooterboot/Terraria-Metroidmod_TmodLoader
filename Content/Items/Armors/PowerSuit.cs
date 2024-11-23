@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -32,13 +33,14 @@ namespace MetroidMod.Content.Items.Armors
 			}
 			set { _suitAddons = value; }
 		}
+		public static int overheatMax = 15;
+		public static float overheatCost = 10f;
+		public override LocalizedText Tooltip => base.Tooltip.WithFormatArgs(overheatMax, overheatCost);
+		public static LocalizedText SetBonus;
 		public override void SetStaticDefaults()
 		{
-			// DisplayName.SetDefault("Power Suit Breastplate");
-			/* Tooltip.SetDefault("+15 overheat capacity\n" +
-			"10% decreased overheat use"); */
-
 			Item.ResearchUnlockCount = 1;
+			SetBonus = this.GetLocalization("SetBonus");
 		}
 		public override void SetDefaults()
 		{
@@ -51,8 +53,8 @@ namespace MetroidMod.Content.Items.Armors
 		public override void UpdateEquip(Player player)
 		{
 			MPlayer mp = player.GetModPlayer<MPlayer>();
-			mp.maxOverheat += 15;
-			mp.overheatCost -= 0.10f;
+			mp.maxOverheat += overheatMax;
+			mp.overheatCost -= overheatCost / 100;
 			mp.tankCapacity += 4;
 			mp.IsPowerSuitBreastplate = true;
 			if (Common.Configs.MConfigItems.Instance.enableLedgeClimbPowerSuitBreastplate)
@@ -85,10 +87,8 @@ namespace MetroidMod.Content.Items.Armors
 		}
 		public override void UpdateArmorSet(Player player)
 		{
-			player.setBonus = "Allows the ability to Sense Move" + "\n" +
-							"Double tap a direction (when enabled)" + "\n" +
-							"Right click the Sense Move button to access Addon Menu";// + 
-																					 //SuitAddonLoader.GetSetBonusText(player);
+			player.setBonus = SetBonus.Value;// 
+											 //SuitAddonLoader.GetSetBonusText(player);
 			MPlayer mp = player.GetModPlayer<MPlayer>();
 			mp.EnergyDefenseEfficiency += Common.Configs.MConfigItems.Instance.energyDefenseEfficiency;
 			mp.EnergyExpenseEfficiency += Common.Configs.MConfigItems.Instance.energyExpenseEfficiency;
@@ -186,14 +186,14 @@ namespace MetroidMod.Content.Items.Armors
 		{
 			for (int i = 0; i < SuitAddons.Length; ++i)
 			{
-				ItemIO.Send(SuitAddons[i], writer);
+				ItemIO.Send(SuitAddons[i], writer, true);
 			}
 		}
 		public override void NetReceive(BinaryReader reader)
 		{
 			for (int i = 0; i < SuitAddons.Length; ++i)
 			{
-				SuitAddons[i] = ItemIO.Receive(reader);
+				SuitAddons[i] = ItemIO.Receive(reader, true);
 			}
 		}
 
@@ -328,6 +328,8 @@ namespace MetroidMod.Content.Items.Armors
 			}
 			set { _suitAddons = value; }
 		}
+		public static float huntDamage = 10f;
+		public override LocalizedText Tooltip => base.Tooltip.WithFormatArgs(huntDamage);
 		public override void SetStaticDefaults()
 		{
 			// DisplayName.SetDefault("Power Suit Helmet");
@@ -347,7 +349,7 @@ namespace MetroidMod.Content.Items.Armors
 		}
 		public override void UpdateEquip(Player player)
 		{
-			HunterDamagePlayer.ModPlayer(player).HunterDamageMult += 0.10f;
+			HunterDamagePlayer.ModPlayer(player).HunterDamageMult += huntDamage / 100;
 			player.nightVision = true;
 			MPlayer mp = player.GetModPlayer<MPlayer>();
 			mp.breathMult = 1.3f;

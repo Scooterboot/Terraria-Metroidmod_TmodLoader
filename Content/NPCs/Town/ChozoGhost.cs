@@ -1,6 +1,7 @@
 #region Using directives
 
 using System.Collections.Generic;
+using MetroidMod.Common.Players;
 using MetroidMod.Common.Systems;
 using MetroidMod.Content.Items.Armors;
 using MetroidMod.Content.Items.Miscellaneous;
@@ -8,11 +9,13 @@ using MetroidMod.Content.Items.Tiles;
 using MetroidMod.Content.Items.Tools;
 using MetroidMod.Content.Items.Vanity;
 using MetroidMod.Content.Items.Weapons;
+using MetroidMod.Content.Pets;
 using MetroidMod.Content.SuitAddons;
 using MetroidMod.ID;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.Personalities;
 using Terraria.ID;
@@ -28,12 +31,14 @@ namespace MetroidMod.Content.NPCs.Town
 	public class ChozoGhost : ModNPC
 	{
 		public const string ShopName = "Chozo Shop";
+
+		private static int ShimmerHeadIndex;
+		private static Profiles.StackedNPCProfile NPCProfile;
 		public override void SetStaticDefaults()
 		{
-			Main.npcFrameCount[Type] = 16;
-
-			NPCID.Sets.ExtraFramesCount[Type] = 9;
-			NPCID.Sets.AttackFrameCount[Type] = 4;
+			Main.npcFrameCount[Type] = 16; //24
+			NPCID.Sets.ExtraFramesCount[Type] = 9; //13
+			NPCID.Sets.AttackFrameCount[Type] = 4;//6
 			NPCID.Sets.DangerDetectRange[Type] = 700;
 
 			NPCID.Sets.AttackType[Type] = 0;
@@ -41,6 +46,9 @@ namespace MetroidMod.Content.NPCs.Town
 			NPCID.Sets.AttackAverageChance[Type] = 30;
 
 			NPCID.Sets.HatOffsetY[Type] = 4;
+
+			//NPCID.Sets.ShimmerTownTransform[NPC.type] = true;
+			//NPCID.Sets.ShimmerTownTransform[Type] = true;
 
 			NPC.Happiness
 				.SetBiomeAffection<OceanBiome>(AffectionLevel.Love)
@@ -52,14 +60,22 @@ namespace MetroidMod.Content.NPCs.Town
 				.SetNPCAffection(NPCID.WitchDoctor, AffectionLevel.Dislike)
 				.SetNPCAffection(NPCID.TaxCollector, AffectionLevel.Hate)
 			;
+			NPCProfile = new Profiles.StackedNPCProfile(
+				new Profiles.DefaultNPCProfile(Texture, NPCHeadLoader.GetHeadSlot(HeadTexture)),
+				new Profiles.DefaultNPCProfile(Texture + "_Shimmer", ShimmerHeadIndex)
+			);
 		}
-
+		public override void Load()
+		{
+			// Adds our Shimmer Head to the NPCHeadLoader.
+			ShimmerHeadIndex = Mod.AddNPCHeadTexture(Type, Texture + "_Shimmer_Head");
+		}
 		public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
 		{
 			bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[] {
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Ocean,
 
-				new FlavorTextBestiaryInfoElement("A deceased member of the Gizzard tribe of Chozo who has lingering guilt. They are susceptible to phazon and prefer to avoid it.")
+				new FlavorTextBestiaryInfoElement("Mods.MetroidMod.Bestiary.ChozoGhost")
 			});
 		}
 
@@ -86,7 +102,10 @@ namespace MetroidMod.Content.NPCs.Town
 		public override bool CanTownNPCSpawn(int numTownNPCs)/* tModPorter Suggestion: Copy the implementation of NPC.SpawnAllowed_Merchant in vanilla if you to count money, and be sure to set a flag when unlocked, so you don't count every tick. */
 			=> MSystem.bossesDown.HasFlag(MetroidBossDown.downedTorizo);
 
-
+		public override ITownNPCProfile TownNPCProfile()
+		{
+			return NPCProfile;
+		}
 		public override List<string> SetNPCNameList()
 		{
 			return new List<string>() {
@@ -105,12 +124,17 @@ namespace MetroidMod.Content.NPCs.Town
 			chat.Add(Language.GetTextValue($"Mods.{nameof(MetroidMod)}.Dialogue.ChozoGhost.StandardDialogue1", Main.LocalPlayer.name));
 			chat.Add(Language.GetTextValue($"Mods.{nameof(MetroidMod)}.Dialogue.ChozoGhost.StandardDialogue2"));
 			chat.Add(Language.GetTextValue($"Mods.{nameof(MetroidMod)}.Dialogue.ChozoGhost.StandardDialogue3"));
+			chat.Add(Language.GetTextValue($"Mods.{nameof(MetroidMod)}.Dialogue.ChozoGhost.StandardDialogue3"));
 			//chat.Add(Language.GetTextValue($"Mods.{nameof(MetroidMod)}.Dialogue.ChozoGhost.StandardDialogue4"));
 
 			int wdoctor = NPC.FindFirstNPC(NPCID.WitchDoctor);
 			if (wdoctor >= 0)
 			{
-				chat.Add(Language.GetTextValue($"Mods.{nameof(MetroidMod)}.Dialogue.ChozoGhost.StandardDialogue3", Main.npc[wdoctor].GivenName), 0.5);
+				chat.Add(Language.GetTextValue($"Mods.{nameof(MetroidMod)}.Dialogue.ChozoGhost.WitchDialogue", Main.npc[wdoctor].GivenName), 0.5);
+			}
+			if (Main.LocalPlayer.TryMetroidPlayer(out MPlayer mp) && mp.ShouldShowArmorUI) // if player is in suit, give them a tip on Energy
+			{
+				chat.Add(Language.GetTextValue($"Mods.{nameof(MetroidMod)}.Dialogue.ChozoGhost.EnergyHint"));
 			}
 
 			return chat;
@@ -189,9 +213,11 @@ namespace MetroidMod.Content.NPCs.Town
 			Condition Gold = new Condition("Conditions.downedGoldenTorizo", () => MSystem.bossesDown.HasFlag(MetroidBossDown.downedGoldenTorizo));
 			Condition Phazon = new Condition("Conditions.spawnedPhazon", () => MSystem.PhazonSpawn != true);
 			npcShop.Add<PowerBeam>(Condition.Hardmode);
+			npcShop.Add<ArmCannon>(Condition.Hardmode);
 			npcShop.Add<MissileLauncher>(Condition.Hardmode);
-			npcShop.Add<Items.Tiles.MissileExpansion>(Condition.Hardmode, Condition.BloodMoon);
-			npcShop.Add<Items.Tiles.EnergyTank>(Condition.Hardmode, Condition.BloodMoon);
+			npcShop.Add<MissileExpansion>(Condition.Hardmode, Condition.BloodMoon);
+			npcShop.Add(SuitAddonLoader.GetAddon<SuitAddons.EnergyTank>().ItemType,Condition.Hardmode, Condition.BloodMoon);
+			npcShop.Add<UAExpansion>(Condition.Hardmode, Condition.BloodMoon);
 			npcShop.Add<PowerSuitHelmet>(Condition.Hardmode);
 			npcShop.Add<PowerSuitBreastplate>(Condition.Hardmode);
 			npcShop.Add<PowerSuitGreaves>(Condition.Hardmode);
@@ -211,6 +237,12 @@ namespace MetroidMod.Content.NPCs.Town
 			npcShop.Add<Items.Boss.TorizoSummon>();
 			npcShop.Add<Items.Boss.GoldenTorizoSummon>(Gold);
 			npcShop.Add<PhazonCore>(Condition.DownedPlantera, Phazon);
+			npcShop.Add<AQAPlating>(Condition.IsNpcShimmered);
+			npcShop.Add<ARCPlating>(Condition.IsNpcShimmered);
+			npcShop.Add<PYRPlating>(Condition.IsNpcShimmered);
+			npcShop.Add<SRXPlating>(Condition.IsNpcShimmered);
+			npcShop.Add<ResearchCenterPlating>(Condition.IsNpcShimmered);
+			npcShop.Add<CrocomireBone>(Condition.InUnderworld);
 			npcShop.Register();
 		}
 

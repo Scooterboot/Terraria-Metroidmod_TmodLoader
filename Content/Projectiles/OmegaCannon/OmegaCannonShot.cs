@@ -1,6 +1,8 @@
 using System;
+using MetroidMod.Content.DamageClasses;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ModLoader;
 
 namespace MetroidMod.Content.Projectiles.OmegaCannon
 {
@@ -23,7 +25,7 @@ namespace MetroidMod.Content.Projectiles.OmegaCannon
 		}
 		public override void AI()
 		{
-			Projectile.rotation = (float)Math.Atan2(Projectile.velocity.Y, Projectile.velocity.X) + 1.57f;
+			Projectile.rotation = (float)Math.Atan2(Projectile.velocity.Y, Projectile.velocity.X) + MathHelper.PiOver2;
 			Color color = MetroidMod.powColor;
 			Lighting.AddLight(Projectile.Center, color.R / 255f, color.G / 255f, color.B / 255f);
 
@@ -43,17 +45,7 @@ namespace MetroidMod.Content.Projectiles.OmegaCannon
 		}
 		public override void OnKill(int timeLeft)
 		{
-			Projectile.width *= 75;
-			Projectile.height *= 75;
-			Projectile.position.X = Projectile.position.X - (Projectile.width / 2);
-			Projectile.position.Y = Projectile.position.Y - (Projectile.height / 2);
-			foreach (NPC target in Main.npc)
-			{
-				if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height))
-				{
-					Projectile.Damage();
-				}
-			}
+			mProjectile.Explode(2368);
 		}
 		public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
 		{
@@ -68,6 +60,14 @@ namespace MetroidMod.Content.Projectiles.OmegaCannon
 				return false;
 			}
 			return null;
+		}
+		public override bool? CanHitNPC(NPC target)
+		{
+			if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height) && Projectile.Hitbox.Intersects(target.Hitbox))
+			{
+				return null;
+			}
+			return false;
 		}
 		public override bool PreDraw(ref Color lightColor)
 		{

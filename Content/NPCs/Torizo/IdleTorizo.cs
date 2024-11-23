@@ -44,7 +44,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 				NPC.ai[i] = 0.0f;
 			}*/
 		}
-		public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
+		/*public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
 		{
 			int associatedNPCType = ModContent.NPCType<Torizo>();
 			bestiaryEntry.UIInfoProvider = new CommonEnemyUICollectionInfoProvider(ContentSamples.NpcBestiaryCreditIdsByNpcNetIds[associatedNPCType], quickUnlock: true);
@@ -53,7 +53,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.UndergroundDesert,
 				new FlavorTextBestiaryInfoElement("Nothing mysterious at all about this thing.")
 			});
-		}
+		}*/
 		public override bool CanChat()
 		{
 			return false;
@@ -75,21 +75,10 @@ namespace MetroidMod.Content.NPCs.Torizo
 		}
 		public override void PostAI()
 		{
-			Rectangle room = MSystem.TorizoRoomLocation;
-			if (room.X > 0 && room.Y > 0)
+			var system = ModContent.GetInstance<TorizoSpawningSystem>();
+			if (system.Initialized)
 			{
-				Vector2 pos = new Vector2(room.X + 8, room.Y + room.Height - 4);
-				NPC.direction = 1;
-				if (room.X > Main.maxTilesX / 2)
-				{
-					pos.X = (room.X + room.Width - 8);
-					NPC.direction = -1;
-				}
-				pos *= 16f;
-				NPC.spriteDirection = NPC.direction;
-
-				NPC.position.X = pos.X - NPC.width / 2;
-				NPC.position.Y = pos.Y - NPC.height;
+				system.UpdateNpcAttributes(NPC);
 
 				for (int i = 0; i < 255; i++)
 				{

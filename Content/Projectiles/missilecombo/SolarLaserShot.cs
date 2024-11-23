@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using MetroidMod.Common.GlobalItems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -54,6 +55,10 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			Vector2 oPos = O.RotatedRelativePoint(O.MountedCenter, true);
 
 			Lead = Main.projectile[(int)P.ai[0]];
+			if(O.HeldItem.GetGlobalItem<MGlobalItem>().statMissiles <= 0)
+			{
+				P.Kill();
+			}
 			if (!Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<ChargeLead>() || !O.controlUseItem)
 			{
 				P.Kill();
@@ -90,7 +95,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 				P.velocity = Vector2.Normalize(Lead.velocity);
 				P.Center = oPos;
 				P.timeLeft = 2;
-				P.rotation = P.velocity.ToRotation() - 1.57f;
+				P.rotation = P.velocity.ToRotation() - MathHelper.PiOver2;
 
 				maxRange = Math.Min(maxRange + 16f, Max_Range);
 
@@ -149,7 +154,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 
 				Vector2 dustPos = oPos - (P.Size / 2f) * scaleUp + P.velocity * P.ai[1];
 				int size = (int)((float)P.width * scaleUp);
-				float num1 = P.velocity.ToRotation() + (Main.rand.NextBool(2) ? -1.0f : 1.0f) * 1.57f;
+				float num1 = P.velocity.ToRotation() + (Main.rand.NextBool(2) ? -1.0f : 1.0f) * MathHelper.PiOver2;
 				float num2 = (float)(Main.rand.NextDouble() * 0.8f + 1.0f);
 				Vector2 dustVel = new Vector2((float)Math.Cos(num1) * num2, (float)Math.Sin(num1) * num2);
 				Dust dust = Main.dust[Dust.NewDust(dustPos, size, size, 6, dustVel.X, dustVel.Y, 100, default(Color), 4f)];
@@ -180,7 +185,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			return false;
 		}
 		public override void SendExtraAI(BinaryWriter writer) => writer.Write(BeamLength);
-		public override void ReceiveExtraAI(BinaryReader reader) => BeamLength = reader.ReadSingle();
+		public override void ReceiveExtraAI(BinaryReader reader) => BeamLength = reader.ReadInt32();
 		public override void CutTiles()
 		{
 			Projectile P = Projectile;

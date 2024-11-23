@@ -1,4 +1,5 @@
 using MetroidMod.Common.GlobalItems;
+using MetroidMod.Common.Players;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -18,6 +19,7 @@ namespace MetroidMod.Content.Items.Tools
 
 			Item.ResearchUnlockCount = 1;
 		}
+		public bool hammer = true;
 		public override void SetDefaults()
 		{
 			Item.width = 28;
@@ -27,6 +29,7 @@ namespace MetroidMod.Content.Items.Tools
 			Item.useAnimation = 4;
 			Item.useTime = 4;
 			Item.pick = 200;//215;
+			Item.hammer = 100;
 			Item.damage = 35;
 			Item.knockBack = 3f;
 			Item.value = 15000;
@@ -114,20 +117,35 @@ namespace MetroidMod.Content.Items.Tools
 
 		public override void HoldItem(Player player)
 		{
+			MPlayer mp = player.GetModPlayer<MPlayer>();
 			bool flag13 = player.position.X / 16f - (float)Player.tileRangeX - (float)Item.tileBoost <= (float)Player.tileTargetX && (player.position.X + (float)player.width) / 16f + (float)Player.tileRangeX + (float)Item.tileBoost - 1f >= (float)Player.tileTargetX && player.position.Y / 16f - (float)Player.tileRangeY - (float)Item.tileBoost <= (float)Player.tileTargetY && (player.position.Y + (float)player.height) / 16f + (float)Player.tileRangeY + (float)Item.tileBoost - 2f >= (float)Player.tileTargetY;
 			if (player.noBuilding)
 			{
 				flag13 = false;
 			}
 			Tile tile = Main.tile[Player.tileTargetX, Player.tileTargetY];
-			if (flag13 && tile != null && tile.HasTile && !player.mouseInterface && (tile.TileType == ModContent.TileType<Content.Tiles.PhazonTile>() || tile.TileType == ModContent.TileType<Content.Tiles.PhazonCore>()))
+			if (hammer)
 			{
-				Item.pick = 1000;
+				Item.pick = 0;
+				Item.hammer = 100;
 			}
 			else
 			{
-				Item.pick = 200;
+				Item.hammer = 0;
+				if (flag13 && tile != null && tile.HasTile && !mp.ballstate && !player.mouseInterface && (tile.TileType == ModContent.TileType<Content.Tiles.PhazonTile>() || tile.TileType == ModContent.TileType<Content.Tiles.PhazonCore>()))
+				{
+					Item.pick = 1000;//TODO morphball drill exploit can make the pick power say at 1000
+				}
+				else
+				{
+					Item.pick = 200;
+				}
 			}
+
+		}
+		public override bool AltFunctionUse(Player player)
+		{
+			return hammer = !hammer;
 		}
 	}
 }

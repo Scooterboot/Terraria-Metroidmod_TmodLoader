@@ -1,7 +1,9 @@
 ﻿using System;
+using MetroidMod.Common.GlobalItems;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ModLoader;
+using static MetroidMod.Sounds;
 
 namespace MetroidMod.Common.Players
 {
@@ -115,7 +117,7 @@ namespace MetroidMod.Common.Players
 		{
 			if (!ShouldShowArmorUI || SMoveEffect > 0 || Energy <= 0) { return; };
 			int energyDamage = (int)(info.SourceDamage * EnergyDefenseEfficiency);
-			Energy = Math.Max(1, Energy - (int)(energyDamage * (1 - EnergyExpenseEfficiency)));
+			Energy = Math.Max(0, Energy - (int)(energyDamage * (1 - EnergyExpenseEfficiency)));
 		}
 		public override void OnRespawn()
 		{
@@ -123,8 +125,37 @@ namespace MetroidMod.Common.Players
 			{
 				mp.Energy = mp.MaxEnergy;
 				mp.SuitReserves = mp.MaxSuitReserves;
+				if (mp.PrimeHunter)
+				{
+					mp.PrimeHunter = !mp.PrimeHunter;
+				}
+				if(mp.ShouldShowArmorUI)
+				{
+					SoundEngine.PlaySound(Sounds.Suit.SpawnIn);
+				}
+			}
+			for (int i = 0; i < Player.inventory.Length; i++)
+			{
+				if (Player.inventory[i].type == ModContent.ItemType<Content.Items.Weapons.MissileLauncher>() || Player.inventory[i].type == ModContent.ItemType<Content.Items.Weapons.PowerBeam>() || Player.inventory[i].type == ModContent.ItemType<Content.Items.Weapons.ArmCannon>())
+				{
+					MGlobalItem mi = Player.inventory[i].GetGlobalItem<MGlobalItem>();
+
+					if (mi.statMissiles < mi.maxMissiles || mi.statUA < mi.maxUA)
+					{
+						if (mi.statMissiles < mi.maxMissiles)
+						{
+							mi.statMissiles = mi.maxMissiles;
+							mi.statUA = mi.maxUA;
+						}
+						if (mi.statUA < mi.maxUA)
+						{
+							mi.statUA += mi.maxUA;
+						}
+					}
+				}
 			}
 		}
+		private int Stinger = 0;
 		public override void UpdateLifeRegen()
 		{
 			if (Energy > MaxEnergy) { Energy = MaxEnergy; }
@@ -143,14 +174,20 @@ namespace MetroidMod.Common.Players
 					Energy -= 1;
 				}
 			}
-			if (Player.immune) { return; }
+			if (Player.immune || Player.creativeGodMode) { return; }
 			if (Energy > 0 && Player.lifeRegen < 0)
 			{
-				//Player.lifeRegen = 0;
+				int regen = Player.lifeRegen;
 				int oldEnergy = Energy;
-				float damageToSubtractFromEnergy = Math.Max((-Player.lifeRegen) / 60 * (1 - EnergyExpenseEfficiency), 1f); //why was this set to min? it nullified dot
-				Energy = (int)Math.Max(Energy - damageToSubtractFromEnergy, 0);
-				Player.lifeRegen += (int)(oldEnergy * EnergyDefenseEfficiency);
+				Stinger++;
+				if (Stinger >= 30 && !Player.creativeGodMode)
+				{
+					Stinger = 0;
+					float damageToSubtractFromEnergy = Math.Max((-Player.lifeRegen) * (1 - EnergyExpenseEfficiency), 1f);// Math.Max((-Player.lifeRegen) / 60 * (1 - EnergyExpenseEfficiency), 1f); //why was this set to min? it nullified dot
+					Energy = (int)Math.Max(Energy - damageToSubtractFromEnergy, 0);
+					//Player.lifeRegen += (int)(oldEnergy * EnergyDefenseEfficiency);
+				}
+				Player.lifeRegen -= Player.lifeRegen;
 				//if (Player.lifeRegen > 0) { Player.lifeRegen = 0; }
 			}
 		}

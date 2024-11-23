@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -18,6 +19,7 @@ namespace MetroidMod.Content.Tiles.ItemTile
 			Main.tileSpelunker[Type] = true;
 			Main.tileFrameImportant[Type] = true;
 			Main.tileNoAttach[Type] = true;
+			TileObjectData.newTile.AnchorBottom = new AnchorData(Terraria.Enums.AnchorType.None, TileObjectData.newTile.Width, 0);
 			LocalizedText name = CreateMapEntryName();
 			AddMapEntry(new Color(90, 90, 90), name);
 			Main.tileOreFinderPriority[Type] = 807;
@@ -25,6 +27,7 @@ namespace MetroidMod.Content.Tiles.ItemTile
 			AnimationFrameHeight = 18;
 			Main.tileLavaDeath[Type] = false;
 			Main.tileObsidianKill[Type] = false;
+			TileID.Sets.FriendlyFairyCanLureTo[Type] = true;
 		}
 
 		public override void AnimateTile(ref int frame, ref int frameCounter)
@@ -40,12 +43,23 @@ namespace MetroidMod.Content.Tiles.ItemTile
 		}
 		public override bool RightClick(int i, int j)
 		{
-			WorldGen.KillTile(i, j, false, false, true);
-			if ((Main.netMode == NetmodeID.MultiplayerClient || Main.netMode == NetmodeID.Server) && !Main.tile[i, j].HasTile)
+			
+			/*if ((Main.netMode == NetmodeID.MultiplayerClient || Main.netMode == NetmodeID.Server) && !Main.tile[i, j].HasTile) //TODO turning this on double drops, turning it off makes the tile invisible
 			{
 				NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, i, j, 0f, 0, 0, 0);
+			}*/
+			if (Main.netMode == NetmodeID.MultiplayerClient || Main.netMode == NetmodeID.Server)
+			{
+				base.RightClick(i, j);
+				return true;
 			}
-			return true;
+			else 
+			{
+				WorldGen.KillTile(i, j, false, false, true);
+				return true;
+			}
+
+
 		}
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
@@ -53,12 +67,13 @@ namespace MetroidMod.Content.Tiles.ItemTile
 			{
 				noItem = true;
 				base.KillTile(i, j, ref fail, ref effectOnly, ref noItem);
-				/*if ((Main.netMode == NetmodeID.MultiplayerClient || Main.netMode == NetmodeID.Server) && !Main.tile[i, j].HasTile)
+				Main.tile[i, j].TileType = (ushort)Common.Systems.MSystem.OrbItem();
+				fail = true;
+				if ((Main.netMode == NetmodeID.MultiplayerClient || Main.netMode == NetmodeID.Server) && !Main.tile[i, j].HasTile)
 				{
 					NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, i, j, 0f, 0, 0, 0);
-				}*/
-				Main.tile[i, j].TileType = (ushort)Common.Systems.MSystem.OrbItem(i, j);
-				fail = true;
+					NetMessage.SendTileSquare(-1, i, j);
+				}
 				//Item.NewItem(new EntitySource_TileBreak(i, j), i * 16, j * 16, 16, 16, Common.Systems.MSystem.OrbItem(i, j));
 			}
 		}

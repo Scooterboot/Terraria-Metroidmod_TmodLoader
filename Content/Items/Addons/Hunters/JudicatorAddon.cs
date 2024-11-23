@@ -39,8 +39,8 @@ namespace MetroidMod.Content.Items.Addons.Hunters
 			MGlobalItem mItem = Item.GetGlobalItem<MGlobalItem>();
 			mItem.addonSlotType = 0;
 			mItem.beamSlotType = BeamChangeSlotID.Judicator;
+			mItem.addonUACost = 400f / 120f;
 			mItem.addonDmg = Common.Configs.MConfigItems.Instance.damageJudicator;
-			mItem.addonHeat = Common.Configs.MConfigItems.Instance.overheatJudicator;
 		}
 
 
@@ -49,7 +49,7 @@ namespace MetroidMod.Content.Items.Addons.Hunters
 			CreateRecipe(1)
 				.AddIngredient<Miscellaneous.ChoziteBar>(15)
 				.AddIngredient<Miscellaneous.EnergyShard>(2)
-				.AddIngredient(ItemID.Bone, 25)
+				.AddIngredient(ItemID.Wire, 25)
 				.AddIngredient(ItemID.Amethyst, 1)
 				.AddIngredient(ItemID.IceBlock, 99)
 				.AddTile(TileID.Anvils)

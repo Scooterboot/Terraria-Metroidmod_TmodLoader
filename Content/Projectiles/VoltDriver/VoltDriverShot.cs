@@ -18,12 +18,21 @@ namespace MetroidMod.Content.Projectiles.VoltDriver
 		}
 		public override void OnSpawn(IEntitySource source)
 		{
-			if (source is EntitySource_Parent parent && parent.Entity is Player player && player.HeldItem.type == ModContent.ItemType<PowerBeam>())
+			if (source is EntitySource_Parent parent && parent.Entity is Player player && (player.HeldItem.type == ModContent.ItemType<PowerBeam>() ||player.HeldItem.type == ModContent.ItemType<ArmCannon>()))
 			{
 				if (player.HeldItem.ModItem is PowerBeam hold)
 				{
 					shot = hold.shotEffect.ToString();
 				}
+				else if (player.HeldItem.ModItem is ArmCannon hold2)
+				{
+					shot = hold2.shotEffect.ToString();
+				}
+			}
+			if (shot.Contains("red"))
+			{
+				Projectile.penetrate = 2;
+				Projectile.maxPenetrate = 2;
 			}
 			if (shot.Contains("green"))
 			{
@@ -44,7 +53,6 @@ namespace MetroidMod.Content.Projectiles.VoltDriver
 		}
 		public override void SetDefaults()
 		{
-
 			base.SetDefaults();
 			Projectile.width = 12;//22
 			Projectile.height = 12; //22
@@ -60,7 +68,7 @@ namespace MetroidMod.Content.Projectiles.VoltDriver
 				Projectile.tileCollide = false;
 				mProjectile.WaveBehavior(Projectile);
 			}
-			Projectile.rotation = (float)Math.Atan2(Projectile.velocity.Y, Projectile.velocity.X) + 1.57f;
+			Projectile.rotation = (float)Math.Atan2(Projectile.velocity.Y, Projectile.velocity.X) + MathHelper.PiOver2;
 			Color color = MetroidMod.powColor;
 			Lighting.AddLight(Projectile.Center, color.R / 255f, color.G / 255f, color.B / 255f);
 			if (Projectile.numUpdates == 0)
@@ -92,8 +100,8 @@ namespace MetroidMod.Content.Projectiles.VoltDriver
 		}
 		public override void ReceiveExtraAI(BinaryReader reader)
 		{
-			Projectile.penetrate = (int)reader.ReadSingle();
-			Projectile.maxPenetrate = (int)reader.ReadSingle();
+			Projectile.penetrate = reader.ReadInt32();
+			Projectile.maxPenetrate = reader.ReadInt32();
 		}
 	}
 }

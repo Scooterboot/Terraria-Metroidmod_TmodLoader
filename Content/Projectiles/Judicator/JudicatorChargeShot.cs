@@ -11,6 +11,7 @@ namespace MetroidMod.Content.Projectiles.Judicator
 {
 	public class JudicatorChargeShot : MProjectile
 	{
+		//todo: add balance for luminite
 		public override void SetStaticDefaults()
 		{
 			// DisplayName.SetDefault("Judicator Charge Shot");
@@ -20,14 +21,27 @@ namespace MetroidMod.Content.Projectiles.Judicator
 			return mp.waveDepth;
 		}
 		private int yeet = 1;
+		private Vector2 LineStart;
+		private Vector2 LineEnd;
 		public override void OnSpawn(IEntitySource source)
 		{
-			if (source is EntitySource_Parent parent && parent.Entity is Player player && player.HeldItem.type == ModContent.ItemType<PowerBeam>())
+			base.OnSpawn(source);
+			if (source is EntitySource_Parent parent && parent.Entity is Player player && (player.HeldItem.type == ModContent.ItemType<PowerBeam>() ||player.HeldItem.type == ModContent.ItemType<ArmCannon>()))
 			{
 				if (player.HeldItem.ModItem is PowerBeam hold)
 				{
 					shot = hold.shotEffect.ToString();
 				}
+				else if (player.HeldItem.ModItem is ArmCannon hold2)
+				{
+					shot = hold2.shotEffect.ToString();
+				}
+			}
+			if (shot.Contains("red"))
+			{
+				Projectile.penetrate = 5;
+				Projectile.maxPenetrate = 5;
+				yeet = 5;
 			}
 			if (shot.Contains("green"))
 			{
@@ -47,59 +61,64 @@ namespace MetroidMod.Content.Projectiles.Judicator
 				Projectile.maxPenetrate = 12;
 				yeet = 12;
 			}
-			base.OnSpawn(source);
+			Projectile.timeLeft = Luminite ? 60 : 40;
 		}
 		public override void SetDefaults()
 		{
-			base.SetDefaults();
-			Projectile.width = 16;//32
-			Projectile.height = 16;//20
+			Projectile.width = 32;
+			Projectile.height = 20;
 			Projectile.scale = 1f;
-			Projectile.timeLeft = 60;
+			Projectile.timeLeft = Luminite ? 60 : 40;
+			base.SetDefaults();
 		}
 
-		private Vector2 move;
 		public override void AI()
 		{
-
-			Projectile.rotation = (float)Math.Atan2(Projectile.velocity.Y, Projectile.velocity.X) + 1.57f;
-			Color color = MetroidMod.powColor;
-			Lighting.AddLight(Projectile.Center, color.R / 255f, color.G / 255f, color.B / 255f);
-
+			Projectile.rotation = (float)Math.Atan2(Projectile.velocity.Y, Projectile.velocity.X) + MathHelper.PiOver2;
+			WaveBehavior(Projectile);
 			if (Projectile.numUpdates == 0)
 			{
 				int dust = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, 135, 0, 0, 100, default(Color), Projectile.scale);
 				Main.dust[dust].noGravity = true;
 			}
-			if (Projectile.timeLeft == 60) //shadowfreeze
+			
+			if (Projectile.timeLeft == (Luminite ? 60 : 40)) //shadowfreeze
 			{
-				move = Projectile.velocity;
 				Projectile.penetrate = -1;
-				if (shot.Contains("wave") || shot.Contains("nebula"))
+				Projectile.tileCollide = false;
+				/*if (shot.Contains("wave") || shot.Contains("nebula"))
 				{
 					Projectile.tileCollide = false;
-				}
-				MProjectile meep = mProjectile;
-				Projectile.velocity.Normalize();
-				int widthbonus = Math.Abs((int)Projectile.velocity.X * 16);
-				int heightbonus = Math.Abs((int)Projectile.velocity.X * 16);
-				Projectile.width *= widthbonus + GetDepth(meep);
-				Projectile.height *= heightbonus + GetDepth(meep);
+				}*/
+				//Projectile.velocity.Normalize();
+				//Projectile.Center.Floor();
+				//Projectile.width += (int)Math.Abs((Projectile.velocity.Y * GetDepth(meep)) * Projectile.width);
+				//Projectile.height += (int)Math.Abs((Projectile.velocity.X * GetDepth(meep)) * Projectile.height);
+				//Projectile.Center = Main.player[Projectile.owner].Center;
+				LineStart = new (Projectile.position.X + (Projectile.velocity.Y * GetDepth(mProjectile)), Projectile.position.Y + (Projectile.velocity.X * GetDepth(mProjectile) * 16f));
+				LineEnd = new (Projectile.position.X - (Projectile.velocity.Y * GetDepth(mProjectile)), Projectile.position.Y - (Projectile.velocity.X * GetDepth(mProjectile) * 16f));
 			}
 			else
 			{
+				Projectile.tileCollide = true;
 				Projectile.penetrate = yeet;
-				Projectile.velocity = move;
-				Projectile.width = 16;
-				Projectile.height = 16;
 			}
+			Color color = MetroidMod.powColor;
+			Lighting.AddLight(Projectile.Center, color.R / 255f, color.G / 255f, color.B / 255f);
 		}
-
+		public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+		{
+			float _ = float.NaN;
+			if (Projectile.timeLeft == (Luminite ? 60 : 40))
+			{
+				return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), LineStart, LineEnd, Projectile.width, ref _);
+			}
+			return base.Colliding(projHitbox, targetHitbox);
+		}
 		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
 		{
 			SoundEngine.PlaySound(Sounds.Items.Weapons.JudicatorFreeze, Projectile.position);
 			target.AddBuff(ModContent.BuffType<Buffs.InstantFreeze>(), 300);
-			target.AddBuff(44, 300);
 		}
 
 		public override bool PreDraw(ref Color lightColor)
@@ -111,11 +130,13 @@ namespace MetroidMod.Content.Projectiles.Judicator
 		{
 			writer.Write(Projectile.penetrate);
 			writer.Write(Projectile.maxPenetrate);
+			base.SendExtraAI(writer);
 		}
 		public override void ReceiveExtraAI(BinaryReader reader)
 		{
-			Projectile.penetrate = (int)reader.ReadSingle();
-			Projectile.maxPenetrate = (int)reader.ReadSingle();
+			Projectile.penetrate =	reader.ReadInt32();
+			Projectile.maxPenetrate = reader.ReadInt32();
+			base.ReceiveExtraAI(reader);
 		}
 	}
 }

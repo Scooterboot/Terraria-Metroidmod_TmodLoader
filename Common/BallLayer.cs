@@ -9,6 +9,7 @@ namespace MetroidMod.Common
 {
 	public class BallLayer : PlayerDrawLayer
 	{
+		//TODO spiderball lags multiplayer like crazy
 		public override Position GetDefaultPosition() => new AfterParent(PlayerDrawLayers.FrontAccFront);
 		public override bool GetDefaultVisibility(PlayerDrawSet drawInfo) => drawInfo.drawPlayer.GetModPlayer<MPlayer>().morphBall;
 

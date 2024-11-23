@@ -23,7 +23,7 @@ namespace MetroidMod.Content.Projectiles.Imperialist
 		private float hitRange = 0;
 		public override void OnSpawn(IEntitySource source)
 		{
-			if (source is EntitySource_Parent parent && parent.Entity is Player player && player.HeldItem.type == ModContent.ItemType<PowerBeam>())
+			if (source is EntitySource_Parent parent && parent.Entity is Player player && (player.HeldItem.type == ModContent.ItemType<PowerBeam>() ||player.HeldItem.type == ModContent.ItemType<ArmCannon>()))
 			{
 				if (player.HeldItem.ModItem is PowerBeam hold)
 				{
@@ -35,9 +35,27 @@ namespace MetroidMod.Content.Projectiles.Imperialist
 					if (shot.Contains("wave") || shot.Contains("nebula"))
 					{
 						depth = waveDepth;
-						mProjectile.WaveBehavior(Projectile, true);
+						//mProjectile.WaveBehavior(Projectile, true);
 					}
 				}
+				if (player.HeldItem.ModItem is ArmCannon hold2)
+				{
+					shot = hold2.shotEffect.ToString();
+					if (hold2.shotAmt > 1)
+					{
+						spaze = true;
+					}
+					if (shot.Contains("wave") || shot.Contains("nebula"))
+					{
+						depth = waveDepth;
+						//mProjectile.WaveBehavior(Projectile, true);
+					}
+				}
+			}
+			if (shot.Contains("red"))
+			{
+				Projectile.penetrate = 2;
+				Projectile.maxPenetrate = 2;
 			}
 			if (shot.Contains("green"))
 			{
@@ -86,7 +104,7 @@ namespace MetroidMod.Content.Projectiles.Imperialist
 			Projectile P = Projectile;
 			P.timeLeft = 100;
 			P.velocity = Vector2.Normalize(P.velocity);
-			P.rotation = P.velocity.ToRotation() - 1.57f;
+			P.rotation = P.velocity.ToRotation() - MathHelper.PiOver2;
 			P.usesLocalNPCImmunity = true;
 			P.localNPCHitCooldown = 18;
 			P.stopsDealingDamageAfterPenetrateHits = true;
@@ -123,18 +141,24 @@ namespace MetroidMod.Content.Projectiles.Imperialist
 		}
 		public override void SendExtraAI(BinaryWriter writer)
 		{
-			writer.Write(Projectile.penetrate);
-			writer.Write(Projectile.maxPenetrate);
 			writer.Write(spaze);
 			writer.Write(BeamLength);
+			//writer.Write(waveDepth);
+			//writer.Write(hitRange);
+			writer.Write(Projectile.penetrate);
+			writer.Write(Projectile.maxPenetrate);
+			base.SendExtraAI(writer);
 		}
 
 		public override void ReceiveExtraAI(BinaryReader reader)
 		{
 			spaze = reader.ReadBoolean();
-			BeamLength = reader.ReadSingle();
-			Projectile.penetrate = (int)reader.ReadSingle();
-			Projectile.maxPenetrate = (int)reader.ReadSingle();
+			BeamLength = reader.ReadInt32();
+			//waveDepth = reader.ReadInt32();
+			//hitRange = reader.ReadInt32();
+			Projectile.penetrate = reader.ReadInt32();
+			Projectile.maxPenetrate = reader.ReadInt32();
+			base.ReceiveExtraAI(reader);
 		}
 
 		public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)

@@ -20,6 +20,14 @@ namespace MetroidMod.Content.NPCs.OmegaPirate
 			// DisplayName.SetDefault("Omega Pirate");
 			NPCID.Sets.MPAllowedEnemies[Type] = true;
 			NPCID.Sets.BossBestiaryPriority.Add(Type);
+			var drawModifier = new NPCID.Sets.NPCBestiaryDrawModifiers()  //Alright so this here method thingy lets you tweak the bestiary display
+			{
+				CustomTexturePath = $"{nameof(MetroidMod)}/Content/NPCs/OmegaPirate/OmegaPirate_BossLog",
+				Position = new Vector2(-25f, 70f), // these two variables ONLY APPLY TO THE LIST TILES
+				PortraitPositionYOverride = 50f,
+				//PortraitScale = 1f, // Portrait refers to the full picture when clicking on the icon in the bestiary
+			};
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, drawModifier);
 
 			NPCID.Sets.SpecificDebuffImmunity[Type][20] = true;
 			NPCID.Sets.SpecificDebuffImmunity[Type][24] = true;
@@ -68,7 +76,7 @@ namespace MetroidMod.Content.NPCs.OmegaPirate
 			bestiaryEntry.Info.AddRange(new List<IBestiaryInfoElement>
 			{
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Sky,
-				new FlavorTextBestiaryInfoElement("An experiment created by the space pirates. It is a hulking monster corrupted by a biomass known as Phazon. It's capable of absorbing projectiles with its hands and firing grenades from a distance. Get too close and it will react by smashing the ground to create an energy wave. Even if you smash its armor, the creature will go invisible and attempt to absorb Phazon to repair its defenses.")
+				new FlavorTextBestiaryInfoElement("Mods.MetroidMod.Bestiary.OmegaPirate")
 			});
 		}
 		public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)/* tModPorter Note: bossLifeScale -> balance (bossAdjustment is different, see the docs for details) */
@@ -86,7 +94,7 @@ namespace MetroidMod.Content.NPCs.OmegaPirate
 			npcLoot.Add(ItemDropRule.BossBag(ModContent.ItemType<Items.Boss.OmegaPirateBag>()));
 
 			LeadingConditionRule notExpertRule = new LeadingConditionRule(new Conditions.NotExpert());
-			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Miscellaneous.PurePhazon>(), 1, 30, 41));
+			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Miscellaneous.PurePhazon>(), 1));
 			//notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Tiles.OmegaPirateMusicBox>(), 6));
 			//notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Vanity.OmegaPirateMask>(), 8));
 			//notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Tiles.OmegaPirateTrophy>(), 11));
@@ -216,6 +224,18 @@ namespace MetroidMod.Content.NPCs.OmegaPirate
 			if (left)
 				return (Main.npc[_lLeg[i]]);
 			return (Main.npc[_rLeg[i]]);
+		}
+
+		internal int NPCArmorHPMax
+		{
+			get {
+				int amt = 0;
+				if (RArmArmor != null && RArmArmor.active) { amt += RArmArmor.lifeMax; }
+				if (LArmArmor != null && LArmArmor.active) { amt += LArmArmor.lifeMax; }
+				if (RLegArmor != null && RLegArmor.active) { amt += RLegArmor.lifeMax; }
+				if (LLegArmor != null && LLegArmor.active) { amt += LLegArmor.lifeMax; }
+				return amt;
+			}
 		}
 
 		internal int NPCArmorHP
@@ -3015,8 +3035,8 @@ namespace MetroidMod.Content.NPCs.OmegaPirate
 				Vector2 LCannonTargetPos = LCannonPos[1] + TrajectoryVelocity(LCannonPos[1], Main.player[NPC.target].Center, grenadeSpeed, grenadeGravity, grenadeTimeBeforeGravity);
 				int rdir = Math.Sign(RCannonTargetPos.X - RCannonPos[1].X);
 				int ldir = Math.Sign(LCannonTargetPos.X - LCannonPos[1].X);
-				float RCannonTargetRot = Angle.Vector2Angle(RCannonPos[1], RCannonTargetPos, rdir, 1, 1f, -1.57f + BodyRot, 0.6f + BodyRot);
-				float LCannonTargetRot = Angle.Vector2Angle(LCannonPos[1], LCannonTargetPos, ldir, 1, 1f, -1.57f + BodyRot, 0.6f + BodyRot);
+				float RCannonTargetRot = Angle.Vector2Angle(RCannonPos[1], RCannonTargetPos, rdir, 1, 1f, -MathHelper.PiOver2 + BodyRot, 0.6f + BodyRot);
+				float LCannonTargetRot = Angle.Vector2Angle(LCannonPos[1], LCannonTargetPos, ldir, 1, 1f, -MathHelper.PiOver2 + BodyRot, 0.6f + BodyRot);
 				RCannonRot[0] = MathHelper.Lerp(RCannonRot[0], RCannonTargetRot * 0.5f, cannonTargetTransition);
 				RCannonRot[1] = MathHelper.Lerp(RCannonRot[1], RCannonTargetRot, cannonTargetTransition);
 				LCannonRot[0] = MathHelper.Lerp(LCannonRot[0], LCannonTargetRot * 0.5f, cannonTargetTransition);

@@ -16,9 +16,6 @@ namespace MetroidMod.Content.Items.Weapons
 	{
 		public override void SetStaticDefaults()
 		{
-			// DisplayName.SetDefault("Paralyzer");
-			// Tooltip.SetDefault("'A gift of the Chozo'");
-
 			Item.ResearchUnlockCount = 1;
 		}
 
@@ -33,7 +30,7 @@ namespace MetroidMod.Content.Items.Weapons
 			Item.useStyle = ItemUseStyleID.Shoot;
 			Item.noMelee = true;
 			Item.knockBack = 0;
-			Item.value = Item.buyPrice(0, 50, 0, 0);
+			Item.value = Item.buyPrice(0, 0, 10, 0);
 			Item.rare = ItemRarityID.Green;
 			Item.UseSound = Sounds.Items.Weapons.Paralyzer;
 			Item.shoot = ModContent.ProjectileType<ParalyzerShot>();
@@ -74,7 +71,7 @@ namespace MetroidMod.Content.Items.Weapons
 		{
 			CreateRecipe(1)
 				.AddIngredient<ChoziteBar>(6)
-				.AddIngredient<EnergyShard>(2)
+				.AddIngredient<CopperParalyzer>()
 				.AddTile(TileID.Anvils)
 				.Register();
 		}

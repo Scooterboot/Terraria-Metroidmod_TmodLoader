@@ -16,8 +16,13 @@ namespace MetroidMod.Content.NPCs.Torizo
 	[AutoloadBossHead]
 	public class Torizo : ModNPC
 	{
+		private bool expert = Main.expertMode;
+		private bool master = Main.masterMode;
+		private bool legend = Main.getGoodWorld;
+		private bool classic = !Main.expertMode && !Main.masterMode && !Main.getGoodWorld;
 		public override string BossHeadTexture => Mod.Name + "/Content/NPCs/Torizo/Torizo_Head_Boss";
 		public override string Texture => Mod.Name + "/Content/NPCs/Torizo/TorizoBody";
+		public string BestTexture => Mod.Name + "/Content/NPCs/Torizo/Torizo_BossLog";
 
 		public override void SetStaticDefaults()
 		{
@@ -25,6 +30,16 @@ namespace MetroidMod.Content.NPCs.Torizo
 			Main.npcFrameCount[Type] = 2;
 			NPCID.Sets.MPAllowedEnemies[Type] = true;
 			NPCID.Sets.BossBestiaryPriority.Add(Type);
+			var drawModifier = new NPCID.Sets.NPCBestiaryDrawModifiers()  //Alright so this here method thingy lets you tweak the bestiary display
+			{
+				CustomTexturePath = BestTexture, //the sprite the bestiary uses. The method doesn't like the filepath shenanigans so make a variable outside
+				Position = new Vector2(-10f, 20f), // these two variables ONLY APPLY TO THE LIST TILES
+				Scale = 1f,
+				PortraitPositionXOverride = -15f, //these three variables ONLY APPLY TO THE BESTIARY PORTRAIT (the one right above the blurb)
+				PortraitPositionYOverride = 5f,
+				PortraitScale = 1f
+			};
+			NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, drawModifier);
 
 			NPCID.Sets.SpecificDebuffImmunity[Type][ModContent.BuffType<Buffs.IceFreeze>()] = true;
 			NPCID.Sets.SpecificDebuffImmunity[Type][ModContent.BuffType<Buffs.InstantFreeze>()] = true;
@@ -58,19 +73,21 @@ namespace MetroidMod.Content.NPCs.Torizo
 			bestiaryEntry.Info.AddRange(new List<IBestiaryInfoElement>
 			{
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.UndergroundDesert,
-				new FlavorTextBestiaryInfoElement("An autonomous machine created by the long deceased Gizzard tribe. This one guards the entrance to the Gizzard tribe catacombs. The machine is slow and lumbering, serving as a gatekeeper rather than a guardian. It moves faster however when it's head is destroyed... There seems to be something alive about it...")
+				new FlavorTextBestiaryInfoElement("Mods.MetroidMod.Bestiary.Torizo")
 			});
 		}
 		public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)/* tModPorter Note: bossLifeScale -> balance (bossAdjustment is different, see the docs for details) */
 		{
-			NPC.lifeMax = (int)(NPC.lifeMax * 0.7f * balance);
+			NPC.lifeMax = (int)(NPC.lifeMax * balance); //*.7f
 			NPC.damage = (int)(NPC.damage * 0.7f);
 		}
 		public override void ModifyNPCLoot(NPCLoot npcLoot)
 		{
 			npcLoot.Add(ItemDropRule.BossBag(ModContent.ItemType<Items.Boss.TorizoBag>()));
-
+			npcLoot.Add(ItemDropRule.MasterModeCommonDrop(ModContent.ItemType<Items.Tiles.TorizoRelic>()));
 			LeadingConditionRule notExpertRule = new LeadingConditionRule(new Conditions.NotExpert());
+			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Weapons.TorizoClaws>(), 3));
+			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Weapons.TorizoSpitter>(), 3));
 			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Miscellaneous.EnergyShard>(), 1, 15, 36));
 			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Tiles.ChoziteOre>(), 1, 30, 90));
 			notExpertRule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<Items.Tiles.TorizoMusicBox>(), 6));
@@ -730,10 +747,15 @@ namespace MetroidMod.Content.NPCs.Torizo
 				{
 					Player player = Main.player[NPC.target];
 
-					float speed = 0.15f;
+					float speed = !legend?(expert? 0.20f : master? 0.25f : 0.15f) : 0.30f; //Dr zoooom
 					if (Head == null || !Head.active)
 					{
+						NPC.defense = 10;
 						speed *= 1.3f;
+					}
+					else
+					{
+						NPC.defense = !legend?( expert ? 17 : master ? 19 : 15) : 21; //DR killing head lowers defense but goes faster
 					}
 
 					bool walkFlagR = (anim_Walk > 6f - speed && anim_Walk <= 6f);
@@ -782,7 +804,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 					}
 
 					// Jump
-					if (Math.Abs(player.Center.X - NPC.Center.X) < 500 && player.Center.Y < NPC.Center.Y && (player.velocity.Y == 0f || NPC.ai[2] >= 1) && NPC.ai[1] == 0f)
+					if (Math.Abs(player.Center.X - NPC.Center.X) < 500 && player.Center.Y < NPC.Center.Y /*&& ((player.velocity.Y == 0f && classic) || NPC.ai[2] >= 1)*/ && NPC.ai[1] == 0f)
 					{
 						NPC.ai[2]++;
 					}
@@ -794,7 +816,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 						}
 					}
 
-					if (NPC.ai[2] > 60)
+					if (!legend ? NPC.ai[2] > 60 : NPC.ai[2] > 20)
 					{
 						NPC.TargetClosest(true);
 						NPC.netUpdate = true;
@@ -845,11 +867,11 @@ namespace MetroidMod.Content.NPCs.Torizo
 
 									float dist = 54f;
 									Vector2 clawPos = RArmPos[2];
-									clawPos += Angle.AngleFlip(RArmRot[0] + 1.57f, NPC.direction).ToRotationVector2() * dist;
+									clawPos += Angle.AngleFlip(RArmRot[0] + MathHelper.PiOver2, NPC.direction).ToRotationVector2() * dist;
 									if (anim_Claw >= 7f)
 									{
 										clawPos = LArmPos[2];
-										clawPos += Angle.AngleFlip(LArmRot[0] + 1.57f, NPC.direction).ToRotationVector2() * dist;
+										clawPos += Angle.AngleFlip(LArmRot[0] + MathHelper.PiOver2, NPC.direction).ToRotationVector2() * dist;
 									}
 									var entitySource = NPC.GetSource_FromAI();
 									int slash = Projectile.NewProjectile(entitySource, clawPos.X, clawPos.Y, 0f, 0f, ModContent.ProjectileType<Projectiles.Boss.TorizoSwipe>(), (int)((float)clawDamage / 2f), 8f);
@@ -896,7 +918,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 					else
 					{
 						NPC.ai[3]++;
-						if (NPC.ai[3] > 300)
+						if (!legend ? NPC.ai[3] >  300 : NPC.ai[3] >100)
 						{
 							NPC.netUpdate = true;
 
@@ -996,7 +1018,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 							NPC.velocity.X = 0f;
 						}
 
-						anim_JumpTransition += 0.075f;
+						anim_JumpTransition += !legend? 0.075f : 0.25f;
 						if (anim_JumpTransition >= 1f)
 						{
 							anim_JumpTransition = 1f;
@@ -1007,32 +1029,32 @@ namespace MetroidMod.Content.NPCs.Torizo
 					{
 						if (NPC.ai[2] == 1)
 						{
-							if (NPC.ai[1] == 1)
+							if (NPC.ai[1] == 1)//jump back
 							{
 								NPC.velocity.X = -7 * NPC.direction;
 								NPC.velocity.Y = -12f;
 							}
-							else
+							else //jump up
 							{
 								NPC.velocity.X = MathHelper.Clamp((player.Center.X - NPC.Center.X) * 0.015f, -7, 7);
-								NPC.velocity.Y = -16f;
+								NPC.velocity.Y = !legend?( expert ? -20f : master ? -24f : -16f): -28f;
 							}
 							NPC.ai[2] = 2;
 						}
 
 						if (anim_Jump < 2f)
 						{
-							anim_Jump = Math.Min(anim_Jump + 0.25f, 2f);
+							anim_Jump = Math.Min(anim_Jump += !legend? 0.25f : 0.75f, 2f);
 						}
 						else
 						{
 							if (NPC.velocity.Y < 0f)
 							{
-								anim_Jump = Math.Min(anim_Jump + 0.15f, 3f);
+								anim_Jump = Math.Min(anim_Jump += !legend? 0.15f :0.45f, 3f);
 							}
 							else
 							{
-								anim_Jump = Math.Max(anim_Jump - 0.05f, 2f);
+								anim_Jump = Math.Max(anim_Jump -= !legend? 0.05f : .15f, 2f);
 								anim_JumpTransition = Math.Max(anim_JumpTransition - 0.025f, 0.5f);
 							}
 						}
@@ -1050,7 +1072,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 						NPC.velocity.X = 0f;
 						if (anim_Jump > 2f)
 						{
-							anim_Jump -= 0.1f;
+							anim_Jump -= !legend ? 0.1f : 0.3f;
 						}
 						anim_Jump = Math.Max(anim_Jump - 0.2f, 1f);
 						if (anim_Jump <= 1f)
@@ -1097,20 +1119,24 @@ namespace MetroidMod.Content.NPCs.Torizo
 					{
 						if (anim_BombTransition < 1f)
 						{
-							anim_BombTransition += 0.075f;
+							anim_BombTransition += !legend? 0.075f : 0.250f;
 							HeadFrame = 4;
+							if(anim_BombTransition >= 0.5f)
+							{
+								HeadFrame = 5;
+							}
 						}
 						else
 						{
 							anim_BombTransition = 1f;
-							anim_Bomb = Math.Min(anim_Bomb + 0.075f, 4f);
+							anim_Bomb = Math.Min(anim_Bomb += !legend ? 0.075f : 0.250f, 4f);
 
 							if (HeadFrame < 8)
 							{
-								HeadFrameCounter++;
+								HeadFrameCounter+= !legend? 1 : 2;
 								if (HeadFrameCounter > 14)
 								{
-									HeadFrame++;
+									HeadFrame += !legend? 1 : 2;
 									HeadFrameCounter = 0;
 								}
 							}
@@ -1119,7 +1145,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 								HeadFrame = 8;
 								HeadFrameCounter = 0;
 
-								NPC.ai[2]++;
+								NPC.ai[2] += !legend ? 1f :2.5f ;
 								if (NPC.ai[2] > 5)
 								{
 									NPC.ai[1] = 1;
@@ -1134,7 +1160,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 						if ((NPC.ai[2] == 10 || NPC.ai[2] == 20 || NPC.ai[2] == 30) && headFlag)
 						{
 							var entitySource = NPC.GetSource_FromAI();
-							for (int i = 0; i < 3; i++)
+							for (int i = 0; i < (!legend ? (expert ? 4 : master ? 5 : 3) : 6); i++) //DR more bombs whee
 							{
 								Vector2 bombPos = HeadPos[0] + new Vector2(32f * NPC.direction, -6f);
 								Vector2 bombVel = new Vector2(3f * NPC.direction, -3f);
@@ -1153,7 +1179,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 						}
 
 						NPC.ai[2]++;
-						if (NPC.ai[2] > 60 || !headFlag)
+						if (!legend ? NPC.ai[2] > 60 : NPC.ai[2]> 20 || !headFlag)
 						{
 							NPC.ai[1] = 2;
 							NPC.ai[2] = 0;
@@ -1162,10 +1188,10 @@ namespace MetroidMod.Content.NPCs.Torizo
 					}
 					if (NPC.ai[1] == 2)
 					{
-						anim_Bomb = Math.Max(anim_Bomb - 0.075f, 1f);
+						anim_Bomb = Math.Max(anim_Bomb -= !legend ? 0.075f : 0.250f, 1f);
 						if (HeadFrame > 4)
 						{
-							HeadFrameCounter++;
+							HeadFrameCounter+= !legend ? 1 : 3 ;
 							if (HeadFrameCounter > 14)
 							{
 								HeadFrame--;
@@ -1174,7 +1200,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 						}
 						else if (anim_BombTransition > 0f)
 						{
-							anim_BombTransition -= 0.075f;
+							anim_BombTransition -= !legend ? 0.075f : 0.250f;
 							HeadFrame = 3;
 						}
 						else
@@ -1221,10 +1247,10 @@ namespace MetroidMod.Content.NPCs.Torizo
 						{
 							anim_ClawTransition = 1f;
 
-							anim_Claw += 0.05f;
+							anim_Claw += !legend? 0.05f : 0.15f;
 							if ((anim_Claw >= 3f && anim_Claw < 4f) || (anim_Claw >= 7f && anim_Claw < 8f))
 							{
-								anim_Claw += 0.05f;
+								anim_Claw += !legend ? 0.05f : 0.15f;
 							}
 							if (anim_Claw >= 9f)
 							{
@@ -1581,7 +1607,12 @@ namespace MetroidMod.Content.NPCs.Torizo
 			float headRot = HeadRot;
 			if (HeadFrame >= 4)
 			{
-				headRot -= -(float)Angle.ConvertToRadians(45);
+				//headRot -= -(float)Angle.ConvertToRadians(45);
+				headRot -= -(float)Angle.ConvertToRadians(25);
+				if (HeadFrame >= 5)
+				{
+					headRot -= -(float)Angle.ConvertToRadians(20);
+				}
 			}
 
 			// back arm
@@ -1617,12 +1648,13 @@ namespace MetroidMod.Content.NPCs.Torizo
 			// head
 			if (Head != null && Head.active)
 			{
-				DrawLimbTexture(NPC, sb, texHead, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), headColor, headColor, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texHead_Glow, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), glowColor, glowColor, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texHead_Glow2, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), eyeGlowColor, eyeGlowColor, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texSpawnHead, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), headColor * spawnAlpha, headColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texSpawnHead_Glow, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), glowColor * spawnAlpha, glowColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
-				DrawLimbTexture(NPC, sb, texSpawnHead_Glow2, HeadPos[0], HeadPos[0], headRot, headRot, new Vector2(32, 38), eyeGlowColor * spawnAlpha, eyeGlowColor * spawnAlpha, fullScale, effects, HeadFrame, 9);
+				Vector2 headOrig = new Vector2(34,48); // 32,38
+				DrawLimbTexture(NPC, sb, texHead, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, headColor, headColor, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texHead_Glow, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, glowColor, glowColor, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texHead_Glow2, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, eyeGlowColor, eyeGlowColor, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texSpawnHead, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, headColor*spawnAlpha, headColor*spawnAlpha, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texSpawnHead_Glow, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, glowColor*spawnAlpha, glowColor*spawnAlpha, fullScale, effects, HeadFrame, 9);
+				DrawLimbTexture(NPC, sb, texSpawnHead_Glow2, HeadPos[0], HeadPos[0], headRot, headRot, headOrig, eyeGlowColor*spawnAlpha, eyeGlowColor*spawnAlpha, fullScale, effects, HeadFrame, 9);
 			}
 
 			// front calf

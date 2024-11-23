@@ -5,6 +5,7 @@ using MetroidMod.Content.MorphBallAddons;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
+using Terraria.Enums;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -113,27 +114,31 @@ namespace MetroidMod.Default
 			Projectile.position.Y = Projectile.position.Y - (Projectile.height / 2);
 
 			Projectile.Damage();
-
-			for (int i = 0; i < 200; ++i)
+			foreach (var npc in Main.ActiveNPCs)
 			{
-				NPC npc = Main.npc[i];
-				if (npc.active && !npc.friendly && !npc.dontTakeDamage && npc.type != NPCID.TargetDummy && !npc.boss)
+				NPC who = Main.npc[npc.whoAmI];
+				if (who.active && !who.friendly && !who.dontTakeDamage && who.type != NPCID.TargetDummy)
 				{
-					Vector2 direction = npc.Center - Projectile.Center;
+					Vector2 direction = who.Center - Projectile.Center;
 					float distance = direction.Length();
 					direction.Normalize();
-					if (distance < BombRadius)
+					if (distance < BombRadius && !npc.dontTakeDamage)
 					{
-						npc.velocity += direction * (BombRadius - distance);
+					 //who.SimpleStrikeNPC(Projectile.damage, Projectile.direction, Main.rand.NextFloat() <= Main.player[Projectile.owner].GetCritChance<HunterDamageClass>(), Projectile.knockBack, ModContent.GetInstance<HunterDamageClass>(), true, Main.player[Projectile.owner].luck);
+						//
+						if (!who.boss)
+						{
+							who.velocity += direction * (BombRadius - distance);
 
-						if (npc.velocity.X > Xthreshold)
-							npc.velocity.X = Xthreshold;
-						if (npc.velocity.X < -Xthreshold)
-							npc.velocity.X = -Xthreshold;
-						if (npc.velocity.Y > Xthreshold)
-							npc.velocity.Y = Xthreshold;
-						if (npc.velocity.Y < -Xthreshold)
-							npc.velocity.Y = -Xthreshold;
+							if (who.velocity.X > Xthreshold)
+								who.velocity.X = Xthreshold;
+							if (who.velocity.X < -Xthreshold)
+								who.velocity.X = -Xthreshold;
+							if (who.velocity.Y > Xthreshold)
+								who.velocity.Y = Xthreshold;
+							if (who.velocity.Y < -Xthreshold)
+								who.velocity.Y = -Xthreshold;
+						}
 					}
 				}
 			}
@@ -169,15 +174,6 @@ namespace MetroidMod.Default
 						if (player.velocity.Y < -Xthreshold)
 							player.velocity.Y = -Xthreshold;
 					}
-				}
-			}
-			foreach (NPC target in Main.npc)
-			{
-				if (Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, target.position, target.width, target.height))
-				{
-					Projectile.Damage();
-					Projectile.usesLocalNPCImmunity = true;
-					Projectile.localNPCHitCooldown = 1;
 				}
 			}
 			SoundEngine.PlaySound(Sounds.Suit.BombExplode, Projectile.Center);
@@ -330,6 +326,15 @@ namespace MetroidMod.Default
 				target.AddBuff(BuffID.Daybreak, 600);*/
 		}
 
+		public override bool? CanCutTiles()
+		{
+			return true;
+		}
+		public override void CutTiles()
+		{
+			DelegateMethods.tilecut_0 = TileCuttingContext.AttackProjectile;
+			Utils.PlotTileLine(Projectile.position, Projectile.BottomRight, Projectile.width, DelegateMethods.CutTiles);
+		}
 		public override ModProjectile Clone(Projectile newEntity)
 		{
 			MBWeaponProjectile inst = (MBWeaponProjectile)base.Clone(newEntity);

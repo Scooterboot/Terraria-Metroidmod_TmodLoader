@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using MetroidMod.Common.Players;
+using MetroidMod.Content.Hatches;
 using MetroidMod.Content.Items;
-using MetroidMod.Content.Tiles.Hatch;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
@@ -18,14 +18,14 @@ namespace MetroidMod
 		SyncPlayerStats,
 		PlaySyncedSound,
 		BestiaryUpdate,
-		DoorClickSync
+		ChangeHatchOpenState
 	}
 
 	[LegacyName("MetroidModPorted")]
 	public class MetroidMod : Mod
 	{
 		internal const int ballSlotAmount = 5;
-		internal const int beamSlotAmount = 5;
+		internal const int beamSlotAmount = 6;
 		internal const int beamChangeSlotAmount = 12;
 		internal const int missileChangeSlotAmount = 13;
 		internal const int missileSlotAmount = 3;
@@ -143,49 +143,15 @@ namespace MetroidMod
 				case MetroidMessageType.SyncStartPlayerStats:
 					byte playerID = reader.ReadByte();
 					MPlayer targetPlayer = Main.player[playerID].GetModPlayer<MPlayer>();
-					double statCharge = reader.ReadDouble();
-					bool spiderBall = reader.ReadBoolean();
-					int boostEffect = reader.ReadInt32();
-					int boostCharge = reader.ReadInt32();
-					int energyTanks = reader.ReadInt32();
-					int energy = reader.ReadInt32();
-					int reserveTanks = reader.ReadInt32();
-					int reserve = reader.ReadInt32();
-					int capacity = reader.ReadInt32();
-					bool canHyper = reader.ReadBoolean();
-					int Hypercharge = reader.ReadInt32();
-					int pbCh = reader.ReadInt32();
 
-					targetPlayer.statCharge = (float)statCharge;
-					targetPlayer.spiderball = spiderBall;
-					targetPlayer.boostEffect = boostEffect;
-					targetPlayer.boostCharge = boostCharge;
-					targetPlayer.EnergyTanks = energyTanks;
-					targetPlayer.Energy = energy;
-					targetPlayer.SuitReserveTanks = reserveTanks;
-					targetPlayer.SuitReserves = reserve;
-					targetPlayer.tankCapacity = capacity;
-					targetPlayer.canHyper = canHyper;
-					targetPlayer.hyperCharge = Hypercharge;
-					targetPlayer.statPBCh = pbCh;
+					targetPlayer.ReadPacketData(reader);
 
 					if (msgType == MetroidMessageType.SyncPlayerStats && Main.netMode == NetmodeID.Server)
 					{
 						ModPacket packet = GetPacket();
 						packet.Write((byte)MetroidMessageType.SyncPlayerStats);
 						packet.Write(playerID);
-						packet.Write(statCharge);
-						packet.Write(spiderBall);
-						packet.Write(boostEffect);
-						packet.Write(boostCharge);
-						packet.Write(energyTanks);
-						packet.Write(energy);
-						packet.Write(reserveTanks);
-						packet.Write(reserve);
-						packet.Write(capacity);
-						packet.Write(canHyper);
-						packet.Write(Hypercharge);
-						packet.Write(pbCh);
+						targetPlayer.WritePacketData(packet);
 						packet.Send(-1, playerID);
 					}
 					break;
@@ -225,23 +191,29 @@ namespace MetroidMod
 						packet.Send(-1, whoAmI);
 					}
 					break;
-				case MetroidMessageType.DoorClickSync:
-					ushort type = reader.ReadUInt16();
-					int i = reader.ReadInt32();
-					int j = reader.ReadInt32();
+				case MetroidMessageType.ChangeHatchOpenState:
+					short i = reader.ReadInt16();
+					short j = reader.ReadInt16();
 
-					BlueHatch hatch = ModContent.GetModTile(type) as BlueHatch;
-					hatch.HitWire(i, j);
+					HatchState state = new();
+					state.DesiredState = (HatchDesiredState)reader.ReadByte();
+					state.LockStatus = (HatchLockStatus)reader.ReadByte();
+					state.BlueConversion = (HatchBlueConversionStatus)reader.ReadByte();
+					DebugAssist.NewTextMP($"Hatch state received: {state}");
 
-					if (Main.netMode == NetmodeID.Server)
+					if (TileUtils.TryGetTileEntityAs(i, j, out HatchTileEntity hatch))
 					{
-						ModPacket packet = GetPacket();
-						packet.Write((byte)MetroidMessageType.DoorClickSync);
-						packet.Write(type);
-						packet.Write(i);
-						packet.Write(j);
-						packet.Send(-1, whoAmI);
+						hatch.State.DesiredState = state.DesiredState;
+						hatch.State.LockStatus = state.LockStatus;
+						hatch.State.BlueConversion = state.BlueConversion;
+						
+						if (Main.netMode == NetmodeID.Server)
+						{
+							ModPacket packet = hatch.GetSyncPacket();
+							packet.Send(-1, whoAmI);
+						}
 					}
+
 					break;
 			}
 		}
