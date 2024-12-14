@@ -2713,7 +2713,7 @@ namespace MetroidMod.Content.Items.Weapons
 							Main.projectile[chargeLead].Kill();
 						}
 
-						bool tryingToUseLauncher = Main.mouseLeft && Main.mouseLeftRelease;
+						bool tryingToUseLauncher = Main.mouseLeft && Main.mouseLeftRelease && !Main.playerInventory;
 						if (tryingToUseLauncher)
 						{
 							pb.isBeam = true;
