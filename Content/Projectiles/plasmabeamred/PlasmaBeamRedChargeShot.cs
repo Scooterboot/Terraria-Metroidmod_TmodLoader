@@ -18,6 +18,8 @@ namespace MetroidMod.Content.Projectiles.plasmabeamred
 			Projectile.width = 16;
 			Projectile.height = 16;
 			Projectile.scale = 2f;
+			/*Projectile.usesLocalNPCImmunity = true;
+			Projectile.localNPCHitCooldown = 4;*/
 
 			mProjectile.wavesPerSecond = 1f;
 			mProjectile.delay = 12;
@@ -27,7 +29,8 @@ namespace MetroidMod.Content.Projectiles.plasmabeamred
 		Color color = MetroidMod.plaRedColor;
 		public override void AI()
 		{
-
+			Projectile.usesLocalNPCImmunity = true;
+			Projectile.localNPCHitCooldown = 16;
 
 			if (shot.Contains("ice"))
 			{

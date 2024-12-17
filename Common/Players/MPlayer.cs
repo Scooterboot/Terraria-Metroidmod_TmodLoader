@@ -568,13 +568,13 @@ namespace MetroidMod.Common.Players
 				dashTime++;
 			}
 		}
-		float oof = Main.rand.NextFloat(1f, 2f);
+		private readonly float oof = Main.rand.NextFloat(1.0f, 2.1f);
 		public override void ModifyHurt(ref Player.HurtModifiers modifiers)
 		{
 			if (Eyed)
 			{
 				modifiers.FinalDamage /= oof;
-				modifiers.KnockbackImmunityEffectiveness *= 0;
+				modifiers.KnockbackImmunityEffectiveness /= oof;
 			}
 			ModifyHurt_SuitEnergy(ref modifiers);
 		}
@@ -583,7 +583,7 @@ namespace MetroidMod.Common.Players
 			if (Eyed)
 			{
 				info.Knockback *= oof;
-				Player.immuneTime /= (int)oof;
+				//Player.immuneTime /= 2; rounding is dumb
 			}
 			PostHurt_SuitEnergy(info);
 		}
