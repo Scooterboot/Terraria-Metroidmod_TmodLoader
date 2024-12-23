@@ -1037,7 +1037,7 @@ namespace MetroidMod.Content.NPCs.Torizo
 							else //jump up
 							{
 								NPC.velocity.X = MathHelper.Clamp((player.Center.X - NPC.Center.X) * 0.015f, -7, 7);
-								NPC.velocity.Y = !legend?( expert ? -20f : master ? -24f : -16f): -28f;
+								NPC.velocity.Y = !legend?( expert ? -17f : master ? -18f : -16f): -20f;
 							}
 							NPC.ai[2] = 2;
 						}

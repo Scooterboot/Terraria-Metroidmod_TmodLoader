@@ -8,11 +8,6 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 {
 	public class IceSpreaderFrozenTerrain : MProjectile
 	{
-		public override void SetStaticDefaults()
-		{
-			// DisplayName.SetDefault("Ice Spreader Terrain");
-		}
-
 		int size = 42;
 		public override void SetDefaults()
 		{

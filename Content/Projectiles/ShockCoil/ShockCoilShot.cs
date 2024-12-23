@@ -83,6 +83,16 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 			dmg = Projectile.damage;
 			base.OnSpawn(source);
 		}
+		private float BeamLength
+		{
+			get {
+				return Projectile.localAI[1];
+			}
+
+			set {
+				Projectile.localAI[1] = value;
+			}
+		}
 		public override bool ShouldUpdatePosition()
 		{
 			return false;
@@ -412,11 +422,13 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 		}
 		public override void SendExtraAI(BinaryWriter writer)
 		{
+			writer.Write(BeamLength);
 			writer.WriteVector2(targetPos);
 			base.SendExtraAI(writer);
 		}
 		public override void ReceiveExtraAI(BinaryReader reader)
 		{
+			BeamLength = reader.ReadInt32();
 			targetPos = reader.ReadVector2();
 			base.ReceiveExtraAI(reader);
 		}

@@ -363,25 +363,9 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 					{
 						rot = (float)Math.Atan2((pos[i].Y - pos[i - 1].Y), (pos[i].X - pos[i - 1].X)) + (float)Math.PI / 2;
 					}
-					sb.Draw(tex,
-					pos[i] - Main.screenPosition,
-					new Rectangle?(new Rectangle(0, y4, tex.Width, num108)),
-					P.GetAlpha(Color.White),
-					rot,
-					new Vector2((float)tex.Width / 2f, (float)num108 / 2),
-					new Vector2(scale, 1f),
-					SpriteEffects.None,
-					0f);
+					sb.Draw(tex,pos[i] - Main.screenPosition,new Rectangle?(new Rectangle(0, y4, tex.Width, num108)),P.GetAlpha(Color.White),rot,new Vector2((float)tex.Width / 2f, (float)num108 / 2),	new Vector2(scale, 1f),	SpriteEffects.None,	0f);
 
-					sb.Draw(tex2,
-					pos[i] - Main.screenPosition,
-					new Rectangle?(new Rectangle(0, numH * Main.rand.Next(4), tex2.Width, numH)),
-					P.GetAlpha(Color.White),
-					rot,
-					new Vector2((float)tex2.Width / 2, (float)numH / 2),
-					(float)(Main.rand.Next(21) / 10),
-					SpriteEffects.None,
-					0f);
+					sb.Draw(tex2,pos[i] - Main.screenPosition,new Rectangle?(new Rectangle(0, numH * Main.rand.Next(4), tex2.Width, numH)),	P.GetAlpha(Color.White),rot,	new Vector2((float)tex2.Width / 2, (float)numH / 2),(float)(Main.rand.Next(21) / 10),SpriteEffects.None,0f);
 
 					Lighting.AddLight(pos[i], (MetroidMod.waveColor2.R / 255f) * P.scale, (MetroidMod.waveColor2.G / 255f) * P.scale, (MetroidMod.waveColor2.B / 255f) * P.scale);
 

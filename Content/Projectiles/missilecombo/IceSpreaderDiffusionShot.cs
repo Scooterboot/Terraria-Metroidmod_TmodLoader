@@ -7,11 +7,6 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 {
 	public class IceSpreaderDiffusionShot : MProjectile
 	{
-		public override void SetStaticDefaults()
-		{
-			// DisplayName.SetDefault("Ice Spreader Shot");
-		}
-
 		bool initialised = false;
 		float radius = 0.0f;
 		public float spin = 0.0f;
@@ -64,6 +59,9 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
 		{
 			target.AddBuff(ModContent.BuffType<Buffs.InstantFreeze>(), 600, true);
+			Player O = Main.player[Projectile.owner];
+			target.immune[O.whoAmI] = 10;
+			Projectile.localNPCHitCooldown = 10;
 		}
 
 		public override Color? GetAlpha(Color lightColor)
