@@ -562,9 +562,7 @@ namespace MetroidMod.Common.UI
 					Main.HoverItem = missileLauncherTarget.MissileMods[missileSlotType].Clone();
 				}
 
-				var frame = Main.itemAnimations[missileLauncherTarget.MissileMods[missileSlotType].type] != null
-							? Main.itemAnimations[missileLauncherTarget.MissileMods[missileSlotType].type].GetFrame(itemTexture)
-							: itemTexture.Frame(1, 1, 0, 0);
+				var frame = Main.itemAnimations[missileLauncherTarget.MissileMods[missileSlotType].type] != null? Main.itemAnimations[missileLauncherTarget.MissileMods[missileSlotType].type].GetFrame(itemTexture): itemTexture.Frame(1, 1, 0, 0);
 
 				float drawScale = 1f;
 				if ((float)frame.Width > innerDimensions.Width || (float)frame.Height > innerDimensions.Width)
@@ -585,8 +583,7 @@ namespace MetroidMod.Common.UI
 				drawPosition.X += (float)innerDimensions.Width * 1f / 2f - (float)frame.Width * drawScale / 2f;
 				drawPosition.Y += (float)innerDimensions.Height * 1f / 2f - (float)frame.Height * drawScale / 2f;
 
-				spriteBatch.Draw(itemTexture, drawPosition, new Rectangle?(frame), itemColor, 0f,
-					Vector2.Zero, drawScale, SpriteEffects.None, 0f);
+				spriteBatch.Draw(itemTexture, drawPosition, new Rectangle?(frame), itemColor, 0f, Vector2.Zero, drawScale, SpriteEffects.None, 0f);
 
 				if (missileLauncherTarget.MissileMods[missileSlotType].stack > 1)
 				{

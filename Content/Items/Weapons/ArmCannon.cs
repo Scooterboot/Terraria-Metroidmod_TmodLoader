@@ -78,7 +78,7 @@ namespace MetroidMod.Content.Items.Weapons
 			get {
 				if (_missileMods == null)
 				{
-					_missileMods = new Item[MetroidMod.missileSlotAmount];
+					_missileMods = new Item[MissileAddonSlotID.Count];
 					for (int i = 0; i < _missileMods.Length; ++i)
 					{
 						_missileMods[i] = new Item();
@@ -95,7 +95,7 @@ namespace MetroidMod.Content.Items.Weapons
 			get {
 				if (_missileChange == null)
 				{
-					_missileChange = new Item[13];
+					_missileChange = new Item[MissileChangeSlotID.Count];
 					for (int i = 0; i < _missileChange.Length; ++i)
 					{
 						_missileChange[i] = new Item();
@@ -115,6 +115,8 @@ namespace MetroidMod.Content.Items.Weapons
 
 			BeamMods = new Item[BeamAddonSlotID.Count];
 			BeamChange = new Item[BeamChangeSlotID.Count];
+			MissileMods = new Item[MissileAddonSlotID.Count];
+			MissileChange = new Item[MissileChangeSlotID.Count];
 		}
 		public override void SetDefaults()
 		{
@@ -160,7 +162,7 @@ namespace MetroidMod.Content.Items.Weapons
 			}
 			Item.autoReuse = pb.isBeam;
 			pb.statUA = MConfigItems.Instance.ammoPowerBeam;
-			pb.maxUA = MConfigItems.Instance.ammoPowerBeam;
+			pb.maxUA = (int)MConfigItems.Instance.ammoPowerBeam;
 			pb.statMissiles = MConfigItems.Instance.ammoMissileLauncher;
 			pb.maxMissiles = MConfigItems.Instance.ammoMissileLauncher;
 		}
@@ -209,7 +211,7 @@ namespace MetroidMod.Content.Items.Weapons
 			return Item.TryGetGlobalItem(out MGlobalItem mi) && (mi.isBeam? (player.whoAmI == Main.myPlayer && mp.statOverheat < mp.maxOverheat) : (player.whoAmI == Main.myPlayer && mi.statMissiles > 0));// && BeamLoader.CanShoot(player, BeamMods);
 		}
 
-		public override int ChoosePrefix(UnifiedRandom rand)
+		/*public override int ChoosePrefix(UnifiedRandom rand)
 		{
 			int output = Item.prefix;
 			switch (rand.Next(14))
@@ -231,7 +233,7 @@ namespace MetroidMod.Content.Items.Weapons
 			}
 			//PrefixLoader.Roll(Item, ref output, 14, rand, new PrefixCategory[] { PrefixCategory.AnyWeapon, PrefixCategory.Custom });
 			return output;
-		}
+		}*/
 
 		public override void OnResearched(bool fullyResearched)
 		{
@@ -270,28 +272,46 @@ namespace MetroidMod.Content.Items.Weapons
 			return false;
 		}*/
 
-		/*public override bool CanReforge()// tModPorter Note: Use CanReforge instead for logic determining if a reforge can happen. 
+		public override bool CanReforge()
 		{
+			foreach (Item item in BeamChange)
+			{
+				if (item == null || item.IsAir || item.type == BeamMods[0].type) { continue; }
+				IEntitySource itemSource_OpenItem = Main.LocalPlayer.GetSource_OpenItem(Type);
+				Main.LocalPlayer.QuickSpawnItem(itemSource_OpenItem, item, item.stack);
+				item.TurnToAir();
+			}
+			//BeamChange = new Item[BeamChangeSlotID.Count];
 			foreach (Item item in BeamMods)
 			{
 				if (item == null || item.IsAir) { continue; }
 				IEntitySource itemSource_OpenItem = Main.LocalPlayer.GetSource_OpenItem(Type);
 				Main.LocalPlayer.QuickSpawnItem(itemSource_OpenItem, item, item.stack);
+				item.TurnToAir();
 			}
-			BeamMods = new Item[BeamAddonSlotID.Count];
-			foreach (Item item in BeamChange)
+			//BeamMods = new Item[BeamAddonSlotID.Count];
+			foreach (Item item in MissileChange)
+			{
+				if (item == null || item.IsAir || item.type == MissileMods[0].type) { continue; }
+				IEntitySource itemSource_OpenItem = Main.LocalPlayer.GetSource_OpenItem(Type);
+				Main.LocalPlayer.QuickSpawnItem(itemSource_OpenItem, item, item.stack);
+				item.TurnToAir();
+			}
+			//MissileChange = new Item[MissileChangeSlotID.Count];
+			foreach (Item item in MissileMods)
 			{
 				if (item == null || item.IsAir) { continue; }
 				IEntitySource itemSource_OpenItem = Main.LocalPlayer.GetSource_OpenItem(Type);
 				Main.LocalPlayer.QuickSpawnItem(itemSource_OpenItem, item, item.stack);
+				item.TurnToAir();
 			}
-			BeamChange = new Item[BeamChangeSlotID.Count];
+			//MissileMods = new Item[MissileAddonSlotID.Count];
 			return base.CanReforge();
 		}
-		/*public override bool RangedPrefix()
+		public override bool RangedPrefix()
 		{
 			return true;
-		}*/
+		}
 
 		private float iceDmg = 0f;
 		private float waveDmg = 0f;
@@ -419,8 +439,9 @@ namespace MetroidMod.Content.Items.Weapons
 		//Mod modBeamTextureMod = null;
 		public override void UpdateInventory(Player P)
 		{
-			MPlayer mp = P.GetModPlayer<MPlayer>();
-			if (Item == null || !Item.TryGetGlobalItem(out MGlobalItem ac)) { return; }
+			if (Item == null || !Item.TryGetGlobalItem(out MGlobalItem ac) || ac==null || !P.TryGetModPlayer(out MPlayer mp)) { return; }
+			Item.Prefix(Item.prefix);
+			//MPlayer mp = P.GetModPlayer<MPlayer>();
 			if (ac.isBeam)
 			{
 				Item slot1 = BeamMods[0];
@@ -488,14 +509,14 @@ namespace MetroidMod.Content.Items.Weapons
 				bool addonsV2 = slot2.type == ic2 || slot3.type == wa2 || slot4.type == wi || slot5.type == nv;
 				addonsV2 |= (slot5.type == plG || slot5.type == plR) && (chargeV2 || chargeV3) && !addonsV1;
 				bool addonsV3 = slot2.type == sd || slot3.type == nb || slot4.type == vt || slot5.type == sl;
-				ac.maxUA = MConfigItems.Instance.ammoPowerBeam + (MConfigItems.Instance.ammoUA * Math.Min(UA.stack, 12));
+				ac.maxUA = (int)MConfigItems.Instance.ammoPowerBeam + (MConfigItems.Instance.ammoUA * Math.Min(UA.stack, 12));
 				if (ac.statUA > ac.maxUA)
 				{
 					ac.statUA = ac.maxUA;
 				}
-				if (ac.statUA <= 0)
+				if (ac.statUA <= 0f)
 				{
-					ac.statUA = 0;
+					ac.statUA = 0f;
 				}
 				int versionType = 1;
 				float GetCharge()
@@ -513,21 +534,7 @@ namespace MetroidMod.Content.Items.Weapons
 						return MConfigItems.Instance.damageChargeBeam;
 					}
 				}
-				float GetCost()
-				{
-					if (!LuminiteActive)
-					{
-						return MConfigItems.Instance.overheatLuminiteBeam;
-					}
-					else if (!DiffusionActive)
-					{
-						return MConfigItems.Instance.overheatChargeBeamV2;
-					}
-					else
-					{
-						return MConfigItems.Instance.overheatChargeBeam;
-					}
-				}
+
 				if (addonsV3 || (chargeV3 && !addonsV1 && !addonsV2))
 				{
 					versionType = 3;
@@ -1352,10 +1359,8 @@ namespace MetroidMod.Content.Items.Weapons
 				Item.scale = 0.8f;
 				Item.crit = 3;
 				Item.value = 20000;
-
-				Item.rare = ItemRarityID.Green;
-
 				Item.Prefix(Item.prefix);
+				Item.rare = ItemRarityID.Green;
 
 				if (isPhazon)
 				{
@@ -1383,8 +1388,8 @@ namespace MetroidMod.Content.Items.Weapons
 				Item slot2 = MissileMods[1];
 				Item exp = MissileMods[2];
 
-				int damage = Common.Configs.MConfigItems.Instance.damageMissileLauncher;
-				useTime = Common.Configs.MConfigItems.Instance.useTimeMissileLauncher;
+				int damage = MConfigItems.Instance.damageMissileLauncher;
+				useTime = MConfigItems.Instance.useTimeMissileLauncher;
 				shot = "MissileShot";
 				chargeShot = "";
 				shotSound = "MissileShoot";
@@ -1689,12 +1694,10 @@ namespace MetroidMod.Content.Items.Weapons
 				Item.scale = 0.8f;
 				Item.crit = 10;
 				Item.value = 20000;
-
-				Item.rare = ItemRarityID.Green;
-
 				Item.Prefix(Item.prefix);
+				Item.rare = ItemRarityID.Green;
 			}
-			
+			Item.Prefix(Item.prefix);
 		}
 		public override bool PreDrawInWorld(SpriteBatch sb, Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI)
 		{
@@ -1773,7 +1776,82 @@ namespace MetroidMod.Content.Items.Weapons
 			Item.TryGetGlobalItem(out MGlobalItem mi);
 			Player player = Main.player[Main.myPlayer];
 			MPlayer mp = player.GetModPlayer<MPlayer>();
-			if (mi.isBeam)
+			for (int k = 0; k < tooltips.Count; k++)
+			{
+				if (Item == Main.HoverItem)
+				{
+					Item.ModItem.UpdateInventory(player);
+				}
+				int dmg = player.GetWeaponDamage(Item);
+				int chDmg = (int)(dmg * chargeDmgMult);
+				TooltipLine chDmgLine = new(Mod, "ChargeDamage", chDmg + " Charge Shot damage");
+				int oh = !usesUA ? (int)(overheat * mp.overheatCost) : (int)(UAcost * mp.UACost);
+				TooltipLine ohLine = !usesUA ? new(Mod, "Overheat", "Overheats by " + oh + " points per use, affected by ammo reservation") : new(Mod, "Overheat", "Uses about " + oh + " UA points per use, affected by ammo reservation");
+				int chOh = (int)(oh * chargeCost);
+				TooltipLine chOhLine = !usesUA ? new(Mod, "ChargeOverheat", "Overheats by " + chOh + " points on Charge Shot, affected by ammo reservation") : new(Mod, "ChargeOverheat", "Uses about " + chOh + " UA points on Charge Shot, affected by ammo reservation");
+				int cost = (int)(chargeCostMi * (mp.missileCost + 0.001f));
+				string ch = "Charge shot consumes " + cost + " missiles";
+				float drain = (float)Math.Round(comboDrain * mp.missileCost, 2);
+				TooltipLine mDrain = new(Mod, "ChargeMissileDrain", "Drains " + drain + " missiles per second");
+				if (isHeldCombo > 0)
+				{
+					ch = "Charge initially costs " + cost + " missiles";
+					tooltips.Insert(k + 2, mDrain);
+				}
+				TooltipLine mCost = new(Mod, "ChargeMissileCost", ch);
+				if (tooltips[k].Name == "Damage" && isCharge)
+				{
+					tooltips.Insert(k + 1, chDmgLine);
+				}
+				if (tooltips[k].Name == "Knockback")
+				{
+					if (mi.isBeam)
+					{
+						tooltips.Insert(k + 1, ohLine);
+						if (isCharge)
+						{
+							tooltips.Insert(k + 2, chOhLine);
+						}
+					}
+					else
+					{
+						if (!MissileMods[0].IsAir && !isSeeker)
+						{
+							tooltips.Insert(k + 1, mCost);
+						}
+					}
+				}
+				if (tooltips[k].Name == "PrefixDamage")
+				{
+					double num19 = (Item.damage - finalDmg);
+					num19 = num19 / (double)((float)finalDmg) * 100.0;
+					num19 = Math.Round(num19);
+					if (num19 > 0.0)
+					{
+						tooltips[k].Text = "+" + num19 + Lang.tip[39].Value;
+					}
+					else
+					{
+						tooltips[k].Text = num19 + Lang.tip[39].Value;
+					}
+				}
+				if (tooltips[k].Name == "PrefixSpeed")
+				{
+					double num20 = (double)(Item.useAnimation - (float)useTime);
+					num20 = num20 / (double)(float)useTime * 100.0;
+					num20 = Math.Round(num20);
+					num20 *= -1.0;
+					if (num20 > 0.0)
+					{
+						tooltips[k].Text = "+" + num20 + Lang.tip[40].Value;
+					}
+					else
+					{
+						tooltips[k].Text = num20 + Lang.tip[40].Value;
+					}
+				}
+			}
+			/*if (mi.isBeam)
 			{
 				if (Item == Main.HoverItem)
 				{
@@ -1893,7 +1971,7 @@ namespace MetroidMod.Content.Items.Weapons
 						}
 					}
 				}
-			}
+			}*/
 		}
 
 		/*public override void GetWeaponDamage(Player P, ref int dmg)
@@ -2394,7 +2472,6 @@ namespace MetroidMod.Content.Items.Weapons
 							BeamMods[0].TurnToAir();
 						}
 					}
-					
 				}
 				else
 				{
@@ -2720,7 +2797,6 @@ namespace MetroidMod.Content.Items.Weapons
 						}
 					}
 				}
-
 			}
 		}
 		SoundEffectInstance soundInstance;
@@ -2788,30 +2864,14 @@ namespace MetroidMod.Content.Items.Weapons
 				}
 				tag.Add("BeamChange" + i, ItemIO.Save(BeamChange[i]));
 			}
-			if (Item.TryGetGlobalItem(out MGlobalItem pb))
-			{
-				tag.Add("statUA", pb.statUA);
-				tag.Add("maxUA", pb.maxUA);
-			}
-			else
-			{
-				tag.Add("statUA", 0);
-				tag.Add("maxUA", 0);
-			}
 			for (int i = 0; i < MissileMods.Length; ++i)
 			{
+				// Failsave check.
+				if (MissileMods[i] == null)
+				{
+					MissileMods[i] = new Item();
+				}
 				tag.Add("missileItem" + i, ItemIO.Save(MissileMods[i]));
-			}
-
-			if (Item.TryGetGlobalItem(out MGlobalItem mi))
-			{
-				tag.Add("statMissiles", mi.statMissiles);
-				tag.Add("maxMissiles", mi.maxMissiles);
-			}
-			else
-			{
-				tag.Add("statMissiles", 0);
-				tag.Add("maxMissiles", 0);
 			}
 			for (int i = 0; i < MissileChange.Length; ++i)
 			{
@@ -2821,6 +2881,20 @@ namespace MetroidMod.Content.Items.Weapons
 					MissileChange[i] = new Item();
 				}
 				tag.Add("MissileChange" + i, ItemIO.Save(MissileChange[i]));
+			}
+			if (Item.TryGetGlobalItem(out MGlobalItem pb))
+			{
+				tag.Add("statUA", pb.statUA);
+				tag.Add("maxUA", pb.maxUA);
+				tag.Add("statMissiles", pb.statMissiles);
+				tag.Add("maxMissiles", pb.maxMissiles);
+			}
+			else
+			{
+				tag.Add("statUA", 0f);
+				tag.Add("maxUA", 0);
+				tag.Add("statMissiles", 0);
+				tag.Add("maxMissiles", 0);
 			}
 		}
 		public override void LoadData(TagCompound tag)
@@ -2839,25 +2913,24 @@ namespace MetroidMod.Content.Items.Weapons
 					Item item = tag.Get<Item>("BeamChange" + i);
 					BeamChange[i] = item;
 				}
-				MGlobalItem pb = Item.GetGlobalItem<MGlobalItem>();
-				pb.statUA = tag.GetFloat("statUA");
-				pb.maxUA = tag.GetInt("maxUA");
 				MissileMods = new Item[MetroidMod.missileSlotAmount];
 				for (int i = 0; i < MissileMods.Length; i++)
 				{
 					Item item = tag.Get<Item>("missileItem" + i);
 					MissileMods[i] = item;
 				}
-
-				MGlobalItem mi = Item.GetGlobalItem<MGlobalItem>();
-				mi.statMissiles = tag.GetInt("statMissiles");
-				mi.maxMissiles = tag.GetInt("maxMissiles");
 				MissileChange = new Item[MetroidMod.missileChangeSlotAmount];
 				for (int i = 0; i < MissileChange.Length; i++)
 				{
 					Item item = tag.Get<Item>("MissileChange" + i);
 					MissileChange[i] = item;
 				}
+				//MGlobalItem pb = Item.GetGlobalItem<MGlobalItem>();
+				if (Item.TryGetGlobalItem(out MGlobalItem pb))
+					pb.statUA = tag.GetFloat("statUA");
+				pb.maxUA = tag.GetInt("maxUA");
+				pb.statMissiles = tag.GetInt("statMissiles");
+				pb.maxMissiles = tag.GetInt("maxMissiles");
 			}
 			catch { }
 		}
@@ -2867,6 +2940,8 @@ namespace MetroidMod.Content.Items.Weapons
 			base.OnCreated(context);
 			_beamMods = new Item[BeamAddonSlotID.Count];
 			_beamchangeMods = new Item[BeamChangeSlotID.Count];
+			_missileMods = new Item[MissileAddonSlotID.Count];
+			_missileChange = new Item[MissileChangeSlotID.Count];
 			for (int i = 0; i < _beamMods.Length; ++i)
 			{
 				_beamMods[i] = new Item();
@@ -2877,46 +2952,66 @@ namespace MetroidMod.Content.Items.Weapons
 				_beamchangeMods[i] = new Item();
 				_beamchangeMods[i].TurnToAir();
 			}
+			for (int i = 0; i < _missileMods.Length; ++i)
+			{
+				_missileMods[i] = new Item();
+				_missileMods[i].TurnToAir();
+			}
+			for (int i = 0; i < _missileChange.Length; ++i)
+			{
+				_missileChange[i] = new Item();
+				_missileChange[i].TurnToAir();
+			}
 		}
 		public override void NetSend(BinaryWriter writer)
 		{
 			for (int i = 0; i < BeamMods.Length; ++i)
 			{
-				ItemIO.Send(BeamMods[i], writer,true);
+				//if (BeamMods[i] != null)
+					ItemIO.Send(BeamMods[i], writer,true);
 			}
 			for (int i = 0; i < BeamChange.Length; ++i)
 			{
-				ItemIO.Send(BeamChange[i], writer);
+				//if (BeamChange[i] != null)
+					ItemIO.Send(BeamChange[i], writer);
 			}
 			for (int i = 0; i < MissileMods.Length; ++i)
 			{
-				ItemIO.Send(MissileMods[i], writer, true);
+				//if (MissileMods[i] != null)
+					ItemIO.Send(MissileMods[i], writer, true);
 			}
 			for (int i = 0; i < MissileChange.Length; ++i)
 			{
-				ItemIO.Send(MissileChange[i], writer);
+				//if (MissileChange[i] != null)
+					ItemIO.Send(MissileChange[i], writer);
 			}
 			writer.Write(chargeLead);
+			//base.NetSend(writer);
 		}
 		public override void NetReceive(BinaryReader reader)
 		{
 			for (int i = 0; i < BeamMods.Length; ++i)
 			{
+				//if (BeamMods[i]!=null)
 				BeamMods[i] = ItemIO.Receive(reader, true);
 			}
 			for (int i = 0; i < BeamChange.Length; ++i)
 			{
-				BeamChange[i] = ItemIO.Receive(reader);
+				//if (BeamChange[i] != null)
+					BeamChange[i] = ItemIO.Receive(reader);
 			}
 			for (int i = 0; i < MissileMods.Length; ++i)
 			{
-				MissileMods[i] = ItemIO.Receive(reader, true);
+				//if (MissileMods[i] != null)
+					MissileMods[i] = ItemIO.Receive(reader, true);
 			}
 			for (int i = 0; i < MissileChange.Length; ++i)
 			{
-				MissileChange[i] = ItemIO.Receive(reader);
+				//if (MissileChange[i] != null)
+					MissileChange[i] = ItemIO.Receive(reader);
 			}
 			chargeLead = reader.ReadInt32();
+			//base.NetReceive(reader);
 		}
 	}
 }

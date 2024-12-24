@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent.ObjectInteractions;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -45,7 +46,15 @@ namespace MetroidMod.Content.Tiles
 				Main.LocalPlayer.cursorItemIconID = ItemType<Items.Tiles.EnergyStationDevtool>();
 			}
 		}
-
+		public override void ModifySmartInteractCoords(ref int width, ref int height, ref int frameWidth, ref int frameHeight, ref int extraY)
+		{
+			width = 2;
+			height = 2;
+		}
+		public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings)
+		{
+			return true;
+		}
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
 			new EntitySource_TileBreak(i, j); //Item.NewItem(new EntitySource_TileBreak(i, j), i * 16, j * 16, 32, 32, ItemType<Items.Tiles.EnergyStationDevtool>());

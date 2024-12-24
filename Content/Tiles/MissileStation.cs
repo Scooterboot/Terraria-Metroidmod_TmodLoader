@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent.ObjectInteractions;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -22,6 +23,7 @@ namespace MetroidMod.Content.Tiles
 			Main.tileSolidTop[Type] = true;
 			TileID.Sets.NotReallySolid[Type] = true;
 			TileID.Sets.DrawsWalls[Type] = true;
+			TileID.Sets.DisableSmartCursor[Type] = true;
 			TileObjectData.newTile.CopyFrom(TileObjectData.Style2x2);
 			TileObjectData.newTile.CoordinateHeights = new int[] { 16, 18 };
 			TileObjectData.newTile.UsesCustomCanPlace = true;
@@ -34,6 +36,15 @@ namespace MetroidMod.Content.Tiles
 
 		public override bool Slope(int i, int j) { return false; }
 
+		public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings)
+		{
+			return true;
+		}
+		public override void ModifySmartInteractCoords(ref int width, ref int height, ref int frameWidth, ref int frameHeight, ref int extraY)
+		{
+			width = 2;
+			height = 2;
+		}
 		public override void MouseOver(int i, int j)
 		{
 			if (Main.LocalPlayer.Distance(TileCenter(i, j)) < rightclickRange)

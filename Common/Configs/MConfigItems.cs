@@ -180,8 +180,8 @@ namespace MetroidMod.Common.Configs
 		[Range(0, 100)]
 		[Increment(1)]
 		[Slider]
-		[DefaultValue(40)]
-		public int ammoPowerBeam;
+		[DefaultValue(40f)]
+		public float ammoPowerBeam;
 
 		//[Label("[i:MetroidMod/MissileExpansion] Ammo per UA Expansion")]
 		[Range(20, 100)]

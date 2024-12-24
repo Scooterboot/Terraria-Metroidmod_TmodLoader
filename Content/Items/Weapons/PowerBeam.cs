@@ -93,7 +93,7 @@ namespace MetroidMod.Content.Items.Weapons
 			Item.crit = 3;
 			MGlobalItem pb = Item.GetGlobalItem<MGlobalItem>();
 			pb.statUA = MConfigItems.Instance.ammoPowerBeam;
-			pb.maxUA = MConfigItems.Instance.ammoPowerBeam;
+			pb.maxUA = (int)MConfigItems.Instance.ammoPowerBeam;
 		}
 
 		/*public override void AddRecipes()
@@ -391,14 +391,14 @@ namespace MetroidMod.Content.Items.Weapons
 			bool addonsV2 = (slot2.type == ic2 || slot3.type == wa2 || slot4.type == wi || slot5.type == nv);
 			addonsV2 |= ((slot5.type == plG || slot5.type == plR) && (chargeV2 || chargeV3) && !addonsV1);
 			bool addonsV3 = (slot2.type == sd || slot3.type == nb || slot4.type == vt || slot5.type == sl);
-			pb.maxUA = MConfigItems.Instance.ammoPowerBeam + (MConfigItems.Instance.ammoUA * Math.Min(UA.stack, 12));
+			pb.maxUA = (int)MConfigItems.Instance.ammoPowerBeam + (MConfigItems.Instance.ammoUA * Math.Min(UA.stack, 12));
 			if (pb.statUA > pb.maxUA)
 			{
 				pb.statUA = pb.maxUA;
 			}
-			if(pb.statUA <= 0)
+			if(pb.statUA <= 0f)
 			{
-				pb.statUA = 0;
+				pb.statUA = 0f;
 			}
 			int versionType = 1;
 			float GetCharge()
