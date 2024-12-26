@@ -315,6 +315,7 @@ Mods: {
 			GreenSwitch.MapEntry: Green Switch
 			RedSwitch.MapEntry: Red Switch
 			YellowSwitch.MapEntry: Yellow Switch
+			PhazonChest.MapEntry: Phazon Chest
 		}
 
 		Buffs: {
@@ -3432,6 +3433,21 @@ Mods: {
 			ChoziteDualtool: {
 				DisplayName: Chozite Dualtool
 				Tooltip: Right Click while holding to edit usage settings
+			}
+
+			Phazestone: {
+				DisplayName: Phazestone
+				Tooltip: ""
+			}
+
+			PhazonChest: {
+				DisplayName: Phazon Chest
+				Tooltip: ""
+			}
+
+			PhazestoneWall: {
+				DisplayName: Phazestone Wall
+				Tooltip: ""
 			}
 		}
 
