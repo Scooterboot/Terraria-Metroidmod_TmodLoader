@@ -1,4 +1,5 @@
 using System;
+using MetroidMod.Content.DamageClasses;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
@@ -25,7 +26,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			Projectile.tileCollide = false;
 			Projectile.penetrate = -1;
 			Projectile.ignoreWater = true;
-			Projectile.DamageType = DamageClass.Ranged;
+			Projectile.DamageType = ModContent.GetInstance<HunterDamageClass>();
 			Projectile.extraUpdates = 2;
 		}
 

@@ -51,6 +51,8 @@ namespace MetroidMod
 
 		public static bool CalamityActive() => ModLoader.TryGetMod("CalamityMod", out _);
 		public static bool CalamityMod(out Mod calamityMod) => ModLoader.TryGetMod("CalamityMod", out calamityMod);
+		public static bool FargoSoulsActive() => ModLoader.TryGetMod("FargowiltasSouls", out _);
+		public static bool FargosSouls(out Mod calamityMod) => ModLoader.TryGetMod("FargowiltasSouls", out calamityMod);
 
 		public static MPlayer MetroidPlayer(this Player p) => p.GetModPlayer<MPlayer>();
 		public static bool TryMetroidPlayer(this Player p, out MPlayer mp) => p.TryGetModPlayer(out mp);
