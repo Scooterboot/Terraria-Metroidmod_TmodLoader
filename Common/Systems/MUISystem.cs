@@ -922,7 +922,7 @@ namespace MetroidMod.Common.Systems
 				sb.Draw(value, destinationRectangle2, value2, mp.HUDColor * 0.5f);
 
 				// boxes
-				int totalBoxes = mp.EnergyTanks;
+				int totalBoxes = Math.Min(mp.tankCapacity, mp.EnergyTanks);
 				int boxCount = mp.FilledEnergyTanks;
 				Texture2D boxTex = ModContent.Request<Texture2D>($"{Mod.Name}/Assets/Textures/EnergyTextures/Box2").Value;
 				for (int i = 0; i < totalBoxes; i++)

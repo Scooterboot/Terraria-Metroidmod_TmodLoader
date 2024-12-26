@@ -608,7 +608,7 @@ namespace MetroidMod.Common.Players
 			{
 				if ((!P.controlLeft || !(P.velocity.X < 0f)) && (!P.controlRight || !(P.velocity.X > 0f)))
 				{
-					P.velocity.X *= 0.98f;
+					P.velocity.X *= 0.98f; //0.95f
 				}
 				if (P.velocity.Y == 0f || !spaceJump)
 				{
