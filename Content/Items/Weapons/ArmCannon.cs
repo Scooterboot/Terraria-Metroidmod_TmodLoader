@@ -1793,12 +1793,6 @@ namespace MetroidMod.Content.Items.Weapons
 				string ch = "Charge shot consumes " + cost + " missiles";
 				float drain = (float)Math.Round(comboDrain * mp.missileCost, 2);
 				TooltipLine mDrain = new(Mod, "ChargeMissileDrain", "Drains " + drain + " missiles per second");
-				if (isHeldCombo > 0)
-				{
-					ch = "Charge initially costs " + cost + " missiles";
-					tooltips.Insert(k + 2, mDrain);
-				}
-				TooltipLine mCost = new(Mod, "ChargeMissileCost", ch);
 				if (tooltips[k].Name == "Damage" && isCharge)
 				{
 					tooltips.Insert(k + 1, chDmgLine);
@@ -1817,6 +1811,12 @@ namespace MetroidMod.Content.Items.Weapons
 					{
 						if (!MissileMods[0].IsAir && !isSeeker)
 						{
+							if (isHeldCombo > 0)
+							{
+								ch = "Charge initially costs " + cost + " missiles";
+								tooltips.Insert(k + 2, mDrain);
+							}
+							TooltipLine mCost = new(Mod, "ChargeMissileCost", ch);
 							tooltips.Insert(k + 1, mCost);
 						}
 					}
