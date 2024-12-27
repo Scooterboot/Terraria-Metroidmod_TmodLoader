@@ -13,9 +13,7 @@ using MetroidMod.Content.Pets;
 using MetroidMod.Content.SuitAddons;
 using MetroidMod.ID;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
@@ -32,16 +30,15 @@ namespace MetroidMod.Content.NPCs.Town
 	[AutoloadHead]
 	public class ChozoGhost : ModNPC
 	{
-		//GHOST HAS BLANK FRAMES BECAUSE SHIMMER HAS MORE SOMEHOW THAT WAS DUMB ENOUGH TO WORK -- DR
 		public const string ShopName = "Chozo Shop";
 
 		private static int ShimmerHeadIndex;
 		private static Profiles.StackedNPCProfile NPCProfile;
 		public override void SetStaticDefaults()
 		{
-			Main.npcFrameCount[Type] = 24; //16
-			NPCID.Sets.ExtraFramesCount[Type] = 13; //9
-			NPCID.Sets.AttackFrameCount[Type] = 6;//4
+			Main.npcFrameCount[Type] = 16; //24
+			NPCID.Sets.ExtraFramesCount[Type] = 9; //13
+			NPCID.Sets.AttackFrameCount[Type] = 4;//6
 			NPCID.Sets.DangerDetectRange[Type] = 700;
 
 			NPCID.Sets.AttackType[Type] = 0;
@@ -50,8 +47,8 @@ namespace MetroidMod.Content.NPCs.Town
 
 			NPCID.Sets.HatOffsetY[Type] = 4;
 
-			NPCID.Sets.ShimmerTownTransform[NPC.type] = true;
-			NPCID.Sets.ShimmerTownTransform[Type] = true;
+			//NPCID.Sets.ShimmerTownTransform[NPC.type] = true;
+			//NPCID.Sets.ShimmerTownTransform[Type] = true;
 
 			NPC.Happiness
 				.SetBiomeAffection<OceanBiome>(AffectionLevel.Love)
@@ -274,12 +271,13 @@ namespace MetroidMod.Content.NPCs.Town
 					riseNum = -1;
 				}
 			}
+
 			if (!Main.dedServ)
 			{
 				// 'Loading' the NPC to make sure its texture is properly populated in the Main.npcTexture array.
 				Main.instance.LoadNPC(NPCID.Guide);
 
-				int gFrame = (NPC.frame.Y / TextureAssets.Npc[NPCID.Guide].Value.Height) * Main.npcFrameCount[NPCID.Guide];
+				int gFrame = (NPC.frame.Y / Terraria.GameContent.TextureAssets.Npc[NPCID.Guide].Value.Height) * Main.npcFrameCount[NPCID.Guide];
 
 				if (gFrame == 16)
 				{
