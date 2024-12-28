@@ -16,7 +16,7 @@ namespace MetroidMod.Content.Projectiles.Imperialist
 		//what a total mess lmao --Dr
 		public override void SetStaticDefaults()
 		{
-			Main.projFrames[Projectile.type] = 100;
+			Main.projFrames[Projectile.type] = 1;
 		}
 		private bool spaze = false;
 		private int depth = 0;
@@ -99,6 +99,7 @@ namespace MetroidMod.Content.Projectiles.Imperialist
 		private const float Max_Range = 2200f;
 		private float maxRange = 0f;
 		private float scaleUp = 0f;
+		private int timer = 0;
 		public override void AI()
 		{
 			Projectile P = Projectile;
@@ -117,15 +118,15 @@ namespace MetroidMod.Content.Projectiles.Imperialist
 			if (P.numUpdates == 0)
 			{
 				scaleUp = Math.Min(scaleUp + 0.1f, 1f);
-				P.frame++;
-				if (P.frame >= Main.projFrames[P.type])
+				timer++;
+				if (timer >= 100)
 				{
 					P.Kill();
 					//P.frame = 0;
 				}
 			}
 			P.scale = 0.75f * scaleUp;
-			if (P.frame >= 6)
+			if (timer >= 6)
 			{
 				P.damage = 0;
 			}
