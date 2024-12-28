@@ -36,19 +36,19 @@ namespace MetroidMod.Content.NPCs.Town
 		private static Profiles.StackedNPCProfile NPCProfile;
 		public override void SetStaticDefaults()
 		{
-			Main.npcFrameCount[Type] = 16; //24
-			NPCID.Sets.ExtraFramesCount[Type] = 9; //13
-			NPCID.Sets.AttackFrameCount[Type] = 4;//6
+			Main.npcFrameCount[Type] = 24; //16
+			NPCID.Sets.ExtraFramesCount[Type] = 18; //9
+			NPCID.Sets.AttackFrameCount[Type] = 6;//4
 			NPCID.Sets.DangerDetectRange[Type] = 700;
 
-			NPCID.Sets.AttackType[Type] = 0;
+			NPCID.Sets.AttackType[Type] = -1; //TODO implement an attack
 			NPCID.Sets.AttackTime[Type] = 90;
 			NPCID.Sets.AttackAverageChance[Type] = 30;
 
 			NPCID.Sets.HatOffsetY[Type] = 4;
 
-			//NPCID.Sets.ShimmerTownTransform[NPC.type] = true;
-			//NPCID.Sets.ShimmerTownTransform[Type] = true;
+			NPCID.Sets.ShimmerTownTransform[NPC.type] = true;
+			NPCID.Sets.ShimmerTownTransform[Type] = true;
 
 			NPC.Happiness
 				.SetBiomeAffection<OceanBiome>(AffectionLevel.Love)
@@ -253,11 +253,9 @@ namespace MetroidMod.Content.NPCs.Town
 		private int riseNum = -1;
 		public override void FindFrame(int frameHeight)
 		{
-			if (++tFrameCounter >= 6)
-			{
-				tFrameCounter = 0;
-				tFrame = (tFrame + 1) % 4;
-			}
+			//TODO WHAT ON EARTH IS THIS --DR
+			bool shim = NPC.IsShimmerVariant;
+			int frames = shim ? 6 : 4;
 
 			if ((tFrame == 0 || tFrame == 2) && tFrameCounter == 0)
 			{
@@ -271,41 +269,43 @@ namespace MetroidMod.Content.NPCs.Town
 					riseNum = -1;
 				}
 			}
+			int gFrame = (int)NPC.frameCounter;
 
-			if (!Main.dedServ)
+			if (gFrame > (shim ? 8 : 6)/* && gFrame <= (shim? 18 : 12)*/)
 			{
-				// 'Loading' the NPC to make sure its texture is properly populated in the Main.npcTexture array.
-				Main.instance.LoadNPC(NPCID.Guide);
-
-				int gFrame = (NPC.frame.Y / Terraria.GameContent.TextureAssets.Npc[NPCID.Guide].Value.Height) * Main.npcFrameCount[NPCID.Guide];
-
-				if (gFrame == 16)
-				{
-					frame = 4;
-				}
-				else if (gFrame == 17)
-				{
-					frame = 8;
-				}
-				else if (gFrame >= 21 && gFrame <= 25)
-				{
-					frame = 12;
-				}
-				else
-				{
-					frame = 0;
-				}
+				//NPC.frameCounter = 3;
+				frames = shim ? 12 : 6;
+				frame = shim ? 6 : 4;
 			}
-
+			/*else if (gFrame == 17)
+			{
+				frame = 8;
+			}
+			else if (gFrame >= 21 && gFrame <= 25)
+			{
+				frame = 12;
+			}*/
+			else
+			{
+				//What = shim ? 5 : 3;
+				frame = 0;
+			}
+			if (++tFrameCounter >= 6)
+			{
+				tFrameCounter = 0;
+				tFrame = (tFrame + 1) % frames;
+			}
 			NPC.spriteDirection = NPC.direction;
 		}
 
 		public override bool PreDraw(SpriteBatch sb, Vector2 screenPos, Color drawColor)
 		{
-			Texture2D tex = Terraria.GameContent.TextureAssets.Npc[Type].Value;
+			bool shim = NPC.IsShimmerVariant;
+			int maxframes = shim ? Main.npcFrameCount[Type] : 16;
+			Texture2D tex = TextureAssets.Npc[Type].Value;
 
 			SpriteEffects spriteEffects = NPC.spriteDirection == 1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-			Rectangle drawFrame = tex.Frame(1, Main.npcFrameCount[NPC.type], 0, frame + tFrame);
+			Rectangle drawFrame = tex.Frame(1, maxframes, 0, frame + tFrame);
 			Vector2 origin = drawFrame.Size() / 2;
 
 			sb.Draw(tex, new Vector2((int)(NPC.Center.X - screenPos.X), (int)(NPC.Center.Y + (rise - 4) - screenPos.Y)), drawFrame, NPC.GetAlpha(Color.White), NPC.rotation, origin, NPC.scale, spriteEffects, 0f);
