@@ -34,7 +34,6 @@ using Terraria.ModLoader.IO;
 using Terraria.WorldBuilding;
 
 
-
 #endregion
 
 namespace MetroidMod.Common.Systems
@@ -69,6 +68,7 @@ namespace MetroidMod.Common.Systems
 		internal static ModKeybind BombKey;
 		internal static ModKeybind SwitchKey;
 		internal static ModKeybind HyperMode;
+		internal static ModKeybind FlashShiftKey;
 
 		public static bool PhazonSpawn;
 
@@ -81,6 +81,7 @@ namespace MetroidMod.Common.Systems
 			BombKey = KeybindLoader.RegisterKeybind(Mod, "Morph Ball Bomb", "C");
 			SwitchKey = KeybindLoader.RegisterKeybind(Mod, "Switch Interface", "G");
 			HyperMode = KeybindLoader.RegisterKeybind(Mod, "HyperMode", "C");
+			FlashShiftKey = KeybindLoader.RegisterKeybind(Mod, "Flash Shift", "F");
 		}
 		public override void Unload()
 		{

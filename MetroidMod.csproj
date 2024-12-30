@@ -6,9 +6,11 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="assets\effects\FlashShiftShader.fx" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\Music\" />
+    <Folder Include="Assets\Effects\" />
     <Folder Include="Assets\Effects\" />
     <Folder Include="Assets\Sounds\" />
     <Folder Include="Assets\Textures\MissileAddons\" />

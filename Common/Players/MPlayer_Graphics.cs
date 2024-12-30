@@ -1,4 +1,6 @@
 using System;
+using MetroidMod.Common.Systems;
+using MetroidMod.Content.Items.Aeion;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -192,6 +194,30 @@ namespace MetroidMod.Common.Players
 				if (shineChargeFlash >= 6)
 				{
 					shineChargeFlash = 0;
+				}
+			}
+			if (flashShiftTime > 0 || flashShiftGlow)
+			{
+				int shader = GameShaders.Armor.GetShaderIdFromItemId(ModContent.ItemType<FlashShiftShader>());
+				if (drawInfo.drawPlayer.head > 0 && drawInfo.drawPlayer.cHead <= 0)
+				{
+					drawInfo.cHead = shader;
+				}
+				if (drawInfo.drawPlayer.body > 0 && drawInfo.drawPlayer.cBody <= 0)
+				{
+					drawInfo.cBody = shader;
+				}
+				if (drawInfo.drawPlayer.legs > 0 && drawInfo.drawPlayer.cLegs <= 0)
+				{
+					drawInfo.cLegs = shader;
+				}
+				if (drawInfo.drawPlayer.shoe > 0 && drawInfo.drawPlayer.cShoe <= 0)
+				{
+					drawInfo.cShoe = shader;
+				}
+				if (flashShiftTime > 0)
+				{
+					drawInfo.drawPlayer.armorEffectDrawShadow = true;
 				}
 			}
 			if (isGripping)

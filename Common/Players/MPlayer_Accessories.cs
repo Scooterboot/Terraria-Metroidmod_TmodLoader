@@ -4,7 +4,9 @@ using MetroidMod.Common.Configs;
 //using MetroidMod.Content.NPCs;
 //using MetroidMod.Content.Items;
 using MetroidMod.Common.Systems;
+using MetroidMod.Content.Dusts;
 using MetroidMod.Content.Items.Accessories;
+using MetroidMod.Content.Items.Aeion;
 using MetroidMod.Content.Items.Armors;
 using MetroidMod.Content.Mounts;
 using MetroidMod.Content.Tiles;
@@ -14,6 +16,7 @@ using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -21,6 +24,15 @@ namespace MetroidMod.Common.Players
 {
 	public partial class MPlayer : ModPlayer
 	{
+		public bool hasFlashShift = false;
+		public bool allowVerticalFlashShift = false;
+		public bool flashShiftGlow = false;
+		public int flashShiftTime = 0;
+		static int FLASH_SHIFT_WINDOW = 20; //Do not set to < 5
+		public int flashShiftLength = FLASH_SHIFT_WINDOW + 12; 
+		public Color flashShiftColor = new Color(0, 1f, 1f);
+		private Vector2 flashDir = Vector2.Zero;
+
 		public bool powerGrip = false;
 		public bool isGripping = false;
 		public int reGripTimer = 0;
@@ -101,6 +113,9 @@ namespace MetroidMod.Common.Players
 
 		public void ResetEffects_Accessories()
 		{
+			hasFlashShift = false;
+			allowVerticalFlashShift = false;
+			flashShiftGlow = false;
 			powerGrip = false;
 
 			Eyed = false;
@@ -268,6 +283,7 @@ namespace MetroidMod.Common.Players
 			{
 				reserveHearts = reserveTanks;
 			}
+
 		}
 		private bool sbFlag = false;
 		public void PostUpdateMiscEffects_Accessories()
@@ -280,6 +296,7 @@ namespace MetroidMod.Common.Players
 				mp.powerGrip = true;
 			}
 			GripMovement();
+			FlashShift();
 			canWallJump = false;
 			int wallJumpDir = 0;
 			bool altJump = false;
@@ -419,6 +436,7 @@ namespace MetroidMod.Common.Players
 				screwAttackSpeedEffect = 0;
 				screwSpeedDelay = 0;
 			}
+
 		}
 		public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
 		{
@@ -1329,6 +1347,137 @@ namespace MetroidMod.Common.Players
 				Player.releaseJump = false;
 			}
 			#endregion
+		}
+
+
+		public void FlashShift()
+		{
+			if (hasFlashShift && !shineActive && !morphBall)
+			{
+				if (flashShiftTime < FLASH_SHIFT_WINDOW || allowVerticalFlashShift && flashShiftTime == flashShiftLength - 1) // The OR flashShiftTime == flashShiftLength - 1 is to give a 1 frame window to reinput the flash direction for easier diagonal input while vertical flash shifting is enabled
+				{
+					Vector2 inputDir = Vector2.Zero;
+					if (MSystem.FlashShiftKey.JustPressed)
+					{
+						if (Player.controlLeft) inputDir.X--;
+						if (Player.controlRight) inputDir.X++;
+						if (allowVerticalFlashShift)
+						{
+							if (Player.controlUp) inputDir.Y -= Player.gravDir;
+							if (Player.controlDown) inputDir.Y += Player.gravDir;
+						}
+
+					}
+					else if (MSystem.FlashShiftKey.Current)
+					{
+						flashShiftGlow = true;
+						if (allowVerticalFlashShift)
+						{
+							if (Player.controlLeft && (Player.releaseLeft || (Player.controlUp && Player.releaseUp) || (Player.controlDown && Player.releaseDown))) inputDir.X--;
+							if (Player.controlRight && (Player.releaseRight || (Player.controlUp && Player.releaseUp) || (Player.controlDown && Player.releaseDown))) inputDir.X++;
+							if (Player.controlUp && (Player.releaseUp || (Player.controlLeft && Player.releaseLeft) || (Player.controlRight && Player.releaseRight))) inputDir.Y -= Player.gravDir;
+							if (Player.controlDown && (Player.releaseDown || (Player.controlLeft && Player.releaseLeft) || (Player.controlRight && Player.releaseRight))) inputDir.Y += Player.gravDir;
+						}
+						else
+						{
+							if (Player.controlLeft && Player.releaseLeft) inputDir.X--;
+							if (Player.controlRight && Player.releaseRight) inputDir.X++;
+						}
+
+					}
+					if (inputDir != Vector2.Zero)
+					{
+						inputDir.Normalize();
+						flashDir = inputDir;
+						if (flashShiftTime < FLASH_SHIFT_WINDOW)
+						{
+							flashShiftTime = flashShiftLength;
+							Dust.NewDustPerfect(Player.Center, ModContent.DustType<FlashRing>(), Vector2.Zero, 0, flashShiftColor, 0.6f);
+
+							//Portal sound effect, replace with actual flash shift sfx once someone gets the audio file for it
+							SoundEngine.PlaySound(SoundID.Item115.WithPitchOffset(0.3f), Player.Center);
+						}
+					}
+				}
+				if (flashShiftTime > 0)
+				{
+					if (flashShiftTime >= FLASH_SHIFT_WINDOW)
+					{
+						Player.velocity = flashDir * 20;
+						Player.maxFallSpeed = 20;
+						Player.gravity = 0;
+						if (Player.velocity.Y == 0)
+						{
+							Player.velocity.Y += (1E-06f) * Player.gravDir;
+						}
+
+						Player.moveSpeed = 0f;
+						Player.maxRunSpeed = 0f;
+						Player.controlUseItem = false;
+						Player.controlUseTile = false;
+						Player.controlJump = false;
+						Player.controlMount = false;
+						Player.releaseMount = false;
+						Player.controlHook = false;
+						Player.stairFall = true;
+
+						Player.slowFall = false;
+						disableSomersault = true;
+
+						for (int i = 0; i < 3; i++)  //Trail effect
+						{
+							Vector2 offset = Vector2.Zero;
+							switch (i)
+							{
+								case 1: //Shoulder
+									offset.X = -12;
+									offset.Y = Player.height / 3;
+									break;
+								case 2: //Foot
+									offset.X = -6;
+									offset.Y = Player.height;
+									break;
+								default: //Head
+									offset.X = 2;
+									offset.Y = 4;
+									break;
+							}
+							Vector2 vector = new Vector2(Player.width / 2 + offset.X * Player.direction, offset.Y * Player.gravDir);
+							Vector2 velCheck = Collision.TileCollision(Player.position, Player.velocity, Player.width, Player.height, true, false, (int)Player.gravDir);
+							vector += velCheck;
+							Vector2 vector2 = vector + Vector2.UnitY * Player.gfxOffY;
+
+							Vector2 vector4 = Player.position + vector2;
+							Vector2 vector5 = Player.oldPosition + vector;
+
+							int num5 = (int)Vector2.Distance(vector4, vector5) + 1;
+							for (float num6 = 1f; num6 <= (float)num5; num6 += 1f)
+							{
+								Dust dust = Main.dust[Dust.NewDust(Player.Center, 0, 0, ModContent.DustType<FlashTrail>(), 0f, 0f, 0, default(Color), 1f)];
+								dust.position = Vector2.Lerp(vector5, vector4, num6 / (float)num5);
+								dust.velocity = Vector2.Zero;
+								dust.customData = Player;
+								dust.scale = 0.75f;
+								dust.noGravity = true;
+								dust.color = flashShiftColor;
+							}
+						}
+					}
+					else if (flashShiftTime > FLASH_SHIFT_WINDOW - 5)
+					{
+						Player.velocity *= 0.5f;
+					}
+					float l = (float)flashShiftTime / (float)flashShiftLength;
+					Lighting.AddLight(Player.Center, flashShiftColor.ToVector3() * l);
+					flashShiftTime--;
+
+				}
+			}
+			else
+			{
+				flashShiftGlow = false;
+				flashShiftTime = 0;
+			}
 		}
 	}
 }
