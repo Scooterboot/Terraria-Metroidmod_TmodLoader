@@ -316,6 +316,7 @@ Mods: {
 			GreenSwitch.MapEntry: Green Switch
 			RedSwitch.MapEntry: Red Switch
 			YellowSwitch.MapEntry: Yellow Switch
+			PhazonChest.MapEntry: Phazon Chest
 		}
 
 		Buffs: {
@@ -3452,6 +3453,21 @@ Mods: {
 					[ UNDER CONSTRUCTION ]
 					Allows 8 directional flash shifting
 					'''
+			}
+
+			Phazestone: {
+				DisplayName: Phazestone
+				Tooltip: ""
+			}
+
+			PhazonChest: {
+				DisplayName: Phazon Chest
+				Tooltip: ""
+			}
+
+			PhazestoneWall: {
+				DisplayName: Phazestone Wall
+				Tooltip: ""
 			}
 		}
 
