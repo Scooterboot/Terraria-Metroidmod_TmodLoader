@@ -11,15 +11,6 @@ namespace MetroidMod.Content.Items.Accessories
 	{
 		public override void SetStaticDefaults()
 		{
-			//DisplayName.SetDefault("Space Booster");
-			//Tooltip.SetDefault("Allows the user to run insanely fast\n" + 
-			/*"Damage enemies while running\n" + 
-			"Damage scales off of enemy's contact damage\n" +
-			"Allows the user to jump up to 10 times in a row\n" + 
-			"Jumps recharge mid-air\n" + 
-			"Allows somersaulting\n" +
-			"Increases jump height and prevents fall damage");*/
-
 			Item.ResearchUnlockCount = 1;
 		}
 		public override void SetDefaults()
@@ -42,14 +33,14 @@ namespace MetroidMod.Content.Items.Accessories
 			Item.consumable = true;
 			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.SpaceBoosterTile>();
 		}
-		public override void AddRecipes()
+		/*public override void AddRecipes()
 		{
 			CreateRecipe(1)
 				.AddIngredient<SpaceJump>(1)
 				.AddIngredient<SpeedBooster>(1)
 				.AddTile(TileID.TinkerersWorkbench)
 				.Register();
-		}
+		}*/
 		public override void UpdateAccessory(Player player, bool hideVisual)
 		{
 			MPlayer mp = player.GetModPlayer<MPlayer>();

@@ -11,13 +11,6 @@ namespace MetroidMod.Content.Items.Accessories
 	{
 		public override void SetStaticDefaults()
 		{
-			//DisplayName.SetDefault("Space Jump");
-			//Tooltip.SetDefault("'Somersault continuously in the air!'\n" + 
-			/*"Allows somersaulting\n" + 
-			"Allows the user to jump up to 10 times in a row\n" + 
-			"Jumps recharge mid-air\n" +
-			"Increases jump height and prevents fall damage");*/
-
 			Item.ResearchUnlockCount = 1;
 		}
 		public override void SetDefaults()
@@ -39,7 +32,20 @@ namespace MetroidMod.Content.Items.Accessories
 		}
 		public override void AddRecipes()
 		{
-			if (MUtils.CalamityActive())
+			CreateRecipe(1)
+	.AddIngredient<SpinBoost>(1)
+	.AddRecipeGroup(MetroidMod.T2HMBarRecipeGroupID, 10)
+	.AddIngredient(ItemID.SoulofFlight, 10)
+	.AddTile(TileID.MythrilAnvil)
+	.Register();
+
+			CreateRecipe(1)
+				.AddIngredient<SpaceJumpBoots>(1)
+				.AddRecipeGroup(MetroidMod.T2HMBarRecipeGroupID, 10)
+				.AddIngredient(ItemID.SoulofFlight, 10)
+				.AddTile(TileID.MythrilAnvil)
+				.Register();
+			/*if (MUtils.CalamityActive())
 			{
 				CreateRecipe(1)
 					.AddIngredient<SpinBoost>(1)
@@ -70,7 +76,7 @@ namespace MetroidMod.Content.Items.Accessories
 					.AddIngredient(ItemID.SoulofFlight, 10)
 					.AddTile(TileID.MythrilAnvil)
 					.Register();
-			}
+			}*/
 		}
 		public override void UpdateAccessory(Player player, bool hideVisual)
 		{

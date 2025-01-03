@@ -39,7 +39,7 @@ namespace MetroidMod.Content.Items.Accessories
 			return incomingItem.type != ModContent.ItemType<SpinBoost>();
 		}
 
-		/*public override void AddRecipes()    //This big block is how it used to be crafted before Spin Boost
+		public override void AddRecipes()    //This big block is how it used to be crafted before Spin Boost
 		{
 			CreateRecipe(1)
 				.AddIngredient<HiJumpBoots>(1)
@@ -68,7 +68,13 @@ namespace MetroidMod.Content.Items.Accessories
 				.AddIngredient(SuitAddonLoader.GetAddon<EnergyTank>().ItemType, 1)
 				.AddTile(TileID.Anvils)
 				.Register();
-		}*/
+			CreateRecipe(1)
+				.AddIngredient<HiJumpBoots>(1)
+				.AddIngredient(ItemID.FartinaJar, 1)
+				.AddIngredient(SuitAddonLoader.GetAddon<EnergyTank>().ItemType, 1)
+				.AddTile(TileID.Anvils)
+				.Register();
+		}
 		public override void UpdateAccessory(Player player, bool hideVisual)
 		{
 			MPlayer mp = player.GetModPlayer<MPlayer>();

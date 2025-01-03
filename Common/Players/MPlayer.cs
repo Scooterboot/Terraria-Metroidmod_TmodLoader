@@ -718,12 +718,12 @@ namespace MetroidMod.Common.Players
 
 					Vector2 vel = Vector2.Zero;
 
-					float maxMaxDist = 400;
+					float maxMaxDist = 400f;
 					Vector2 v = Player.Center - projectile.Center;
 					float dist = Vector2.Distance(Player.Center, projectile.Center);
 					bool up = (Player.controlUp && maxDist > 3);
 					bool down = (Player.controlDown && maxDist < maxMaxDist);
-					float reelSpeed = 11f;
+					float reelSpeed = Math.Max((4f * projectile.extraUpdates)-1f,11f);// 11f; reel speed can be dynamic
 					if (Player.honeyWet && !Player.ignoreWater)
 					{
 						reelSpeed *= 0.25f;
