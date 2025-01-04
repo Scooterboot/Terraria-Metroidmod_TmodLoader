@@ -39,7 +39,7 @@ namespace MetroidMod.Content.Tiles.ItemTile
 		public override bool RightClick(int i, int j)
 		{
 			WorldGen.KillTile(i, j, false, false, false);
-			if (Main.netMode == NetmodeID.MultiplayerClient && !Main.tile[i, j].HasTile)
+			if (Main.netMode != NetmodeID.SinglePlayer && !Main.tile[i, j].HasTile)
 			{
 				NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, (float)i, (float)j, 0f, 0, 0, 0);
 			}

@@ -1,9 +1,12 @@
+using System.Collections.Generic;
+using MetroidMod.Common.Systems;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader;
 using Terraria.ObjectData;
 
 namespace MetroidMod.Content.Tiles.ItemTile
@@ -29,7 +32,13 @@ namespace MetroidMod.Content.Tiles.ItemTile
 			Main.tileObsidianKill[Type] = false;
 			TileID.Sets.FriendlyFairyCanLureTo[Type] = true;
 		}
-
+		public override IEnumerable<Item> GetItemDrops(int i, int j)
+		{
+			if (Main.netMode != NetmodeID.SinglePlayer)
+			{
+				yield return new Item(MSystem.OORB());
+			}
+		}
 		public override void AnimateTile(ref int frame, ref int frameCounter)
 		{
 			frameCounter++;
@@ -43,38 +52,35 @@ namespace MetroidMod.Content.Tiles.ItemTile
 		}
 		public override bool RightClick(int i, int j)
 		{
-			
-			/*if ((Main.netMode == NetmodeID.MultiplayerClient || Main.netMode == NetmodeID.Server) && !Main.tile[i, j].HasTile) //TODO turning this on double drops, turning it off makes the tile invisible
+			if (Main.netMode == NetmodeID.SinglePlayer)
 			{
+				Main.tile[i, j].TileType = (ushort)MSystem.OrbItem();
+			}
+			else if (Main.netMode != NetmodeID.SinglePlayer)
+			{
+				Main.tile[i, j].ClearTile();
 				NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, i, j, 0f, 0, 0, 0);
-			}*/
-			if (Main.netMode == NetmodeID.MultiplayerClient || Main.netMode == NetmodeID.Server)
-			{
-				base.RightClick(i, j);
-				return true;
+				NetMessage.SendTileSquare(-1, i, j);
 			}
-			else 
-			{
-				WorldGen.KillTile(i, j, false, false, true);
-				return true;
-			}
-
-
+			return true;
 		}
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
-			if (!fail && !effectOnly)
+			if (Main.netMode != NetmodeID.SinglePlayer/*&& !Main.tile[i, j].HasTile*/)
 			{
-				noItem = true;
-				base.KillTile(i, j, ref fail, ref effectOnly, ref noItem);
-				Main.tile[i, j].TileType = (ushort)Common.Systems.MSystem.OrbItem();
-				fail = true;
-				if ((Main.netMode == NetmodeID.MultiplayerClient || Main.netMode == NetmodeID.Server) && !Main.tile[i, j].HasTile)
+				if(!Main.tile[i, j].HasTile)
 				{
+					fail = false;
+					noItem = false;
 					NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, i, j, 0f, 0, 0, 0);
 					NetMessage.SendTileSquare(-1, i, j);
 				}
-				//Item.NewItem(new EntitySource_TileBreak(i, j), i * 16, j * 16, 16, 16, Common.Systems.MSystem.OrbItem(i, j));
+			}
+			else
+			{
+				fail = true;
+				noItem = true;
+				Main.tile[i, j].TileType = (ushort)MSystem.OrbItem();
 			}
 		}
 	}

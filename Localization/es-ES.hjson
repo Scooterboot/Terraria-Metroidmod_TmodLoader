@@ -3436,21 +3436,6 @@ Mods: {
 				// Tooltip: Right Click while holding to edit usage settings
 			}
 
-			Phazestone: {
-				// DisplayName: Phazestone
-				// Tooltip: ""
-			}
-
-			PhazonChest: {
-				// DisplayName: Phazon Chest
-				// Tooltip: ""
-			}
-
-			PhazestoneWall: {
-				// DisplayName: Phazestone Wall
-				// Tooltip: ""
-			}
-
 			FlashShift: {
 				// DisplayName: Flash Shift
 				// Tooltip: "[ UNDER CONSTRUCTION ]"
@@ -3468,6 +3453,21 @@ Mods: {
 					[ UNDER CONSTRUCTION ]
 					Allows 8 directional flash shifting
 					''' */
+			}
+
+			Phazestone: {
+				// DisplayName: Phazestone
+				// Tooltip: ""
+			}
+
+			PhazonChest: {
+				// DisplayName: Phazon Chest
+				// Tooltip: ""
+			}
+
+			PhazestoneWall: {
+				// DisplayName: Phazestone Wall
+				// Tooltip: ""
 			}
 		}
 
