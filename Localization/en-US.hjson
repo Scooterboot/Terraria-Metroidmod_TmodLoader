@@ -317,6 +317,8 @@ Mods: {
 			RedSwitch.MapEntry: Red Switch
 			YellowSwitch.MapEntry: Yellow Switch
 			PhazonChest.MapEntry: Phazon Chest
+			ChozoStatueOrb2.MapEntry: Chozo Statue Orb2
+			ChozoStatueOrb3.MapEntry: Chozo Statue Orb3
 		}
 
 		Buffs: {
@@ -3467,6 +3469,16 @@ Mods: {
 
 			PhazestoneWall: {
 				DisplayName: Phazestone Wall
+				Tooltip: ""
+			}
+
+			ChozoStatueOrb2: {
+				DisplayName: Chozo Statue Orb2
+				Tooltip: ""
+			}
+
+			ChozoStatueOrb3: {
+				DisplayName: Chozo Statue Orb3
 				Tooltip: ""
 			}
 		}

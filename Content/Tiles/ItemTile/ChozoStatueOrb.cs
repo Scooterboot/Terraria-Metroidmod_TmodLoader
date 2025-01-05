@@ -83,5 +83,20 @@ namespace MetroidMod.Content.Tiles.ItemTile
 				Main.tile[i, j].TileType = (ushort)MSystem.OrbItem();
 			}
 		}
+	}	
+	public class ChozoStatueOrb2 : ChozoStatueOrb
+	{
+		public override void SetStaticDefaults()
+		{
+			base.SetStaticDefaults();
+		}
+	}	
+	public class ChozoStatueOrb3 : ChozoStatueOrb
+	{
+		public override void SetStaticDefaults()
+		{
+			base.SetStaticDefaults();
+			AnimationFrameHeight = 0;
+		}
 	}
 }

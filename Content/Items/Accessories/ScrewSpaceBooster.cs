@@ -47,6 +47,12 @@ namespace MetroidMod.Content.Items.Accessories
 				.AddIngredient<SpaceBooster>(1)
 				.AddTile(TileID.TinkerersWorkbench)
 				.Register();
+			CreateRecipe(1)
+				.AddIngredient<ScrewAttack>(1)
+				.AddIngredient<SpeedBooster>(1)
+				.AddIngredient<SpaceJump>(1)
+				.AddTile(TileID.TinkerersWorkbench)
+				.Register();
 		}
 		public override void UpdateAccessory(Player player, bool hideVisual)
 		{

@@ -41,4 +41,22 @@ namespace MetroidMod.Content.Items.Tiles
 			base.RightClick(player);
 		}
 	}
+	public class ChozoStatueOrb2 : ChozoStatueOrb
+	{
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb2>();
+		}
+	}
+	public class ChozoStatueOrb3 : ChozoStatueOrb
+	{
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+			Item.height = 32;
+			Main.RegisterItemAnimation(Item.type, new DrawAnimationVertical(1, 1));
+			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb3>();
+		}
+	}
 }

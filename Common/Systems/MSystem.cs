@@ -1001,7 +1001,15 @@ namespace MetroidMod.Common.Systems
 						return false;
 					}
 
-					int rand = WorldGen.genRand.Next(4); // 0 & 1 = statue only, 2 = statue + brick base, 3 = statue + brick shrine
+					int rand = 0;// WorldGen.genRand.Next(4); // 0 & 1 = statue only, 2 = statue + brick base, 3 = statue + brick shrine // temp disabled for new statues
+					int rand2 = WorldGen.genRand.Next(3);
+					ushort oorb = rand2 switch
+					{
+						2 => (ushort)ModContent.TileType<ChozoStatueOrb>(),
+						1 => (ushort)ModContent.TileType<ChozoStatueOrb2>(),
+						0 => (ushort)ModContent.TileType<ChozoStatueOrb3>(),
+						_ => (ushort)ModContent.TileType<ChozoStatueOrb>(),
+					};
 					if (Main.wallDungeon[(int)Main.tile[i, num].WallType])
 					{
 						rand = 0;
@@ -1094,7 +1102,7 @@ namespace MetroidMod.Common.Systems
 
 					//ushort item = StatueItem(statueX2, statueY - 2);
 					Main.tile[statueX2, statueY - 2].Get<TileWallWireStateData>().HasTile = true;
-					Main.tile[statueX2, statueY - 2].Get<TileTypeData>().Type = (ushort)ModContent.TileType<ChozoStatueOrb>();
+					Main.tile[statueX2, statueY - 2].Get<TileTypeData>().Type = oorb;
 
 					Main.tile[statueX2, statueY - 2].Get<TileWallWireStateData>().TileFrameX = 0;
 					Main.tile[statueX2, statueY - 2].Get<TileWallWireStateData>().TileFrameY = 0;
@@ -1874,7 +1882,7 @@ namespace MetroidMod.Common.Systems
 		int spawnCounter2 = 0;
 		public override void PostUpdateEverything()
 		{
-			if (Main.hardMode && NPC.downedPlantBoss && !spawnedPhazonMeteor && meteorSpawnAttempt <= 0)
+			if (/*Main.hardMode && */NPC.downedPlantBoss && !spawnedPhazonMeteor/* && meteorSpawnAttempt <= 0*/)
 			{
 				DropPhazonMeteor();
 				meteorSpawnAttempt = Main.maxTilesX;
