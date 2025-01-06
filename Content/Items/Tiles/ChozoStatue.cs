@@ -39,4 +39,11 @@ namespace MetroidMod.Content.Items.Tiles
 			recipe.AddRecipe();*/
 		}
 	}
+	public class ChozoStatue2 : ChozoStatue
+	{
+
+	}
+	public class ChozoStatue3 : ChozoStatue
+	{
+	}
 }

@@ -1,3 +1,4 @@
+using MetroidMod.Content.Items.Tiles;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -37,6 +38,22 @@ namespace MetroidMod.Content.Items.Tiles
 			recipe.AddTile(TileID.Anvils);
 			recipe.SetResult(this);
 			recipe.AddRecipe();*/
+		}
+	}	
+	public class ChozoStatueArm2 : ChozoStatueArm
+	{
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+			Item.createTile = ModContent.TileType<Content.Tiles.ChozoStatueArm2>();
+		}
+	}	
+	public class ChozoStatueArm3 : ChozoStatueArm
+	{
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+			Item.createTile = ModContent.TileType<Content.Tiles.ChozoStatueArm3>();
 		}
 	}
 }

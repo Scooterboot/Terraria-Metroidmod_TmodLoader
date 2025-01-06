@@ -924,6 +924,7 @@ namespace MetroidMod.Common.Players
 				if (CurEdge != Edge.None)
 				{
 					// render Player's default movements effortless
+					//Player.runSlowdown *= 5f;
 					Player.moveSpeed = 0f;
 					Player.maxRunSpeed = 0f;
 					Player.accRunSpeed = 0f;

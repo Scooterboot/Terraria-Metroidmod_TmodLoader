@@ -319,6 +319,14 @@ Mods: {
 			PhazonChest.MapEntry: Phazon Chest
 			ChozoStatueOrb2.MapEntry: Chozo Statue Orb2
 			ChozoStatueOrb3.MapEntry: Chozo Statue Orb3
+			ChozoStatue2.MapEntry: Chozo Statue2
+			ChozoStatue3.MapEntry: Chozo Statue3
+			ChozoStatueArm2.MapEntry: Chozo Statue Arm2
+			ChozoStatueArm2Natural.MapEntry: Chozo Statue Arm2 Natural
+			ChozoStatueArm3.MapEntry: Chozo Statue Arm3
+			ChozoStatueArm3Natural.MapEntry: Chozo Statue Arm3 Natural
+			ChozoStatueNatural2.MapEntry: Chozo Statue Natural2
+			ChozoStatueNatural3.MapEntry: Chozo Statue Natural3
 		}
 
 		Buffs: {
@@ -3479,6 +3487,26 @@ Mods: {
 
 			ChozoStatueOrb3: {
 				DisplayName: Chozo Statue Orb3
+				Tooltip: ""
+			}
+
+			ChozoStatue2: {
+				DisplayName: Chozo Statue2
+				Tooltip: ""
+			}
+
+			ChozoStatue3: {
+				DisplayName: Chozo Statue3
+				Tooltip: ""
+			}
+
+			ChozoStatueArm2: {
+				DisplayName: Chozo Statue Arm2
+				Tooltip: ""
+			}
+
+			ChozoStatueArm3: {
+				DisplayName: Chozo Statue Arm3
 				Tooltip: ""
 			}
 		}

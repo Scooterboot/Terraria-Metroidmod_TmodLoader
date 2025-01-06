@@ -1096,9 +1096,15 @@ namespace MetroidMod.Common.Systems
 						statueX2 = i + 2;
 					}
 					int statueY = num;
-
-					WorldGen.PlaceObject(statueX, statueY, ModContent.TileType<ChozoStatueNatural>(), false, 0, 0, -1, -dir);
-					WorldGen.PlaceObject(statueX2, statueY, ModContent.TileType<ChozoStatueArmNatural>(), false, 0, 0, -1, -dir);
+					int[] statue = rand2 switch
+					{
+						2 => [ModContent.TileType<ChozoStatueNatural>(), ModContent.TileType<ChozoStatueArmNatural>()],
+						1 => [ModContent.TileType<ChozoStatueNatural2>(), ModContent.TileType<ChozoStatueArm2Natural>()],
+						0 => [ModContent.TileType<ChozoStatueNatural3>(), ModContent.TileType<ChozoStatueArm3Natural>()],
+						_ => [ModContent.TileType<ChozoStatueNatural>(), ModContent.TileType<ChozoStatueArmNatural>()],
+					};
+					WorldGen.PlaceObject(statueX, statueY, statue[0], false, 0, 0, -1, -dir);
+					WorldGen.PlaceObject(statueX2, statueY, statue[1], false, 0, 0, -1, -dir);
 
 					//ushort item = StatueItem(statueX2, statueY - 2);
 					Main.tile[statueX2, statueY - 2].Get<TileWallWireStateData>().HasTile = true;

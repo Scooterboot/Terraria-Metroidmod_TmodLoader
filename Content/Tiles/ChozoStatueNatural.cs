@@ -46,4 +46,12 @@ namespace MetroidMod.Content.Tiles
 			Item.NewItem(new EntitySource_TileBreak(i, j), i * 16, j * 16, 32, 48, ModContent.ItemType<Items.Tiles.ChoziteOre>(), Main.rand.Next(10, 25));
 		}
 	}
+	public class ChozoStatueNatural2 : ChozoStatueNatural
+	{
+
+	}	
+	public class ChozoStatueNatural3 : ChozoStatueNatural
+	{
+
+	}
 }
