@@ -525,7 +525,7 @@ namespace MetroidMod.Common.Players
 						{
 							p.PickTile(Player.tileTargetX, Player.tileTargetY, drill);
 						}
-						cooldownbomb = (int)(drills.useTime * p.pickSpeed);
+						cooldownbomb = (int)(drills.useTime * p.pickSpeed)+1;
 					}
 				}
 			}
@@ -620,7 +620,9 @@ namespace MetroidMod.Common.Players
 			if (boostEffect > 0)
 			{
 				bool BoostRam = false;
-				foreach (Projectile P in Main.projectile) if (P != null)
+				foreach (Projectile P in Main.projectile)
+				{
+					if (P != null)
 					{
 						if (P.active && P.owner == Player.whoAmI && P.type == ModContent.ProjectileType<Content.Projectiles.RamBall>())
 						{
@@ -628,6 +630,8 @@ namespace MetroidMod.Common.Players
 							break;
 						}
 					}
+				}
+
 				if (!BoostRam)
 				{
 					Projectile.NewProjectile(Player.GetSource_FromAI(), Player.position.X + Player.width / 2, Player.position.Y + Player.height / 2, 0, 0, ModContent.ProjectileType<Content.Projectiles.RamBall>(), mp.PrimeHunter ? mp.boostEffect * 5 : mp.boostEffect, mp.PrimeHunter ? mp.boostEffect : mp.boostEffect / 3, Player.whoAmI);
@@ -851,7 +855,7 @@ namespace MetroidMod.Common.Players
 				Player.position.Y += velocity.Y;
 				num--;
 			}
-			spiderVelocity = velocity;// * spiderSpeed;
+			spiderVelocity = velocity;
 
 			int num2 = 10;
 			while (!CheckCollide(velocity2.X, velocity2.Y) && num2 > 0)
@@ -915,7 +919,7 @@ namespace MetroidMod.Common.Players
 				}
 
 				// if no solid tile is adjacent to the Player
-				if (!CheckCollide(Player.position - new Vector2(3, 3), Player.width + 6, Player.height + 6))
+				if (!CheckCollide(Player.position - new Vector2(3f, 3f), Player.width + 6, Player.height + 6))
 				{
 					CurEdge = Edge.None;
 				}

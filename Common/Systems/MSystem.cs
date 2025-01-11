@@ -679,8 +679,13 @@ namespace MetroidMod.Common.Systems
 			}
 			if (NPC.downedPlantBoss || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
-				list[index++] = new WeightedChance(() => { item = ModContent.TileType<NovaCombo>(); }, 4);
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<NovaBeamTile>(); }, 4);
+			}			
+			if (NPC.downedGolemBoss || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+				list[index++] = new WeightedChance(() => { item = ModContent.TileType<NovaCombo>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceBeamV2Tile>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceSuperMissile>(); }, 4);
 			}
 			if (NPC.downedMoonlord || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
@@ -701,11 +706,6 @@ namespace MetroidMod.Common.Systems
 			{
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<DiffusionMissile>(); }, 4);
 				list[index++] = new WeightedChance(() => { item = ModContent.TileType<SpaceJumpTile>(); }, 4);
-			}
-			if (NPC.downedChristmasIceQueen || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
-			{
-				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceBeamV2Tile>(); }, 4);
-				list[index++] = new WeightedChance(() => { item = ModContent.TileType<IceSuperMissile>(); }, 4);
 			}
 			Array.Resize(ref list, index);
 			double numericValue = WorldGen.genRand.Next(0, (int)list.Sum(p => p.Ratio));
@@ -785,8 +785,14 @@ namespace MetroidMod.Common.Systems
 			}
 			if (NPC.downedPlantBoss || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
-				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<NovaComboAddon>(); }, 4);
 				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<NovaBeamAddon>(); }, 4);
+			}			
+			if (NPC.downedGolemBoss || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
+			{
+
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceBeamV2Addon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceSuperMissileAddon>(); }, 4);
+				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<NovaComboAddon>(); }, 4);
 			}
 			if (NPC.downedMoonlord || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
 			{
@@ -807,11 +813,6 @@ namespace MetroidMod.Common.Systems
 			{
 				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<DiffusionMissileAddon>(); }, 4);
 				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<SpaceJump>(); }, 4);
-			}
-			if (NPC.downedChristmasIceQueen || Configs.MConfigMain.Instance.drunkWorldHasDrunkStatues)
-			{
-				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceBeamV2Addon>(); }, 4);
-				list[index++] = new WeightedChance(() => { item = ModContent.ItemType<IceSuperMissileAddon>(); }, 4);
 			}
 			Array.Resize(ref list, index);
 			double numericValue = WorldGen.genRand.Next(0, (int)list.Sum(p => p.Ratio));
