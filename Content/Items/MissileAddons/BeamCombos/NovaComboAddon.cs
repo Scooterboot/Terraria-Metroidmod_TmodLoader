@@ -35,8 +35,8 @@ namespace MetroidMod.Content.Items.MissileAddons.BeamCombos
 			MGlobalItem mItem = Item.GetGlobalItem<MGlobalItem>();
 			mItem.missileSlotType = 0;
 			mItem.addonChargeDmg = 1f;
-			mItem.addonMissileCost = 10;
-			mItem.addonMissileDrain = 5;
+			mItem.addonMissileCost = 15;
+			mItem.addonMissileDrain = 10;
 			mItem.missileChangeType = MissileChangeSlotID.Novalaser;
 		}
 

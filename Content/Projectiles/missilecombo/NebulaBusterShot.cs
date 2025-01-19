@@ -1,4 +1,5 @@
 using System;
+using MetroidMod.Common.GlobalItems;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Enums;
@@ -51,7 +52,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			oPos = O.RotatedRelativePoint(O.MountedCenter, true);
 
 			Lead = Main.projectile[(int)P.ai[0]];
-			if (!Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<NebulaComboShot>())
+			if (!Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<NebulaComboShot>()|| O.HeldItem.GetGlobalItem<MGlobalItem>().isBeam)
 			{
 				P.Kill();
 				return;

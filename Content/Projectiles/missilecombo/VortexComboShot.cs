@@ -1,4 +1,5 @@
 using System;
+using MetroidMod.Common.GlobalItems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -39,7 +40,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 
 			float speed = 10f;//14f;
 
-			if (Lead == null || !Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<ChargeLead>() || !O.controlUseItem)
+			if (Lead == null || !Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<ChargeLead>() || !O.controlUseItem|| O.HeldItem.GetGlobalItem<MGlobalItem>().isBeam)
 			{
 				P.Kill();
 				return;

@@ -1,4 +1,5 @@
 using System;
+using MetroidMod.Common.GlobalItems;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
@@ -43,7 +44,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			Player O = Main.player[P.owner];
 			Vector2 oPos = O.RotatedRelativePoint(O.MountedCenter, true);
 			Projectile Lead = Main.projectile[(int)P.ai[0]];
-			if (!Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<ChargeLead>() || !O.controlUseItem)
+			if (!Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<ChargeLead>() || !O.controlUseItem || O.HeldItem.GetGlobalItem<MGlobalItem>().isBeam)
 			{
 				P.Kill();
 				return;

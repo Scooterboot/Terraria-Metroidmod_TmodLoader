@@ -327,6 +327,7 @@ Mods: {
 			// ChozoStatueArm3Natural.MapEntry: Chozo Statue Arm3 Natural
 			// ChozoStatueNatural2.MapEntry: Chozo Statue Natural2
 			// ChozoStatueNatural3.MapEntry: Chozo Statue Natural3
+			// UnknownItemTile.MapEntry: Unknown Item Tile
 		}
 
 		Buffs: {

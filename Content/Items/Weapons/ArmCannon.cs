@@ -2085,6 +2085,11 @@ namespace MetroidMod.Content.Items.Weapons
 			{
 				Item.TryGetGlobalItem(out MGlobalItem mi);
 				mi.isBeam = !mi.isBeam;
+				player.GetModPlayer<MPlayer>().statCharge = 0f;
+				if (LeadActive(player, chargeLead))
+				{
+					Main.projectile[chargeLead].Kill();
+				}
 			}
 			if (Stealth)
 			{
@@ -2662,7 +2667,7 @@ namespace MetroidMod.Content.Items.Weapons
 					}
 
 					bool ranOutOfMissiles = pb.statMissiles <= 0f;
-					if (ranOutOfMissiles)
+					if (ranOutOfMissiles || pb.isBeam)
 					{
 						if(LeadActive(player, chargeLead))
 						{

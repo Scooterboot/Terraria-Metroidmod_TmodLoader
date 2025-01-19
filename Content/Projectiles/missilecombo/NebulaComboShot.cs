@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using MetroidMod.Common.GlobalItems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -53,7 +54,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			oPos = O.RotatedRelativePoint(O.MountedCenter, true);
 
 			Lead = Main.projectile[(int)P.ai[0]];
-			if (!Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<ChargeLead>())
+			if (!Lead.active || Lead.owner != P.owner || Lead.type != ModContent.ProjectileType<ChargeLead>()|| O.HeldItem.GetGlobalItem<MGlobalItem>().isBeam)
 			{
 				P.Kill();
 				return;

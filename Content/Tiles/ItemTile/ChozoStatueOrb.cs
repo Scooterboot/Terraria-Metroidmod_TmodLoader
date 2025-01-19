@@ -36,7 +36,7 @@ namespace MetroidMod.Content.Tiles.ItemTile
 		{
 			if (Main.netMode != NetmodeID.SinglePlayer)
 			{
-				yield return new Item(MSystem.OORB());
+				yield return new Item(MSystem.OORB1());
 			}
 		}
 		public override void AnimateTile(ref int frame, ref int frameCounter)
@@ -54,7 +54,7 @@ namespace MetroidMod.Content.Tiles.ItemTile
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer)
 			{
-				Main.tile[i, j].TileType = (ushort)MSystem.OrbItem();
+				Main.tile[i, j].TileType = (ushort)MSystem.OORBItem1();
 			}
 			else if (Main.netMode != NetmodeID.SinglePlayer)
 			{
@@ -80,7 +80,7 @@ namespace MetroidMod.Content.Tiles.ItemTile
 			{
 				fail = true;
 				noItem = true;
-				Main.tile[i, j].TileType = (ushort)MSystem.OrbItem();
+				Main.tile[i, j].TileType = (ushort)MSystem.OORBItem1();
 			}
 		}
 	}	
@@ -90,6 +90,46 @@ namespace MetroidMod.Content.Tiles.ItemTile
 		{
 			base.SetStaticDefaults();
 		}
+		public override IEnumerable<Item> GetItemDrops(int i, int j)
+		{
+			if (Main.netMode != NetmodeID.SinglePlayer)
+			{
+				yield return new Item(MSystem.OORB2());
+			}
+		}
+		public override bool RightClick(int i, int j)
+		{
+			if (Main.netMode == NetmodeID.SinglePlayer)
+			{
+				Main.tile[i, j].TileType = (ushort)MSystem.OORBItem2();
+			}
+			else if (Main.netMode != NetmodeID.SinglePlayer)
+			{
+				Main.tile[i, j].ClearTile();
+				NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, i, j, 0f, 0, 0, 0);
+				NetMessage.SendTileSquare(-1, i, j);
+			}
+			return true;
+		}
+		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
+		{
+			if (Main.netMode != NetmodeID.SinglePlayer/*&& !Main.tile[i, j].HasTile*/)
+			{
+				if (!Main.tile[i, j].HasTile)
+				{
+					fail = false;
+					noItem = false;
+					NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, i, j, 0f, 0, 0, 0);
+					NetMessage.SendTileSquare(-1, i, j);
+				}
+			}
+			else
+			{
+				fail = true;
+				noItem = true;
+				Main.tile[i, j].TileType = (ushort)MSystem.OORBItem2();
+			}
+		}
 	}	
 	public class ChozoStatueOrb3 : ChozoStatueOrb
 	{
@@ -97,6 +137,46 @@ namespace MetroidMod.Content.Tiles.ItemTile
 		{
 			base.SetStaticDefaults();
 			AnimationFrameHeight = 0;
+		}
+		public override IEnumerable<Item> GetItemDrops(int i, int j)
+		{
+			if (Main.netMode != NetmodeID.SinglePlayer)
+			{
+				yield return new Item(MSystem.OORB3());
+			}
+		}
+		public override bool RightClick(int i, int j)
+		{
+			if (Main.netMode == NetmodeID.SinglePlayer)
+			{
+				Main.tile[i, j].TileType = (ushort)MSystem.OORBItem3();
+			}
+			else if (Main.netMode != NetmodeID.SinglePlayer)
+			{
+				Main.tile[i, j].ClearTile();
+				NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, i, j, 0f, 0, 0, 0);
+				NetMessage.SendTileSquare(-1, i, j);
+			}
+			return true;
+		}
+		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
+		{
+			if (Main.netMode != NetmodeID.SinglePlayer/*&& !Main.tile[i, j].HasTile*/)
+			{
+				if (!Main.tile[i, j].HasTile)
+				{
+					fail = false;
+					noItem = false;
+					NetMessage.SendData(MessageID.TileManipulation, -1, -1, null, 0, i, j, 0f, 0, 0, 0);
+					NetMessage.SendTileSquare(-1, i, j);
+				}
+			}
+			else
+			{
+				fail = true;
+				noItem = true;
+				Main.tile[i, j].TileType = (ushort)MSystem.OORBItem3();
+			}
 		}
 	}
 }

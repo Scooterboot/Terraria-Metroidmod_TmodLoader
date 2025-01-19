@@ -50,6 +50,7 @@ namespace MetroidMod.Content.MorphBallAddons
 				.AddRecipeGroup(MetroidMod.T2HMBarRecipeGroupID, 5)
 				.AddIngredient(ItemID.CursedFlame, 5)
 				.AddTile(TileID.MythrilAnvil)
+								.AddDecraftCondition(Condition.Hardmode)
 				.Register();
 		}
 	}

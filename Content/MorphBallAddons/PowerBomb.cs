@@ -168,6 +168,7 @@ namespace MetroidMod.Content.MorphBallAddons
 				.AddIngredient(ItemID.SoulofMight, 10)
 				.AddIngredient(ItemID.SoulofFright, 10)
 				.AddIngredient(ItemID.SoulofSight, 10)
+				.AddDecraftCondition(Condition.DownedMechBossAll)
 				.Register();
 		}
 	}

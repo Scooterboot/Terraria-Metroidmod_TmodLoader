@@ -1,5 +1,6 @@
 using MetroidMod.Common.GlobalItems;
 using MetroidMod.ID;
+using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -46,6 +47,7 @@ namespace MetroidMod.Content.Items.MissileAddons.BeamCombos
 				.AddIngredient(ItemID.Topaz, 1)
 				.AddIngredient(ItemID.Bone, 10)
 				.AddTile(TileID.Anvils)
+				.AddDecraftCondition(Condition.DownedSkeletron)
 				.Register();
 		}
 	}

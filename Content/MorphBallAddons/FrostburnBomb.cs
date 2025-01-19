@@ -50,6 +50,7 @@ namespace MetroidMod.Content.MorphBallAddons
 				.AddRecipeGroup(MetroidMod.T1HMBarRecipeGroupID, 5)
 				.AddIngredient(ItemID.FrostCore, 1)
 				.AddTile(TileID.Anvils)
+				.AddDecraftCondition(Condition.Hardmode)
 				.Register();
 		}
 	}

@@ -68,7 +68,7 @@ namespace MetroidMod.Content.Projectiles.missilecombo
 			Player O = Main.player[P.owner];
 
 			Lead = Main.projectile[(int)P.ai[0]];
-			if (O.HeldItem.GetGlobalItem<MGlobalItem>().statMissiles <= 0)
+			if (O.HeldItem.GetGlobalItem<MGlobalItem>().statMissiles <= 0 ||O.HeldItem.GetGlobalItem<MGlobalItem>().isBeam)
 			{
 				P.Kill();
 			}

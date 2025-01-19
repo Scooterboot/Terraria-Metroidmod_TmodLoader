@@ -68,7 +68,7 @@ namespace MetroidMod
 				}
 			}
 			return false;*/
-			return !Collision.IsClearSpotTest(Position,10f,Width,Height);
+			return !Collision.IsClearSpotTest(Position,12f,Width,Height);
 		}
 
 		public static Tile GetTile(Vector2 Position)

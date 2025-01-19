@@ -36,7 +36,7 @@ namespace MetroidMod.Content.Items.Tiles
 		}
 		public override void RightClick(Player player)
 		{
-			player.QuickSpawnItem(player.GetSource_FromThis(), MSystem.OORB());
+			player.QuickSpawnItem(player.GetSource_FromThis(), MSystem.OORB1());
 			//Item.NewItem(player.GetSource_FromThis(), player.position, (ushort)MSystem.OrbItem());
 			base.RightClick(player);
 		}
@@ -48,6 +48,16 @@ namespace MetroidMod.Content.Items.Tiles
 			base.SetDefaults();
 			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb2>();
 		}
+		public override bool CanRightClick()
+		{
+			return true;
+		}
+		public override void RightClick(Player player)
+		{
+			player.QuickSpawnItem(player.GetSource_FromThis(), MSystem.OORB2());
+			//Item.NewItem(player.GetSource_FromThis(), player.position, (ushort)MSystem.OrbItem());
+			//RightClick(player);
+		}
 	}
 	public class ChozoStatueOrb3 : ChozoStatueOrb
 	{
@@ -57,6 +67,16 @@ namespace MetroidMod.Content.Items.Tiles
 			Item.height = 32;
 			Main.RegisterItemAnimation(Item.type, new DrawAnimationVertical(1, 1));
 			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb3>();
+		}
+		public override bool CanRightClick()
+		{
+			return true;
+		}
+		public override void RightClick(Player player)
+		{
+			player.QuickSpawnItem(player.GetSource_FromThis(), MSystem.OORB3());
+			//Item.NewItem(player.GetSource_FromThis(), player.position, (ushort)MSystem.OrbItem());
+			//base.RightClick(player);
 		}
 	}
 }
