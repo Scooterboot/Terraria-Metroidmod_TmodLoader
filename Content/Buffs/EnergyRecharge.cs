@@ -21,7 +21,7 @@ namespace MetroidMod.Content.Buffs
 		public override void Update(Player player, ref int buffIndex)
 		{
 			MPlayer mp = player.GetModPlayer<MPlayer>();
-			if ((/*player.statLife >= player.statLifeMax2 && mp.reserveHearts >= mp.reserveTanks && */mp.Energy >= mp.MaxEnergy) || player.controlJump || player.controlUseItem)
+			if ((/*player.statLife >= player.statLifeMax2 &&*/ mp.reserveHearts >= mp.reserveTanks && mp.Energy >= mp.MaxEnergy) || player.controlJump || player.controlUseItem)
 			{
 				if (SoundEngine.TryGetActiveSound(soundInstance, out ActiveSound result))
 				{

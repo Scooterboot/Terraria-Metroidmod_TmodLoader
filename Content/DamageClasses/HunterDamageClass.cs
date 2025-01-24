@@ -10,7 +10,7 @@ namespace MetroidMod.Content.DamageClasses
 		}
 		public override bool GetEffectInheritance(DamageClass damageClass)
 		{
-			if (damageClass == Generic)
+			if (damageClass == Generic /*|| MUtils.FargoSoulsActive()*/)
 			{
 				return true;
 			}
@@ -18,7 +18,7 @@ namespace MetroidMod.Content.DamageClasses
 		}
 		public override StatInheritanceData GetModifierInheritance(DamageClass damageClass)
 		{
-			if (damageClass == Generic)
+			if (damageClass == Generic /*|| MUtils.FargoSoulsActive()*/)
 			{
 				return StatInheritanceData.Full;
 			}
@@ -35,7 +35,7 @@ namespace MetroidMod.Content.DamageClasses
 			if (damageClass == Generic)
 				return 1f;
 			return 0;
-		}*/
+		}
 		/*public override void SetDefaultStats(Player player)
 		{
 			base.SetDefaultStats(player);

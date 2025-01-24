@@ -123,6 +123,7 @@ namespace MetroidMod.Common.Players
 		{
 			if (Player.TryMetroidPlayer(out MPlayer mp))
 			{
+				mp.reserveHearts = mp.reserveTanks;
 				mp.Energy = mp.MaxEnergy;
 				mp.SuitReserves = mp.MaxSuitReserves;
 				if (mp.PrimeHunter)
