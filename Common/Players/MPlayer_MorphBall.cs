@@ -525,7 +525,7 @@ namespace MetroidMod.Common.Players
 						{
 							p.PickTile(Player.tileTargetX, Player.tileTargetY, drill);
 						}
-						cooldownbomb = (int)(drills.useTime * p.pickSpeed)+1;
+						cooldownbomb = Math.Max((int)(drills.useTime * p.pickSpeed),1);
 					}
 				}
 			}
