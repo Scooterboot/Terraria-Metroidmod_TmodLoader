@@ -9,7 +9,7 @@ namespace MetroidMod
 	{
 		public static bool CheckCollide(Vector2 Position, int Width, int Height)
 		{
-			/*int num = (int)(Position.X / 16f) - 1;
+			int num = (int)(Position.X / 16f) - 1;
 			int num2 = (int)((Position.X + (float)Width) / 16f) + 2;
 			int num3 = (int)(Position.Y / 16f) - 1;
 			int num4 = (int)((Position.Y + (float)Height) / 16f) + 2;
@@ -67,8 +67,8 @@ namespace MetroidMod
 					}
 				}
 			}
-			return false;*/
-			return !Collision.IsClearSpotTest(Position,12f,Width,Height);
+			return false;
+			//return !Collision.IsClearSpotTest(Position,12f,Width,Height);
 		}
 
 		public static Tile GetTile(Vector2 Position)

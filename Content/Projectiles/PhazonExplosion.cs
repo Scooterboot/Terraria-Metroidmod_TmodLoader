@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MetroidMod.Content.Projectiles
@@ -52,6 +53,63 @@ namespace MetroidMod.Content.Projectiles
 			{
 				P.velocity *= 1.1f;
 			}
+			//Convert((int)(Projectile.position.X + (Projectile.width * 0.5f)) / 16, (int)(Projectile.position.Y + (Projectile.height * 0.5f)) / 16, 2);
 		}
+		//
+		/*private static void Convert(int i, int j, int size = 4)
+		{
+			for (int k = i - size; k <= i + size; k++)
+			{
+				for (int l = j - size; l <= j + size; l++)
+				{
+					if (WorldGen.InWorld(k, l, 1) && Math.Abs(k - i) + Math.Abs(l - j) < Math.Sqrt((size * size) + (size * size)))
+					{
+						int type = Main.tile[k, l].TileType;
+						int wall = Main.tile[k, l].WallType;
+
+
+						// Convert all walls to ExampleWall (or ExampleWallUnsafe for SpiderUnsafe)
+						if (wall != 0 && wall != ModContent.WallType<Walls.PhazestoneWall>())
+						{
+							Main.tile[k, l].WallType = (ushort)ModContent.WallType<Walls.PhazestoneWall>();
+							WorldGen.SquareWallFrame(k, l);
+							NetMessage.SendTileSquare(-1, k, l, 1);
+						}
+
+						// If the tile is stone, convert to ExampleBlock
+						if (TileID.Sets.Conversion.Stone[type])
+						{
+							Main.tile[k, l].TileType = (ushort)ModContent.TileType<Tiles.PhazestoneTile>();
+							WorldGen.SquareTileFrame(k, l);
+							NetMessage.SendTileSquare(-1, k, l, 1);
+						}
+						if (TileID.Sets.Conversion.MushroomGrass[type]|| TileID.Sets.Conversion.Grass[type])
+						{
+							Main.tile[k, l].TileType = (ushort)ModContent.TileType<Tiles.PhazonGrass>();
+							WorldGen.SquareTileFrame(k, l);
+							NetMessage.SendTileSquare(-1, k, l, 1);
+						}
+						else if (type == TileID.Trees)
+						{
+							Main.tile[k, l].TileType = (ushort)ModContent.TileType<Tiles.PhazonTreeTile>();
+							WorldGen.SquareTileFrame(k, l);
+							NetMessage.SendTileSquare(-1, k, l, 1);
+						}
+						else if (type == TileID.Plants || type == TileID.Plants2)
+						{
+							Main.tile[k, l].TileType = (ushort)ModContent.TileType<Tiles.PhazonTreeTile>();
+							WorldGen.SquareTileFrame(k, l);
+							NetMessage.SendTileSquare(-1, k, l, 1);
+						}
+						else if (type == TileID.Vines)
+						{
+							Main.tile[k, l].TileType = (ushort)ModContent.TileType<Tiles.PhazonTreeTile>();
+							WorldGen.SquareTileFrame(k, l);
+							NetMessage.SendTileSquare(-1, k, l, 1);
+						}
+					}
+				}
+			}
+		}*/
 	}
 }
