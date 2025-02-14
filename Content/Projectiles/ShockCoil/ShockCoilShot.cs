@@ -54,7 +54,7 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 		int soundDelay = 30;
 
 		int ampSyncCooldown = 20;
-		//int shots = 1;
+		int shots = 1;
 		int immuneTime = 0;
 		int dmg = 0;
 
@@ -78,6 +78,7 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 				else if (player.HeldItem.ModItem is ArmCannon hold2)
 				{
 					shot = hold2.shotEffect.ToString();
+					shots = hold2.shotAmt;
 				}
 			}
 			dmg = Projectile.damage;
@@ -444,7 +445,7 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 			//float bonusShots = (mp.statCharge * (shots - 1) / MPlayer.maxCharge) + 1f;
 			int immunity = (int)(O.HeldItem.useTime / (double)damaage); //(int)(O.HeldItem.useTime / bonusShots / (double)damaage);
 			//mp.statOverheat += mp.overheatCost; // /shots;
-			mp.statCharge = Math.Min(mp.statCharge + 1.5f, MPlayer.maxCharge);
+			mp.statCharge = Math.Min(mp.statCharge + 1.5f/shots, MPlayer.maxCharge);
 			if (mp.Energy < mp.MaxEnergy && !mp.PrimeHunter && (Luminite || DiffBeam))
 			{
 				if (heal > mp.MaxEnergy - mp.Energy)
