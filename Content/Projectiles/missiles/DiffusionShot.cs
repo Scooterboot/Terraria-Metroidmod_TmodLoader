@@ -29,6 +29,7 @@ namespace MetroidMod.Content.Projectiles.missiles
 			Projectile.timeLeft = 175;
 			Projectile.tileCollide = false;
 			Projectile.penetrate = -1;
+			Projectile.localNPCHitCooldown = 12;
 			Main.projFrames[Projectile.type] = 5;
 		}
 
@@ -132,6 +133,10 @@ namespace MetroidMod.Content.Projectiles.missiles
 			mProjectile.DrawCentered(Projectile, Main.spriteBatch);
 			return false;
 		}
+		/*public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+		{
+			target.immune[Projectile.owner] = 12; //4;
+		}*/
 	}
 	public class IceDiffusionShot : DiffusionShot
 	{

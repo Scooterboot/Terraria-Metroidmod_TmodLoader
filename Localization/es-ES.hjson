@@ -390,6 +390,11 @@ Mods: {
 				// Description: Mods.MetroidMod.Buffs.CrocomirePetBuff.Description
 				// DisplayName: Baby Crocomire
 			}
+
+			MiniTorizoBuff: {
+				// Description: Mods.MetroidMod.Buffs.MiniTorizoBuff.Description
+				// DisplayName: Mini Torizo Buff
+			}
 		}
 
 		Items: {
@@ -3510,6 +3515,11 @@ Mods: {
 				// DisplayName: Chozo Statue Arm3
 				// Tooltip: ""
 			}
+
+			ChozoStaff: {
+				// Tooltip: ""
+				// DisplayName: Chozo Staff
+			}
 		}
 
 		NPCs: {
@@ -3993,6 +4003,7 @@ Mods: {
 			// ChozoRapierStab.DisplayName: Chozo Rapier Stab
 			// ChozoSawProjectile.DisplayName: Powered Chozite Saw
 			// OrbBomb.DisplayName: Orb Bomb
+			// MiniTorizo.DisplayName: Mini Torizo
 		}
 
 		Configs: {

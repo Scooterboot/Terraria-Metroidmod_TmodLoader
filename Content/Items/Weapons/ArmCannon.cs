@@ -274,7 +274,7 @@ namespace MetroidMod.Content.Items.Weapons
 
 		public override bool CanReforge()
 		{
-			foreach (Item item in BeamChange)
+			/*foreach (Item item in BeamChange)
 			{
 				if (item == null || item.IsAir || item.type == BeamMods[0].type) { continue; }
 				IEntitySource itemSource_OpenItem = Main.LocalPlayer.GetSource_OpenItem(Type);
@@ -304,8 +304,8 @@ namespace MetroidMod.Content.Items.Weapons
 				IEntitySource itemSource_OpenItem = Main.LocalPlayer.GetSource_OpenItem(Type);
 				Main.LocalPlayer.QuickSpawnItem(itemSource_OpenItem, item, item.stack);
 				item.TurnToAir();
-			}
-			//MissileMods = new Item[MissileAddonSlotID.Count];
+			}*/
+			//MissileMods = new Item[MissileAddonSlotID.Count]; //it dont matter, noneathis matters. DR
 			return base.CanReforge();
 		}
 		public override bool RangedPrefix()
