@@ -60,7 +60,7 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 
 		float[] amp = new float[3];
 		float[] ampDest = new float[3];
-		float range;
+		private float range;
 		float distance;
 
 		private int GetDepth(MProjectile mp)
@@ -423,13 +423,17 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 		}
 		public override void SendExtraAI(BinaryWriter writer)
 		{
+			writer.Write(range);
+			writer.Write(distance);
 			writer.Write(BeamLength);
 			writer.WriteVector2(targetPos);
 			base.SendExtraAI(writer);
 		}
 		public override void ReceiveExtraAI(BinaryReader reader)
 		{
-			BeamLength = reader.ReadInt32();
+			range = reader.ReadSingle();
+			distance = reader.ReadSingle();
+			BeamLength = reader.ReadSingle();
 			targetPos = reader.ReadVector2();
 			base.ReceiveExtraAI(reader);
 		}

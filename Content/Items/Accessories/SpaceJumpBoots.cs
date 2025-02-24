@@ -14,7 +14,7 @@ namespace MetroidMod.Content.Items.Accessories
 		public override void SetStaticDefaults()
 		{
 			Item.ResearchUnlockCount = 1;
-			ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<SpinBoost>();
+			//ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<SpinBoost>(); dickheads in multi like to use up all the energy tanks they find so this is another way to get them
 		}
 		public override void SetDefaults()
 		{
