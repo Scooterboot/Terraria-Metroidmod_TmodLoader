@@ -375,7 +375,7 @@ namespace MetroidMod.Content.Items.Weapons
 		private int miniGunCostReduct = 2;
 		private int miniGunAmt = 1;
 
-		private int comboUseTime = 4;
+		private int comboUseTime = 6;
 		private int comboCostUseTime = 12;
 		private int comboShotAmt = 1;
 		private float chargeMult = 1f;
@@ -1346,9 +1346,9 @@ namespace MetroidMod.Content.Items.Weapons
 				Item.useTime = (int)useTime;
 				Item.useAnimation = (int)useTime;
 				Item.shoot = ModContent.Find<ModProjectile>(Mod.Name, shot).Type;
-				//ShotSound = new SoundStyle($"{shotSoundMod.Name}/Assets/Sounds/{shotSound}");
+				ShotSound = new SoundStyle($"{shotSoundMod.Name}/Assets/Sounds/{shotSound}");
 				ChargeShotSound = new SoundStyle($"{Mod.Name}/Assets/Sounds/{chargeShotSound}");
-				Item.UseSound = new($"{Mod.Name}/Assets/Sounds/{shotSound}");//ShotSound; //TESTING
+				Item.UseSound = ShotSound; //TESTING
 
 				//Item.autoReuse = (!slot1.IsAir);//(isCharge);
 
@@ -1423,7 +1423,7 @@ namespace MetroidMod.Content.Items.Weapons
 				miniGunCostReduct = 2;
 				miniGunAmt = 1;
 
-				comboUseTime = 4;
+				comboUseTime = 6;
 				comboCostUseTime = 12;
 				comboShotAmt = 1;
 
@@ -1685,7 +1685,8 @@ namespace MetroidMod.Content.Items.Weapons
 				Item.useTime = (int)useTime;
 				Item.useAnimation = (int)useTime;
 				Item.shoot = Mod.Find<ModProjectile>(shot).Type;
-				Item.UseSound = null;// new($"{Mod.Name}/Assets/Sounds/{shotSound}");
+				ShotSound = new($"{Mod.Name}/Assets/Sounds/{shotSound}");
+				Item.UseSound = ShotSound;// null;
 
 				Item.shootSpeed = 8f;
 				Item.reuseDelay = 0;
@@ -2090,10 +2091,11 @@ namespace MetroidMod.Content.Items.Weapons
 				{
 					Main.projectile[chargeLead].Kill();
 				}
+				Item.Refresh(false);
 			}
 			if (Stealth)
 			{
-				if (!player.mount.Active)
+				if (!player.mount.Active && Item.TryGetGlobalItem(out MGlobalItem mi) && mi.isBeam)
 				{
 					player.scope = true;
 				}
@@ -2235,7 +2237,7 @@ namespace MetroidMod.Content.Items.Weapons
 							{
 								if (mp.statCharge < MPlayer.maxCharge && mp.statOverheat < mp.maxOverheat)
 								{
-									mp.statCharge = Math.Min(mp.statCharge + 1, MPlayer.maxCharge);
+									mp.statCharge = (float)Math.Min(mp.statCharge + 1f + (1 / useTime), MPlayer.maxCharge);
 								}
 							}
 							else
@@ -2391,7 +2393,7 @@ namespace MetroidMod.Content.Items.Weapons
 							{
 								if (mp.statCharge < MPlayer.maxCharge)
 								{
-									mp.statCharge = Math.Min(mp.statCharge + 1, MPlayer.maxCharge);
+									mp.statCharge = (float)Math.Min(mp.statCharge + 1f + (1f / useTime), MPlayer.maxCharge);
 								}
 								if (isHeldCombo > 0)
 								{
@@ -2708,7 +2710,7 @@ namespace MetroidMod.Content.Items.Weapons
 					vector5 = vector5.RotatedBy((Main.rand.NextDouble() * 0.12 - 0.06) * spray, default(Vector2));
 					if (float.IsNaN(vector5.X) || float.IsNaN(vector5.Y))
 					{
-						vector5 = -Vector2.UnitY;
+						vector5 = -Vector2.UnitY; //this can turn the shots into a cursed flame candle with fargos hypermode and or/enough speed
 					}
 					int proj = Projectile.NewProjectile(entitySource, vector3.X, vector3.Y, vector5.X, vector5.Y, projType, damage, knockBack, player.whoAmI, 0f, 0f);
 					Main.projectile[proj].ai[0] = Lead.whoAmI;

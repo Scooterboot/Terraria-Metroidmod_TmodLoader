@@ -51,7 +51,7 @@ namespace MetroidMod.Content.MorphBallAddons
 				.AddRecipeGroup(MetroidMod.T2HMBarRecipeGroupID, 5)
 				.AddIngredient(ItemID.Ichor, 5)
 				.AddTile(TileID.MythrilAnvil)
-								.AddDecraftCondition(Condition.Hardmode)
+				//.AddDecraftCondition(Condition.Hardmode)
 				.Register();
 		}
 	}

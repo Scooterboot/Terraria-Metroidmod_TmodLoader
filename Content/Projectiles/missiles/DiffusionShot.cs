@@ -29,6 +29,7 @@ namespace MetroidMod.Content.Projectiles.missiles
 			Projectile.timeLeft = 175;
 			Projectile.tileCollide = false;
 			Projectile.penetrate = -1;
+			Projectile.usesLocalNPCImmunity = true;
 			Projectile.localNPCHitCooldown = 12;
 			Main.projFrames[Projectile.type] = 5;
 		}

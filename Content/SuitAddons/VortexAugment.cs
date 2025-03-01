@@ -109,7 +109,7 @@ namespace MetroidMod.Content.SuitAddons
 				.AddIngredient(ItemID.FragmentVortex, 45)
 				.AddSuitAddon<TerraGravitySuitAddon>(1)
 				.AddTile(TileID.LunarCraftingStation)
-				.AddDecraftCondition(Condition.DownedMoonLord)
+				//.AddDecraftCondition(Condition.DownedMoonLord)
 				.Register();
 		}
 	}

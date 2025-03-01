@@ -50,7 +50,7 @@ namespace MetroidMod.Content.MorphBallAddons
 				.AddRecipeGroup(MBAddonLoader.BombsRecipeGroupID, 1)
 				.AddIngredient(ItemID.FragmentSolar, 5)
 				.AddTile(TileID.LunarCraftingStation)
-				.AddDecraftCondition(Condition.DownedCultist)
+				//.AddDecraftCondition(Condition.DownedCultist)
 				.Register();
 		}
 	}

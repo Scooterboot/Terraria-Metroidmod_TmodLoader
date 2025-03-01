@@ -47,7 +47,7 @@ namespace MetroidMod.Content.Items.MissileAddons.BeamCombos
 				.AddIngredient(ItemID.Topaz, 1)
 				.AddIngredient(ItemID.Bone, 10)
 				.AddTile(TileID.Anvils)
-				.AddDecraftCondition(Condition.DownedSkeletron)
+				//.AddDecraftCondition(Condition.DownedSkeletron)
 				.Register();
 		}
 	}

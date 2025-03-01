@@ -425,16 +425,16 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 		{
 			writer.Write(range);
 			writer.Write(distance);
-			writer.Write(BeamLength);
-			writer.WriteVector2(targetPos);
+			//writer.Write(BeamLength);
+			//writer.WriteVector2(targetPos);
 			base.SendExtraAI(writer);
 		}
 		public override void ReceiveExtraAI(BinaryReader reader)
 		{
 			range = reader.ReadSingle();
 			distance = reader.ReadSingle();
-			BeamLength = reader.ReadSingle();
-			targetPos = reader.ReadVector2();
+			//BeamLength = reader.ReadSingle();
+			//targetPos = reader.ReadVector2();
 			base.ReceiveExtraAI(reader);
 		}
 		public override void OnHitNPC(NPC target2, NPC.HitInfo hit, int damageDone)

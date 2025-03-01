@@ -51,7 +51,7 @@ namespace MetroidMod.Content.MorphBallAddons
 				.AddIngredient(ItemID.ChlorophyteBar, 5)
 				.AddIngredient(ItemID.VialofVenom, 5)
 				.AddTile(TileID.MythrilAnvil)
-								.AddDecraftCondition(Condition.DownedGolem)
+				//.AddDecraftCondition(Condition.DownedGolem)
 				.Register();
 		}
 	}

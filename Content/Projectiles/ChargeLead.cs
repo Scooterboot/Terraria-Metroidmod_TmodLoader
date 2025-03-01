@@ -50,6 +50,7 @@ namespace MetroidMod.Content.Projectiles
 		public float aimSpeed = 0f;
 
 		bool soundPlayed = false;
+		bool sound2Played = false;
 		ReLogic.Utilities.SlotId soundInstance;
 		int negateUseTime = 0;
 		public override void AI()
@@ -90,26 +91,30 @@ namespace MetroidMod.Content.Projectiles
 				P.alpha = 0;
 			}
 
-			if (mp.statCharge == 10)
+			if (mp.statCharge >= 5f)
 			{
-				soundInstance = SoundEngine.PlaySound(new SoundStyle($"{ChargeUpSoundMod.Name}/Assets/Sounds/{ChargeUpSound}"), P.Center);
-			}
-			else if (comboSound == 1)
-			{
-				if (mp.statCharge >= MPlayer.maxCharge - 20 && !soundPlayed)
+				if (!sound2Played)
 				{
-					SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeComboActivate, P.Center);
+					soundInstance = SoundEngine.PlaySound(new SoundStyle($"{ChargeUpSoundMod.Name}/Assets/Sounds/{ChargeUpSound}"), P.Center);
+					sound2Played = true;
+				}
+				if (comboSound == 1)
+				{
+					if (mp.statCharge >= MPlayer.maxCharge - 20 && !soundPlayed)
+					{
+						SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeComboActivate, P.Center);
+						soundPlayed = true;
+					}
+				}
+				else if (mp.statCharge >= MPlayer.maxCharge && !soundPlayed)
+				{
+					SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeMax, P.Center);
+					if (SoundEngine.TryGetActiveSound(soundInstance, out ActiveSound result))
+					{
+						result.Stop();
+					}
 					soundPlayed = true;
 				}
-			}
-			else if (mp.statCharge >= MPlayer.maxCharge && !soundPlayed)
-			{
-				SoundEngine.PlaySound(Sounds.Items.Weapons.ChargeMax, P.Center);
-				if (SoundEngine.TryGetActiveSound(soundInstance, out ActiveSound result))
-				{
-					result.Stop();
-				}
-				soundPlayed = true;
 			}
 			if (noSomersault)
 			{

@@ -232,7 +232,7 @@ namespace MetroidMod.Content.MorphBallAddons
 			CreateRecipe(1)
 				.AddIngredient(ItemID.FragmentSolar, 18)
 				.AddTile(TileID.LunarCraftingStation)
-								.AddDecraftCondition(Condition.DownedCultist)
+				//.AddDecraftCondition(Condition.DownedCultist)
 				.Register();
 		}
 	}

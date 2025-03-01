@@ -224,7 +224,7 @@ namespace MetroidMod.Content.MorphBallAddons
 			CreateRecipe(1)
 				.AddIngredient(ItemID.FragmentVortex, 18)
 				.AddTile(TileID.LunarCraftingStation)
-				.AddDecraftCondition(Condition.DownedMoonLord)
+				//.AddDecraftCondition(Condition.DownedMoonLord)
 				.Register();
 		}
 	}

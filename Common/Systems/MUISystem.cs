@@ -279,7 +279,7 @@ namespace MetroidMod.Common.Systems
 						float dist = Math.Min(Vector2.Distance(pos, screenCenter), Main.screenHeight / 2 - 32);
 
 						Vector2 drawPos = screenCenter + rot.ToRotationVector2() * dist - Main.screenPosition;
-						if (tex == Terraria.GameContent.TextureAssets.Tile[ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb>()].Value)
+						if (tex == Terraria.GameContent.TextureAssets.Tile[ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb>()].Value|| tex == Terraria.GameContent.TextureAssets.Tile[ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb2>()].Value || tex == Terraria.GameContent.TextureAssets.Tile[ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb3>()].Value)
 						{
 							sb.Draw(tex, drawPos, new Rectangle?(new Rectangle(0, 0, tex.Width, tex.Height/4)), Color.White, 0, new Vector2(tex.Width / 2, tex.Height / 8), 1f, SpriteEffects.None, 0f);
 						}
