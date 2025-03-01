@@ -132,7 +132,7 @@ namespace MetroidMod.Common.Players
 				}
 				if(mp.ShouldShowArmorUI)
 				{
-					SoundEngine.PlaySound(Sounds.Suit.SpawnIn);
+					SoundEngine.PlaySound(Sounds.Suit.SpawnIn, new(Player.SpawnX,Player.SpawnY));
 				}
 			}
 			for (int i = 0; i < Player.inventory.Length; i++)
