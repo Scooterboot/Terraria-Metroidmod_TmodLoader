@@ -2091,7 +2091,6 @@ namespace MetroidMod.Content.Items.Weapons
 				{
 					Main.projectile[chargeLead].Kill();
 				}
-				Item.Refresh(false);
 			}
 			if (Stealth)
 			{
