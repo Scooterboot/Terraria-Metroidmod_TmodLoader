@@ -273,11 +273,11 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 				if (ampSyncCooldown-- <= 0)
 				{
 					ampSyncCooldown = 20;
-					Projectile.netUpdate2 = true;
 				}
 				float speed = Math.Max(8f, Vector2.Distance(targetPos, P.Center) * 0.25f);
 				float targetAngle = (float)Math.Atan2(targetPos.Y - P.Center.Y, targetPos.X - P.Center.X);
 				P.velocity = targetAngle.ToRotationVector2() * speed;
+				Projectile.netUpdate = true;
 			}
 			if (O.controlUseItem)
 			{
@@ -425,15 +425,15 @@ namespace MetroidMod.Content.Projectiles.ShockCoil
 		{
 			//writer.Write(range);
 			//writer.Write(distance);
-			writer.Write(BeamLength);
-			//writer.WriteVector2(targetPos);
+			//writer.Write(BeamLength);
+			writer.WriteVector2(targetPos);
 			base.SendExtraAI(writer);
 		}
 		public override void ReceiveExtraAI(BinaryReader reader)
 		{
 			//range = reader.ReadSingle();
 			//distance = reader.ReadSingle();
-			BeamLength = reader.ReadSingle();
+			//BeamLength = reader.ReadSingle();
 			//targetPos = reader.ReadVector2();
 			base.ReceiveExtraAI(reader);
 		}

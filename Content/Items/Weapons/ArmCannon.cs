@@ -2667,7 +2667,7 @@ namespace MetroidMod.Content.Items.Weapons
 						targetingDelay = 0;
 					}
 
-					bool ranOutOfMissiles = pb.statMissiles <= 0f;
+					bool ranOutOfMissiles = pb.statMissiles <= 0;
 					if (ranOutOfMissiles || pb.isBeam)
 					{
 						if(LeadActive(player, chargeLead))
@@ -2675,10 +2675,11 @@ namespace MetroidMod.Content.Items.Weapons
 							Main.projectile[chargeLead].Kill();
 						}
 
-						bool tryingToUseLauncher = Main.mouseLeft && Main.mouseLeftRelease && !Main.playerInventory;
+						bool tryingToUseLauncher = Main.mouseLeft /*&& Main.mouseLeftRelease*/ && !Main.playerInventory;
 						if (tryingToUseLauncher)
 						{
 							pb.isBeam = true;
+							mp.statCharge = 0f;
 						}
 					}
 				}
