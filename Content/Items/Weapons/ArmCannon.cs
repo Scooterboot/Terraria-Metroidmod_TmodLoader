@@ -1685,8 +1685,8 @@ namespace MetroidMod.Content.Items.Weapons
 				Item.useTime = (int)useTime;
 				Item.useAnimation = (int)useTime;
 				Item.shoot = Mod.Find<ModProjectile>(shot).Type;
-				ShotSound = new($"{Mod.Name}/Assets/Sounds/{shotSound}");
-				Item.UseSound = ShotSound;// null;
+				//ShotSound = new($"{Mod.Name}/Assets/Sounds/{shotSound}");
+				Item.UseSound = null;
 
 				Item.shootSpeed = 8f;
 				Item.reuseDelay = 0;
