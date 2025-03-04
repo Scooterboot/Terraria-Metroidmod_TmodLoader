@@ -36,7 +36,7 @@ namespace MetroidMod.Content.MorphBallAddons
 			item.rare = ItemRarityID.Yellow;
 		}
 
-		public override void Kill(int timeLeft, ref int dustType, ref int dustType2, ref float dustScale, ref float dustScale2)
+		public override void Kill(Projectile P, int timeLeft, ref int dustType, ref int dustType2, ref float dustScale, ref float dustScale2)
 		{
 			dustType = 6;
 			dustType2 = 6;
@@ -47,7 +47,7 @@ namespace MetroidMod.Content.MorphBallAddons
 			{
 				float rot = (float)Angle.ConvertToRadians(angle + ((360f / max) * i));
 				Vector2 vel = rot.ToRotationVector2() * 5f;
-				Projectile proj = Main.projectile[Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, vel, ProjectileID.JackOLantern, Projectile.damage / max, Projectile.knockBack + 3, Projectile.owner)];
+				Projectile proj = Main.projectile[Projectile.NewProjectile(P.GetSource_FromThis(), P.Center, vel, ProjectileID.JackOLantern, P.damage / max, P.knockBack + 3, P.owner)];
 				proj.timeLeft = 60;
 			}
 		}

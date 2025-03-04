@@ -5,8 +5,11 @@ using MetroidMod.Common.Players;
 using MetroidMod.Content.Hatches;
 using MetroidMod.Content.Items;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
+using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -86,6 +89,13 @@ namespace MetroidMod
 				MusicLoader.AddMusicBox(this, MusicLoader.GetMusicSlot(this, "Assets/Music/OmegaPirate"), ModContent.ItemType<Content.Items.Tiles.OmegaPirateMusicBox>(), ModContent.TileType<Content.Tiles.OmegaPirateMusicBox>());
 				MusicLoader.AddMusicBox(this, MusicLoader.GetMusicSlot(this, "Assets/Music/ChozoRuinsActive"), ModContent.ItemType<Content.Items.Tiles.ChozoRuinsActiveMusicBox>(), ModContent.TileType<Content.Tiles.ChozoRuinsActiveMusicBox>());
 				MusicLoader.AddMusicBox(this, MusicLoader.GetMusicSlot(this, "Assets/Music/ChozoRuinsInactive"), ModContent.ItemType<Content.Items.Tiles.ChozoRuinsInactiveMusicBox>(), ModContent.TileType<Content.Tiles.ChozoRuinsInactiveMusicBox>());
+			}
+
+			if (Main.netMode != NetmodeID.Server)
+			{
+				Asset<Effect> projShaderRef = this.Assets.Request<Effect>("Assets/Effects/ProjectileShaders");
+
+				GameShaders.Misc["MetroidModLaserBeam"] = new MiscShaderData(projShaderRef, "LaserShaderPass");
 			}
 
 			/*if (Main.netMode != NetmodeID.Server)

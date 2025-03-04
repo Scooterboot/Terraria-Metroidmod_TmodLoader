@@ -44,7 +44,7 @@ namespace MetroidMod
 			mp.bombDamage = player.GetWeaponDamage(Item);
 			mp.Bomb(player, ProjectileType, Item);
 		}
-		public virtual void Kill(int timeLeft, ref int dustType, ref int dustType2, ref float dustScale, ref float dustScale2) { }
+		public virtual void Kill(Projectile P, int timeLeft, ref int dustType, ref int dustType2, ref float dustScale, ref float dustScale2) { }
 		public virtual void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) { }
 	}
 }

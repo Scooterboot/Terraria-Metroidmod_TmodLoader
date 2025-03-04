@@ -2479,7 +2479,7 @@ Mods: {
 			}
 
 			BetsyBombAddon: {
-				DisplayName: Betsy Morph Ball Bombs
+				DisplayName: Dragonfire Morph Ball Bombs
 				Tooltip:
 					'''
 					-Press the bomb keybind to set off a bomb

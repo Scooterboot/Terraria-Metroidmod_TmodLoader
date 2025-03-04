@@ -1,4 +1,5 @@
-﻿using MetroidMod.ID;
+﻿using MetroidMod.Content.DamageClasses;
+using MetroidMod.ID;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
@@ -42,6 +43,7 @@ namespace MetroidMod.Default
 			Item.consumable = true;
 			Item.createTile = modMBAddon.TileType;
 			Item.GetGlobalItem<Common.GlobalItems.MGlobalItem>().AddonType = AddonType.MorphBall;
+			Item.DamageType = ModContent.GetInstance<HunterDamageClass>();
 		}
 
 		public override void HoldItem(Player player)

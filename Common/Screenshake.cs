@@ -42,35 +42,53 @@ namespace MetroidMod.Common{
 			//	[Antinous]: I'd like to add this list to the MScreenshakeGlobalProjectile class itself, but I'm not sure how yet..
 			bool configFire = MConfigClient.Instance.WeaponFireScreenshake;
 			bool configCollide = MConfigClient.Instance.WeaponCollideScreenshake;
-			bool BeamShot = projectile.Name.Contains("Beam") && projectile.Name.Contains("Shot");
+			bool BeamShot = (projectile.Name.Contains("Beam")
+						 || (projectile.Name.Contains("Battle") && projectile.Name.Contains("Hammer"))
+						 || projectile.Name.Contains("Judicator")
+						 || (projectile.Name.Contains("Mag") && projectile.Name.Contains("Maul"))
+						 || (projectile.Name.Contains("Volt") && projectile.Name.Contains("Driver")))
+						 && projectile.Name.Contains("Shot");
 			bool ChargeShot = projectile.Name.Contains("Charge") && projectile.Name.Contains("Shot");
 			bool MissileShot = projectile.Name.Contains("Missile") && projectile.Name.Contains("Shot");
-			bool SuperMissile = projectile.Name.Contains("Super") && projectile.Name.Contains("Missile") || projectile.Name.Contains("Nebula") && projectile.Name.Contains("Missile") || projectile.Name.Contains("Stardust") && projectile.Name.Contains("Missile");
+			bool SuperMissile = (projectile.Name.Contains("Super")
+							  || projectile.Name.Contains("Nebula")
+							  || projectile.Name.Contains("Stardust"))
+							  && projectile.Name.Contains("Missile");
 			bool Bomb = projectile.Name.Contains("Bomb");
 			bool isBeamSmall = BeamShot || projectile.Name.Contains("Spazer");
 			bool isBeamLarge = ChargeShot;
 			bool isMissile = MissileShot;
 			bool isSuperMissile = SuperMissile;
 			bool isBomb = Bomb;
+			bool isImperialist = projectile.Name.Contains("Imperialist");
 			//	[Antinous]: I need to figure out how to exclude every other projectile except for Metroid Mod's.
-			if(isBeamSmall){
-				if(behavior==1 && configFire){DoScreenshake(projectile,1);}
-				if(behavior==3 && configCollide){DoScreenshake(projectile,2);}
+			if (isBeamSmall)
+			{
+				if (behavior == 1 && configFire) { DoScreenshake(projectile, 1); }
+				if (behavior == 3 && configCollide) { DoScreenshake(projectile, 2); }
 			}
-			if(isBeamLarge){
-				if(behavior==1 && configFire){DoScreenshake(projectile,2);}
-				if(behavior==3 && configCollide){DoScreenshake(projectile,3);}
+			if (isBeamLarge)
+			{
+				if (behavior == 1 && configFire) { DoScreenshake(projectile, 2); }
+				if (behavior == 3 && configCollide) { DoScreenshake(projectile, 3); }
 			}
-			if(isMissile){
-				if(behavior==1 && configFire){DoScreenshake(projectile,2);}
-				if(behavior==3 && configCollide){DoScreenshake(projectile,4);}
+			if (isMissile)
+			{
+				if (behavior == 1 && configFire) { DoScreenshake(projectile, 2); }
+				if (behavior == 3 && configCollide) { DoScreenshake(projectile, 4); }
 			}
-			if(isSuperMissile){
-				if(behavior==1 && configFire){DoScreenshake(projectile,3);}
-				if(behavior==3 && configCollide){DoScreenshake(projectile,5);}
+			if (isSuperMissile)
+			{
+				if (behavior == 1 && configFire) { DoScreenshake(projectile, 3); }
+				if (behavior == 3 && configCollide) { DoScreenshake(projectile, 5); }
 			}
-			if(isBomb){
-				if(behavior==3 && configCollide){DoScreenshake(projectile,4);}
+			if (isBomb)
+			{
+				if (behavior == 3 && configCollide) { DoScreenshake(projectile, 3); }
+			}
+			if (isImperialist)
+			{
+				if (behavior == 1 && configFire) { DoScreenshake(projectile, 2); }
 			}
 		}
 		public override void OnSpawn(Projectile projectile, IEntitySource source){

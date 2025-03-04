@@ -33,7 +33,7 @@ namespace MetroidMod.Content.MorphBallAddons
 			item.rare = ItemRarityID.Yellow;
 		}
 
-		public override void Kill(int timeLeft, ref int dustType, ref int dustType2, ref float dustScale, ref float dustScale2)
+		public override void Kill(Projectile P, int timeLeft, ref int dustType, ref int dustType2, ref float dustScale, ref float dustScale2)
 		{
 			dustType = DustID.BlueCrystalShard;// These two ids are
 			dustType2 = DustID.t_Crystal;//       the same thing.

@@ -296,7 +296,6 @@ namespace MetroidMod.Common.Players
 				mp.powerGrip = true;
 			}
 			GripMovement();
-			FlashShift();
 			canWallJump = false;
 			int wallJumpDir = 0;
 			bool altJump = false;
@@ -340,6 +339,7 @@ namespace MetroidMod.Common.Players
 			}
 
 			DoWallJump(Player, wallJumpDir, altJump);
+			FlashShift();
 
 			if (spaceJumpBoots || spaceJump || screwAttack)
 			{
@@ -768,6 +768,15 @@ namespace MetroidMod.Common.Players
 				Player.autoJump = true;
 				Player.justJumped = true;
 				canSomersault = true;
+				if (flashShiftTime > FLASH_SHIFT_WINDOW - 5)
+				{
+					flashShiftTime = FLASH_SHIFT_WINDOW - 5;
+					if (flashDir.Y < 0)
+					{
+						Player.velocity.Y += flashDir.Y * 10 * Player.gravDir;
+						Player.jump = 0;
+					}
+				}
 			}
 		}
 		public static void AddSpaceJump(Player Player)
@@ -1359,7 +1368,7 @@ namespace MetroidMod.Common.Players
 		{
 			if (hasFlashShift && !shineActive && !morphBall)
 			{
-				if (flashShiftTime < FLASH_SHIFT_WINDOW || allowVerticalFlashShift && flashShiftTime == flashShiftLength - 1) // The OR flashShiftTime == flashShiftLength - 1 is to give a 1 frame window to reinput the flash direction for easier diagonal input while vertical flash shifting is enabled
+				if (flashShiftTime < FLASH_SHIFT_WINDOW || allowVerticalFlashShift && flashShiftTime == flashShiftLength - 1) //[Joost] The OR flashShiftTime == flashShiftLength - 1 is to give a 1 frame window to reinput the flash direction for easier diagonal input while vertical flash shifting is enabled
 				{
 					Vector2 inputDir = Vector2.Zero;
 					if (MSystem.FlashShiftKey.JustPressed)
@@ -1389,6 +1398,11 @@ namespace MetroidMod.Common.Players
 							if (Player.controlRight && Player.releaseRight) inputDir.X++;
 						}
 
+						if (flashShiftTime > 0)
+						{
+							canSomersault = false;
+							spaceJumped = false;
+						}
 					}
 					if (inputDir != Vector2.Zero)
 					{
@@ -1399,7 +1413,7 @@ namespace MetroidMod.Common.Players
 							flashShiftTime = flashShiftLength;
 							Dust.NewDustPerfect(Player.Center, ModContent.DustType<FlashRing>(), Vector2.Zero, 0, flashShiftColor, 0.6f);
 
-							//Portal sound effect, replace with actual flash shift sfx once someone gets the audio file for it
+							//[Joost] Portal sound effect, replace with actual flash shift sfx once someone gets the audio file for it
 							SoundEngine.PlaySound(SoundID.Item115.WithPitchOffset(0.3f), Player.Center);
 						}
 					}
@@ -1408,26 +1422,34 @@ namespace MetroidMod.Common.Players
 				{
 					if (flashShiftTime >= FLASH_SHIFT_WINDOW)
 					{
-						Player.velocity = flashDir * 20;
-						Player.maxFallSpeed = 20;
-						Player.gravity = 0;
-						if (Player.velocity.Y == 0)
+						if (Player.velocity.Y == 0 && Player.controlJump && Player.releaseJump)
 						{
-							Player.velocity.Y += (1E-06f) * Player.gravDir;
+							flashShiftTime = FLASH_SHIFT_WINDOW - 5;
+						}
+						else
+						{
+							Player.moveSpeed = 0f;
+							Player.maxRunSpeed = 0f;
+							Player.controlUseItem = false;
+							Player.controlUseTile = false;
+							Player.controlJump = false;
+							Player.controlMount = false;
+							Player.releaseMount = false;
+							Player.controlHook = false;
+							Player.stairFall = true;
+
+							Player.slowFall = false;
+							disableSomersault = true;
+
+							Player.velocity = flashDir * 20;
+							Player.maxFallSpeed = 20;
+							Player.gravity = 0;
+							if (Player.velocity.Y == 0)
+							{
+								Player.velocity.Y += (1E-06f) * Player.gravDir;
+							}
 						}
 
-						Player.moveSpeed = 0f;
-						Player.maxRunSpeed = 0f;
-						Player.controlUseItem = false;
-						Player.controlUseTile = false;
-						Player.controlJump = false;
-						Player.controlMount = false;
-						Player.releaseMount = false;
-						Player.controlHook = false;
-						Player.stairFall = true;
-
-						Player.slowFall = false;
-						disableSomersault = true;
 
 						for (int i = 0; i < 3; i++)  //Trail effect
 						{

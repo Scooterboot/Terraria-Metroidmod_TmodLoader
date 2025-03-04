@@ -35,10 +35,10 @@ namespace MetroidMod.Content.Projectiles.MagMaul
 		public override void OnKill(int timeLeft)
 		{
 			SoundEngine.PlaySound(Sounds.Items.Weapons.MagMaulExplode, Projectile.position);
-			if(timeLeft <=0 )
-			{
+			//if(timeLeft <=0) [Joost] Let's be real, waiting for the timeout just for the explosion is never happening
+			//{
 				mProjectile.Explode(Luminite ? 80 : DiffBeam ? 60 : 40, 1.6f);
-			}
+			//}
 			mProjectile.Diffuse(Projectile, 286);
 		}
 		/*public override bool? CanHitNPC(NPC target)

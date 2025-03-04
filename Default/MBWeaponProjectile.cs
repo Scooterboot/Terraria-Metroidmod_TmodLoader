@@ -180,7 +180,8 @@ namespace MetroidMod.Default
 
 			int dustType = 59, dustType2 = 61;
 			float dustScale = 5f, dustScale2 = 5f;
-			modMBAddon.Kill(timeLeft, ref dustType, ref dustType2, ref dustScale, ref dustScale2);
+			modMBAddon.Kill(Projectile, timeLeft, ref dustType, ref dustType2, ref dustScale, ref dustScale2);
+			//Main.NewText(Projectile.whoAmI, Color.Yellow);
 			/*if (Projectile.type == mod.ProjectileType("PoisonBomb"))
 			{
 				dustType = 0;

@@ -33,7 +33,7 @@ namespace MetroidMod.Content.MorphBallAddons
 			item.rare = ItemRarityID.Orange;
 		}
 
-		public override void Kill(int timeLeft, ref int dustType, ref int dustType2, ref float dustScale, ref float dustScale2)
+		public override void Kill(Projectile P, int timeLeft, ref int dustType, ref int dustType2, ref float dustScale, ref float dustScale2)
 		{
 			dustType = DustID.IceTorch;
 			dustType2 = DustID.IceTorch;

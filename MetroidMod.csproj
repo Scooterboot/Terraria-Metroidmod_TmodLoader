@@ -10,8 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\Music\" />
-    <Folder Include="Assets\Effects\" />
-    <Folder Include="Assets\Effects\" />
     <Folder Include="Assets\Sounds\" />
     <Folder Include="Assets\Textures\MissileAddons\" />
     <Folder Include="Assets\Textures\SuitAddons\EnergyTank\" />
@@ -34,5 +32,11 @@
     <Compile Remove="ExampleMetroidAddonMod\**" />
     <EmbeddedResource Remove="ExampleMetroidAddonMod\**" />
     <None Remove="ExampleMetroidAddonMod\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Remove="Assets\Effects\ProjectileShaders.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assets\Effects\ProjectileShaders.fx" />
   </ItemGroup>
 </Project>
