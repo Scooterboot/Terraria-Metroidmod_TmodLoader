@@ -5,12 +5,10 @@ using Terraria.ModLoader;
 
 namespace MetroidMod.Content.Items.Tiles
 {
-	public class ChozoStatueArm : ModItem
+	public abstract class ChozoStatueArmBuilder : ModItem
 	{
 		public override void SetStaticDefaults()
 		{
-			// DisplayName.SetDefault("Chozo Statue Arm");
-
 			Item.ResearchUnlockCount = 1;
 		}
 		public override void SetDefaults()
@@ -24,9 +22,7 @@ namespace MetroidMod.Content.Items.Tiles
 			Item.useTime = 10;
 			Item.useStyle = ItemUseStyleID.Swing;
 			Item.consumable = true;
-			Item.createTile = ModContent.TileType<Content.Tiles.ChozoStatueArm>();
 		}
-
 		public override void AddRecipes()
 		{
 			CreateRecipe(1)
@@ -39,8 +35,16 @@ namespace MetroidMod.Content.Items.Tiles
 			recipe.SetResult(this);
 			recipe.AddRecipe();*/
 		}
+	}
+	public class ChozoStatueArm : ChozoStatueArmBuilder
+	{
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+			Item.createTile = ModContent.TileType<Content.Tiles.ChozoStatueArm>();
+		}
 	}	
-	public class ChozoStatueArm2 : ChozoStatueArm
+	public class ChozoStatueArm2 : ChozoStatueArmBuilder
 	{
 		public override void SetDefaults()
 		{
@@ -48,7 +52,7 @@ namespace MetroidMod.Content.Items.Tiles
 			Item.createTile = ModContent.TileType<Content.Tiles.ChozoStatueArm2>();
 		}
 	}	
-	public class ChozoStatueArm3 : ChozoStatueArm
+	public class ChozoStatueArm3 : ChozoStatueArmBuilder
 	{
 		public override void SetDefaults()
 		{

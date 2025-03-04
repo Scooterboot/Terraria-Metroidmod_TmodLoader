@@ -7,13 +7,12 @@ using Terraria.ModLoader;
 
 namespace MetroidMod.Content.Items.Tiles
 {
-	public class ChozoStatueOrb : ModItem
+	public abstract class ChozoStatueOrbBuilder : ModItem
 	{
 		public override void SetStaticDefaults()
 		{
 			Item.ResearchUnlockCount = 15;
 		}
-
 		public override void SetDefaults()
 		{
 			Item.width = 32;
@@ -28,11 +27,18 @@ namespace MetroidMod.Content.Items.Tiles
 			Item.useTime = 10;
 			Item.useStyle = ItemUseStyleID.Swing;
 			Item.consumable = true;
-			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb>();
 		}
 		public override bool CanRightClick()
 		{
 			return true;
+		}
+	}
+	public class ChozoStatueOrb : ChozoStatueOrbBuilder
+	{
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb>();
 		}
 		public override void RightClick(Player player)
 		{
@@ -41,16 +47,12 @@ namespace MetroidMod.Content.Items.Tiles
 			base.RightClick(player);
 		}
 	}
-	public class ChozoStatueOrb2 : ChozoStatueOrb
+	public class ChozoStatueOrb2 : ChozoStatueOrbBuilder
 	{
 		public override void SetDefaults()
 		{
 			base.SetDefaults();
 			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb2>();
-		}
-		public override bool CanRightClick()
-		{
-			return true;
 		}
 		public override void RightClick(Player player)
 		{
@@ -59,7 +61,7 @@ namespace MetroidMod.Content.Items.Tiles
 			//RightClick(player);
 		}
 	}
-	public class ChozoStatueOrb3 : ChozoStatueOrb
+	public class ChozoStatueOrb3 : ChozoStatueOrbBuilder
 	{
 		public override void SetDefaults()
 		{
@@ -67,10 +69,6 @@ namespace MetroidMod.Content.Items.Tiles
 			Item.height = 32;
 			Main.RegisterItemAnimation(Item.type, new DrawAnimationVertical(1, 1));
 			Item.createTile = ModContent.TileType<Content.Tiles.ItemTile.ChozoStatueOrb3>();
-		}
-		public override bool CanRightClick()
-		{
-			return true;
 		}
 		public override void RightClick(Player player)
 		{
